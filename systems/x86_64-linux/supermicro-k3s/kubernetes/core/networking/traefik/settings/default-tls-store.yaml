@@ -1,0 +1,38 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: domain-certificate
+  namespace: networking
+spec:
+  secretName: domain-tls-secret
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    encoding: PKCS1
+    size: 4096
+  duration: 8760h # 1 Year
+  renewBefore: 2208h # 3 months
+  subject:
+    organizations:
+      - homelab
+  commonName: homelab
+  isCA: false
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - "${SECRET_DOMAIN}"
+    - "*.${SECRET_DOMAIN}"
+  issuerRef:
+    name: ca-issuer
+    kind: ClusterIssuer
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: networking
+spec:
+  defaultCertificate:
+    secretName: domain-tls-secret

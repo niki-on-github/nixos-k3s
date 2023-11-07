@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - resources/apps.yaml
+  - resources/backup.yaml
+  - resources/dashboard.yaml
+  - resources/kubevirt.yaml
+  - resources/minio-operator.yaml
+  - resources/monitoring.yaml
+  - resources/networking.yaml
+  - resources/notification.yaml
+  - resources/policy.yaml
+  - resources/storage.yaml
+  - resources/vpn-apps.yaml
+  - resources/vpn-gateway.yaml
+  - resources/cnpg-system.yaml
+  - resources/database.yaml

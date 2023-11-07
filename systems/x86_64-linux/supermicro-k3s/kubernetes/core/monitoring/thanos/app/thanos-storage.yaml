@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: thanos-objstore-config
+  namespace: monitoring
+stringData:
+  objstore.yml: |-
+    type: s3
+    config:
+      insecure: false
+      bucket: "thanos"
+      endpoint: "minio.monitoring"
+      access_key: "${SECRET_MINIO_ACCESS_KEY_BASE64}"
+      secret_key: "${SECRET_MINIO_SECRET_KEY_BASE64}"
+      http_config:
+        insecure_skip_verify: true
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: minio-thanos-storage-configuration
+  namespace: monitoring
+stringData:
+  # see https://github.com/minio/minio/blob/master/docs/erasure/storage-class/README.md
+  # WARNING: we have set parity to 0 with MINIO_STORAGE_CLASS_STANDARD="EC:0"!
+  config.env: |-
+    export MINIO_ROOT_USER="${SECRET_MINIO_ACCESS_KEY_BASE64}"
+    export MINIO_ROOT_PASSWORD="${SECRET_MINIO_SECRET_KEY_BASE64}"
+    export MINIO_STORAGE_CLASS_STANDARD="EC:0"
+    export MINIO_BROWSER="on"
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: minio-thanos-storage-user
+  namespace: monitoring
+data:
+  CONSOLE_ACCESS_KEY: ${SECRET_MINIO_ACCESS_KEY_BASE64}
+  CONSOLE_SECRET_KEY: ${SECRET_MINIO_SECRET_KEY_BASE64}
+---
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  labels:
+    app: minio
+  name: minio
+  namespace: monitoring
+spec:
+  configuration:
+    name: minio-thanos-storage-configuration
+  users:
+    - name: minio-thanos-storage-user
+  buckets:
+  - name: "thanos"
+    region: "local-hostpath"
+    objectLock: false
+  pools:
+  - name: pool-0
+    servers: 1
+    volumesPerServer: 1
+    volumeClaimTemplate:
+      spec:
+        storageClassName: local-hostpath
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi

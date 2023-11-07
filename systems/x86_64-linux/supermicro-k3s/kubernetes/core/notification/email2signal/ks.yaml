@@ -1,0 +1,17 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: email2signal
+  namespace: flux-system
+spec:
+  interval: 15m
+  retryInterval: 2m0s
+  timeout: 15m
+  dependsOn:
+    - name: signal-rest-api
+  path: "./kubernetes/core/notification/email2signal/app"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+

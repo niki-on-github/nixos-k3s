@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: minio-backup-storage-configuration
+  namespace: backup
+stringData:
+  # see https://github.com/minio/minio/blob/master/docs/erasure/storage-class/README.md
+  # WARNING: we have set parity to 0 with MINIO_STORAGE_CLASS_STANDARD="EC:0"!
+  config.env: |-
+    export MINIO_ROOT_USER="${SECRET_MINIO_ACCESS_KEY_BASE64}"
+    export MINIO_ROOT_PASSWORD="${SECRET_MINIO_SECRET_KEY_BASE64}"
+    export MINIO_STORAGE_CLASS_STANDARD="EC:0"
+    export MINIO_BROWSER="on"
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: minio-backup-storage-user
+  namespace: backup
+data:
+  CONSOLE_ACCESS_KEY: ${SECRET_MINIO_ACCESS_KEY_BASE64}
+  CONSOLE_SECRET_KEY: ${SECRET_MINIO_SECRET_KEY_BASE64}
+---
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  labels:
+    app: minio
+  name: minio
+  namespace: backup
+spec:
+  configuration:
+    name: minio-backup-storage-configuration
+  users:
+    - name: minio-backup-storage-user
+  requestAutoCert: false
+  buckets:
+  - name: "volsync"
+    region: "local"
+    objectLock: false
+  pools:
+  - name: pool-0
+    servers: 1
+    volumesPerServer: 1
+    volumeClaimTemplate:
+      metadata:
+        name: backup
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 128Gi
+        storageClassName: "local-hostpath"
+

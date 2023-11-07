@@ -1,0 +1,83 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Renovate Dashboard",
+  "labels": ["renovatebot"],
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "commitMessageSuffix": "",
+  "prHourlyLimit": 99,
+  "prConcurrentLimit": 99,
+  "hostRules": [
+    {
+      "matchHost": "docker.io",
+      "concurrentRequestLimit": 2
+    }
+  ],
+  "helm-values": {
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+  },
+  "flux": {
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+  },
+  "kubernetes": {
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+  },
+  "regexManagers": [
+    {
+      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "matchStrings": ["# renovate: datasource=docker\\n.*: ?(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["kubernetes/.+/kustomization\\.ya?ml$"],
+      "matchStrings": [
+        "- (\\w+://)?(raw\\.)?github(usercontent)?\\.com\\/(?<depName>[\\w\\-_]+\\/[\\w\\-_]+)\\/(.+\\/)?(?<currentValue>v?[\\d+\\.]+)\\/"
+      ],
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"]
+    },
+    {
+      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*=?))?( versionTemplate=(?<versionTemplate>.*=?))?\\n.*: ?(\"?(?<currentValue>[^\"\\n]+=?)\"?)"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
+      "extractVersionTemplate": "{{#if versionTemplate}}{{{versionTemplate}}}{{else}}{{/if}}"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "labels": ["type/major"]
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "labels": ["type/minor"]
+    },
+    {
+      "description": "Automatically patch-level updates",
+      "matchUpdateTypes": ["patch", "digest"],
+      "labels": ["type/patch"],
+      "automerge": true,
+      "automergeType": "branch",
+      "requiredStatusChecks": null,
+      "ignoreTests": true,
+      "stabilityDays": 1
+    },
+    {
+      "matchDatasources": ["helm"],
+      "addLabels": ["renovate/helm"],
+      "semanticCommitScope": "helm-chart"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "addLabels": ["renovate/container"],
+      "semanticCommitScope": "docker-image"
+    }
+  ]
+}

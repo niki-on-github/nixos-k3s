@@ -1,0 +1,48 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: minio-operator
+  namespace: minio-operator
+spec:
+  interval: 5m
+
+  chart:
+    spec:
+      chart: operator
+      version: 5.0.10
+      interval: 15m
+      sourceRef:
+        kind: HelmRepository
+        name: minio-charts
+        namespace: flux-system
+
+  values:
+    operator:
+      replicaCount: 1
+      env:
+        - name: MINIO_ROOT_USER
+          value: "${SECRET_MINIO_ACCESS_KEY_BASE64}"
+        - name: MINIO_ROOT_PASSWORD
+          value: "${SECRET_MINIO_SECRET_KEY_BASE64}"
+        - name: MINIO_OPERATOR_TLS_ENABLE
+          value: "off"
+        - name: MINIO_CONSOLE_TLS_ENABLE
+          value: "off"
+
+      resources:
+        requests:
+          cpu: 25m
+          memory: 128M
+
+    console:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        host: &host minio.${SECRET_DOMAIN}
+        path: /
+        tls:
+        - hosts:
+          - *host

@@ -1,0 +1,77 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app grafana
+  namespace: monitoring
+spec:
+  interval: 15m
+  timeout: 15m
+  chart:
+    spec:
+      chart: grafana
+      version: 6.59.4
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-charts
+        namespace: flux-system
+
+  values:
+    nameOverride: *app
+
+    service:
+      portName: http
+      port: 3000
+
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      hosts:
+        - "grafana.${SECRET_DOMAIN}"
+      tls:
+        - hosts:
+            - "grafana.${SECRET_DOMAIN}"
+
+    adminUser: root
+    adminPassword: "${SECRET_WEBSERVICES_PASSWORD}"
+
+    sidecar:
+      dashboards:
+        enabled: true
+        searchNamespace: ALL
+
+      datasources:
+        enabled: false
+        searchNamespace: ALL
+
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://thanos-query.monitoring:9090
+        - name: loki
+          type: loki
+          access: proxy
+          isDefault: false
+          url: http://loki-stack.monitoring:3100
+
+    plugins:
+      - grafana-piechart-panel
+      - grafana-worldmap-panel
+      - grafana-clock-panel
+
+    serviceMonitor:
+      enabled: true
+
+    persistence:
+      enabled: false
+
+    env:
+      GF_EXPLORE_ENABLED: true
+      GF_SECURITY_ALLOW_EMBEDDING: true
+

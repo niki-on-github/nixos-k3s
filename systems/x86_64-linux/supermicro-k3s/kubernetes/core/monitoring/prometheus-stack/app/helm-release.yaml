@@ -1,0 +1,120 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 15m
+  timeout: 20m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: 51.0.3
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+
+  values:
+    # required to get thanos discovery working
+    fullnameOverride: prometheus
+
+    alertmanager:
+      config:
+        global:
+          resolve_timeout: 5m
+        receivers:
+          - name: "email"
+            email_configs:
+              - to: '${SECRET_SIGNAL_PHONE_NUMBER}@signal.localdomain'
+                from: 'alertmanager@${SECRET_DOMAIN}'
+                smarthost: "email2signal.notification.svc:8025"
+                send_resolved: true
+                require_tls: false
+        route:
+          group_by: ["alertname", "job"]
+          group_wait: 1m
+          group_interval: 10m
+          repeat_interval: 12h
+          receiver: email
+          routes:
+            - receiver: email
+              matchers:
+                - severity = "critical"
+              continue: true
+        inhibit_rules:
+          - source_matchers:
+              - severity = "critical"
+            target_matchers:
+              - severity = "warning"
+            equal: ["alertname", "namespace"]
+
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - "alert.${SECRET_DOMAIN}"
+        tls:
+          - hosts:
+              - "alert.${SECRET_DOMAIN}"
+
+      alertmanagerSpec:
+        replicas: 1
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-hostpath
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 2Gi
+
+    grafana:
+      enabled: false
+      defaultDashboardsTimezone: "${TIMEZONE}"
+      forceDeployDatasources: false
+      forceDeployDashboards: true
+
+    nodeExporter:
+      # we install prometheus-node-exporter on host system
+      enabled: false
+
+    prometheus:
+      prometheusSpec:
+        replicas: 1
+        replicaExternalLabelName: "replica"
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        retention: 6h
+        enableAdminAPI: true
+        walCompression: true
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-hostpath
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 5Gi
+        thanos:
+          objectStorageConfig:
+            name: thanos-objstore-config
+            key: objstore.yml
+
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128M
+
+      thanosService:
+        enabled: true
+
+      thanosServiceMonitor:
+        enabled: true
+
+

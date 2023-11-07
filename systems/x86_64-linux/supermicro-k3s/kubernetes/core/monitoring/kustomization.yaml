@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - grafana/ks.yaml
+  - loki-stack/ks.yaml
+  - metrics-server
+  - prometheus-stack/ks.yaml
+  - thanos/ks.yaml

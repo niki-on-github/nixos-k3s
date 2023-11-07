@@ -1,0 +1,52 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app email2signal
+  namespace: notification
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.0.3
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  dependsOn:
+  - name: signal-rest-api
+    namespace: notification
+
+  values:
+    global:
+      nameOverride: *app
+
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/niki-on-github/email2signal
+              tag: "v1.0.0"
+
+            env:
+              TZ: "${TIMEZONE}"
+              SIGNAL_REST_URL: "http://signal-rest-api.notification.svc:8080"
+              SENDER_NUMBER: "\\${SECRET_SIGNAL_PHONE_NUMBER}"
+              SMTP_HOST: ""
+              SMTP_USER: ""
+              SMTP_PASSWORD: ""
+    
+    service:
+      main:
+        enabled: true
+        ports:
+          http:
+            enabled: false
+          smtp:
+            enabled: true
+            port: 8025
+            protocol: TCP
+

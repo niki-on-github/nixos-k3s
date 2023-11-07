@@ -1,0 +1,74 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: networking
+  annotations:
+    meta.helm.sh/release-namespace: "networking"
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: traefik
+      version: 24.0.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: traefik-charts
+        namespace: flux-system
+
+  values:
+    deployment:
+      replicas: 1
+
+    logs:
+      general:
+        level: INFO
+
+      access:
+        enabled: true
+
+    ingressClass:
+      enabled: true
+      isDefaultClass: true
+      fallbackApiVersion: v1
+
+    ingressRoute:
+      dashboard:
+        # helm chart use PathPrefix(`/dashboard`) || PathPrefix(`/api`), i want to use a subdomain
+        # => use an IngressRoute object for the dashboard
+        enabled: false
+
+    metrics:
+      prometheus:
+        entryPoint: metrics
+
+    globalArguments:
+      - "--global.checknewversion"
+
+    additionalArguments:
+      - "--serverstransport.insecureskipverify=true"
+      - "--entryPoints.websecure.forwardedHeaders.trustedIPs=10.0.0.0/8,192.168.0.0/16,172.16.0.0/12,127.0.0.1/32"
+
+    providers:
+      kubernetesCRD:
+        enabled: true
+        allowCrossNamespace: true
+        allowExternalNameServices: true
+      kubernetesIngress:
+        enabled: true
+        allowExternalNameServices: true
+        ingressClass: "traefik"
+
+    ports:
+      web:
+        redirectTo: websecure
+      websecure:
+        tls:
+          enabled: true
+          options: default
+      metrics:
+        port: 8082
+        expose: false
+        exposedPort: 8082

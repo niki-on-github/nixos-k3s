@@ -1,0 +1,19 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: prometheus-stack
+  namespace: flux-system
+spec:
+  interval: 15m
+  retryInterval: 2m0s
+  timeout: 15m
+  dependsOn:
+    - name: local-path
+    - name: thanos
+    - name: traefik
+  path: "./kubernetes/core/monitoring/prometheus-stack/app"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
