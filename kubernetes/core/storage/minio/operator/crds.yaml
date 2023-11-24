@@ -31,18 +31,3 @@ spec:
     - apiVersion: apiextensions.k8s.io/v1
       kind: CustomResourceDefinition
       name: tenants.minio.min.io
-  #TODO patch does not work so the namespace can not be changed!
-  # patches:
-  #   - patch: |-
-  #       - op: remove
-  #         path: /meta/annotations
-  #     target:
-  #       group: minio.min.io
-  #       kind: CustomResourceDefinition
-  #   - patch: |-
-  #       - op: remove
-  #         path: /meta/labels
-  #     target:
-  #       group: minio.min.io
-  #       kind: CustomResourceDefinition
-

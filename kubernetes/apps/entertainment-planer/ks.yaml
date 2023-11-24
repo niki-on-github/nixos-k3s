@@ -1,47 +1,45 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: local-hostpath-temp
+  name: app-entertainment-planer-db
   namespace: flux-system
 spec:
   interval: 15m
   retryInterval: 2m0s
   timeout: 5m
-  path: "./kubernetes/core/storage/local-path/operator"
+  path: "./kubernetes/templates/postgres"
   prune: true
-  wait: true
   force: true
+  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  dependsOn:
-    - name: external-snapshotter
   postBuild:
     substitute:
-      STORAGE_CLASS_NAME: local-temp
-      PATH_POSTFIX: temp
-      RECLAIM_POLICY: Delete
+      APP_NAME: entertainment-planer
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "entertainment_planer"
+      POSTGRES_BACKUP_SCHEDULE: "0 0 * * * *"
+      POSTGRES_BACKUP_RETENTION: "30d"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: local-hostpath-persistent
+  name: app-entertainment-planer
   namespace: flux-system
 spec:
   interval: 15m
   retryInterval: 2m0s
   timeout: 5m
-  path: "./kubernetes/core/storage/local-path/operator"
+  path: "./kubernetes/apps/entertainment-planer/app"
   prune: true
-  wait: true
   force: true
+  dependsOn:
+    - name: app-entertainment-planer-db
   sourceRef:
     kind: GitRepository
     name: flux-system
-  dependsOn:
-    - name: external-snapshotter
   postBuild:
     substitute:
-      STORAGE_CLASS_NAME: local-persistent
-      PATH_POSTFIX: persistent
-      RECLAIM_POLICY: Retain
+      APP_NAME: entertainment-planer
+      APP_NAMESPACE: apps

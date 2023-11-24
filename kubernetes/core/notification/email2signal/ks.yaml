@@ -8,9 +8,12 @@ spec:
   retryInterval: 2m0s
   timeout: 15m
   dependsOn:
-    - name: signal-rest-api
+    - name: traefik
+    - name: local-hostpath-persistent
   path: "./kubernetes/core/notification/email2signal/app"
   prune: true
+  wait: true
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system

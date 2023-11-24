@@ -1,0 +1,59 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: &db ${APP_NAME}-postgresql
+  namespace: ${APP_NAMESPACE}
+  annotations:
+    cnpg.io/skipEmptyWalArchiveCheck: enabled
+spec:
+  instances: 1
+ 
+  backup:
+    retentionPolicy: "${POSTGRES_BACKUP_RETENTION}"        
+    barmanObjectStore:
+      destinationPath: &backupDestinationPath "s3://${POSTGRES_BACKUP_BUCKET}/${APP_NAME}"
+      endpointURL: &backupEndpoint "http://${POSTGRES_BACKUP_ENDPOINT}"    
+      s3Credentials:
+        accessKeyId:
+          name: &credentials ${APP_NAME}-postgresql-backup-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: *credentials          
+          key: ACCESS_SECRET_KEY   
+        region:
+          name: *credentials         
+          key: REGION   
+      
+  externalClusters:
+    - name: *db
+      barmanObjectStore:
+        destinationPath: *backupDestinationPath
+        endpointURL: *backupEndpoint
+        s3Credentials:  
+          accessKeyId:
+            name: *credentials
+            key: ACCESS_KEY_ID
+          secretAccessKey:
+            name: *credentials          
+            key: ACCESS_SECRET_KEY   
+          region:
+            name: *credentials        
+            key: REGION
+    
+  bootstrap:
+    ${POSTGRES_BOOTSTRAP_CMD}:
+      source: *db
+      database: ${POSTGRES_DATABASE}
+      owner: ${SECRET_DATABASE_USER}
+      secret:
+        name: ${APP_NAME}-postgresql-credentials
+
+  storage:
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 4Gi
+      storageClassName: local-temp
+      volumeMode: Filesystem

@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: local-path-provisioner
+  name: ${STORAGE_CLASS_NAME}-provisioner
   namespace: storage
 spec:
   interval: 30m
@@ -17,25 +17,24 @@ spec:
         namespace: flux-system
   values:
     csiDriver:
-      name: "org.democratic-csi.local-hostpath"
+      name: "org.democratic-csi.${STORAGE_CLASS_NAME}"
       attachRequired: false
-      storageCapacity: true # With storage capacity tracking, the scheduler filters out nodes which do not have enough capacity.
+      storageCapacity: true
       fsGroupPolicy: File
 
     storageClasses:
-      - name: local-hostpath
+      - name: ${STORAGE_CLASS_NAME}
         defaultClass: false
-        reclaimPolicy: Delete
+        reclaimPolicy: ${RECLAIM_POLICY:=Retain}
         volumeBindingMode: WaitForFirstConsumer
-        # distributed support is not yet ready for expansion
         allowVolumeExpansion: false
 
     volumeSnapshotClasses:
-      - name: local-hostpath
-        deletionPolicy: Delete
+      - name: ${STORAGE_CLASS_NAME}
+        deletionPolicy: ${RECLAIM_POLICY:=Retain}
         parameters:
           dummy: {}
-
+ 
     controller:
       enabled: true
       strategy: node
@@ -43,7 +42,6 @@ spec:
         enabled: false
       externalProvisioner:
         enabled: true
-        image: registry.k8s.io/sig-storage/csi-provisioner:v3.6.1
         extraArgs:
           - --leader-election=false
           - --node-deployment=true
@@ -63,29 +61,29 @@ spec:
     node:
       driver:
         extraVolumeMounts:
-          - name: local-hostpath
-            mountPath: "${HOST_PATH_PREFIX}"            
+          - name: ${STORAGE_CLASS_NAME}
+            mountPath: "${HOST_PATH_PREFIX}/${PATH_POSTFIX}"            
             mountPropagation: Bidirectional
-
+   
       driverRegistrar:
         enabled: true
-        image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.9.0
-
       extraVolumes:
-        - name: local-hostpath
+        - name: ${STORAGE_CLASS_NAME}
           hostPath:
-            path: "${HOST_PATH_PREFIX}"
+            path: "${HOST_PATH_PREFIX}/${PATH_POSTFIX}"
             type: DirectoryOrCreate
-
+ 
     driver:
       config:
         driver: local-hostpath
         instance_id:
         local-hostpath:
-          shareBasePath: "${HOST_PATH_PREFIX}"
-          controllerBasePath: "${HOST_PATH_PREFIX}"
-          dirPermissionsMode: "0770"
+          shareBasePath: "${HOST_PATH_PREFIX}/${PATH_POSTFIX}"
+          controllerBasePath: "${HOST_PATH_PREFIX}/${PATH_POSTFIX}"
+          dirPermissionsMode: "0777"
           dirPermissionsUser: 0
           dirPermissionsGroup: 0
-        iscsi:
-          nameTemplate: "{{ parameters.[csi.storage.k8s.io/pvc/namespace] }}-{{ parameters.[csi.storage.k8s.io/pvc/name] }}"
+        _private:
+          csi:
+            volume:
+              idTemplate: "{{ parameters.[csi.storage.k8s.io/pvc/namespace] }}-{{ parameters.[csi.storage.k8s.io/pvc/name] }}"

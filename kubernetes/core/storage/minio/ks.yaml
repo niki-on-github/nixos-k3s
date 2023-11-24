@@ -9,6 +9,8 @@ spec:
   timeout: 5m
   path: "./kubernetes/core/storage/minio/operator"
   prune: true
+  wait: true
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -29,9 +31,10 @@ spec:
   path: "./kubernetes/core/storage/minio/storage-local"
   prune: true
   wait: true
+  force: true
   dependsOn:
     - name: minio
-    - name: local-path
+    - name: local-hostpath-persistent
   sourceRef:
     kind: GitRepository
     name: flux-system

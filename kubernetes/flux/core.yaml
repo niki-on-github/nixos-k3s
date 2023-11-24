@@ -43,6 +43,7 @@ spec:
         spec:
           force: true
           prune: true
+          wait: true
           decryption:
             provider: sops
             secretRef:

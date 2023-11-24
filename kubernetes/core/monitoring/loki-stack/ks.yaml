@@ -9,8 +9,10 @@ spec:
   timeout: 15m
   path: "./kubernetes/core/monitoring/loki-stack/app"
   dependsOn:
-    - name: local-path
+    - name: local-hostpath-persistent
   prune: true
+  wait: true
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system

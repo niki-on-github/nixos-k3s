@@ -9,6 +9,8 @@ spec:
   timeout: 5m
   path: "./kubernetes/core/networking/cert-manager/operator"
   prune: true
+  wait: true
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system

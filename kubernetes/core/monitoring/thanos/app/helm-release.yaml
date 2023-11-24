@@ -56,7 +56,7 @@ spec:
       podAntiAffinityPreset: hard
       persistence:
         enabled: true
-        storageClass: "local-hostpath"
+        storageClass: "local-persistent"
 
     metrics:
       enabled: true

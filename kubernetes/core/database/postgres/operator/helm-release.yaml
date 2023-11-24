@@ -21,3 +21,16 @@ spec:
   values:
     monitoring:
       podMonitoringEnabled: true
+
+  postRenderers:
+    - kustomize: 
+         patchesJson6902:
+          - target: 
+              kind: CustomResourceDefinition
+              name: clusters.postgresql.cnpg.io
+            patch:
+              - op: add
+                path: /spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/bootstrap/properties/initdb/properties/source
+                value: 
+                  description: unused
+                  type: string

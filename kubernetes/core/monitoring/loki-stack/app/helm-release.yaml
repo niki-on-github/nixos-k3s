@@ -21,7 +21,7 @@ spec:
       enabled: true
       persistence:
         enabled: true
-        storageClassName: "local-hostpath"
+        storageClassName: "local-persistent"
 
     promtail:
       enabled: true

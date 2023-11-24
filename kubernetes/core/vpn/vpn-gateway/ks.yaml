@@ -12,6 +12,8 @@ spec:
     - name: cert-manager-issuer
   path: "./kubernetes/core/vpn/vpn-gateway/operator"
   prune: true
+  wait: true
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system

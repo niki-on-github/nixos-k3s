@@ -12,6 +12,8 @@ spec:
     - name: prometheus-stack
   path: "./kubernetes/core/monitoring/grafana/app"
   prune: true
+  wait: true
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system

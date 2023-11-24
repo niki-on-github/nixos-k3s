@@ -3,6 +3,7 @@ let
   user = "nix";
   cpu = "intel";
   dnsName = "server02";
+  ip = "10.0.1.200";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -14,15 +15,16 @@ in
 
   templates = {
     system = {
-      bootEncrypted = {
+      setup = {
         enable = true;
+        encrypt = true;
         disk = "/dev/disk/by-id/ata-SanDisk_SDSSDH3_512G_191805802811";
       };
     };
     services = {
       singleNodeCluster = {
         enable = true;
-        fluxBootstrap.enable = true;
+        flux.enable = true;
       };
     };
   };
@@ -97,7 +99,6 @@ in
   systemd.tmpfiles.rules = [
     "d /opt/k3s 0775 ${user} data -"
     "d /opt/k3s/data 0775 ${user} data -"
-    "d /opt/k3s/data/pv 0775 ${user} data -"
     "d /mnt/backup 0775 ${user} data -"
     "d /mnt/backup/k3s 0775 ${user} data -"
     "d /mnt/backup/k3s/minio 0775 ${user} data -"
@@ -157,10 +158,10 @@ in
   };
 
   system.activationScripts.git-mirror.text = ''
-    mkdir -p /opt/k3s/data/pv/gitea/git/respositories/r
-    chown git:data /opt/k3s/data/pv/gitea/git/respositories/r 
-    chmod 775 /opt/k3s/data/pv/gitea/git/respositories/r
-    chmod g+s /opt/k3s/data/pv/gitea/git/respositories/r    
-    ln -s -t /home/git /opt/k3s/data/pv/gitea/git/respositories/r 2>/dev/null || true
+    mkdir -p /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r
+    chown git:data /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r
+    chmod 775 /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r
+    chmod g+s /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r  
+    ln -s -t /home/git /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r 2>/dev/null || true
   '';
 }

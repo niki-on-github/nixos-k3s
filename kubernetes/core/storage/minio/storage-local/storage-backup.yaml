@@ -37,9 +37,12 @@ spec:
     - name: minio-backup-storage-user
   requestAutoCert: false
   buckets:
-  - name: "volsync"
-    region: "local"
+  - name: "${VOLSYNC_BACKUP_BUCKET}"
+    region: "${MINIO_REGION}"
     objectLock: false
+  - name: "${POSTGRES_BACKUP_BUCKET}"
+    region: "${MINIO_REGION}"
+    objectLock: false  
   pools:
   - name: pool-0
     servers: 1
@@ -53,5 +56,5 @@ spec:
         resources:
           requests:
             storage: 128Gi
-        storageClassName: "local-hostpath"
+        storageClassName: "local-persistent"
 

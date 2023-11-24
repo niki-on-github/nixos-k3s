@@ -1,0 +1,21 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: ${APP_NAME}-backup
+  namespace: ${APP_NAMESPACE}
+spec:
+  sourcePVC: "${SOURCE_PVC}"
+  trigger:
+    schedule: "${BACKUP_SCHEDULE}"
+  restic:
+    pruneIntervalDays: 14
+    repository: ${APP_NAME}-restic-credentials
+    retain:
+      hourly: 6
+      daily: 5
+      weekly: 4
+      monthly: 2
+      yearly: 1
+    copyMethod: Snapshot
+    volumeSnapshotClassName: local-persistent
+    cacheStorageClassName: local-temp

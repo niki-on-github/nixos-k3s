@@ -13,5 +13,5 @@ resources:
   - resources/storage.yaml
   - resources/vpn-apps.yaml
   - resources/vpn-gateway.yaml
-  - resources/cnpg-system.yaml
   - resources/database.yaml
+  - resources/system.yaml

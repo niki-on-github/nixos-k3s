@@ -1,47 +1,44 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: local-hostpath-temp
+  name: app-gitea
   namespace: flux-system
 spec:
   interval: 15m
   retryInterval: 2m0s
   timeout: 5m
-  path: "./kubernetes/core/storage/local-path/operator"
+  path: "./kubernetes/apps/gitea/app"
   prune: true
-  wait: true
   force: true
+  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  dependsOn:
-    - name: external-snapshotter
   postBuild:
     substitute:
-      STORAGE_CLASS_NAME: local-temp
-      PATH_POSTFIX: temp
-      RECLAIM_POLICY: Delete
+      APP_NAME: gitea
+      APP_NAMESPACE: apps
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: local-hostpath-persistent
+  name: app-gitea-backup
   namespace: flux-system
 spec:
   interval: 15m
   retryInterval: 2m0s
   timeout: 5m
-  path: "./kubernetes/core/storage/local-path/operator"
+  path: "./kubernetes/templates/volsync"
   prune: true
-  wait: true
   force: true
+  dependsOn:
+    - name: app-gitea
   sourceRef:
     kind: GitRepository
     name: flux-system
-  dependsOn:
-    - name: external-snapshotter
   postBuild:
     substitute:
-      STORAGE_CLASS_NAME: local-persistent
-      PATH_POSTFIX: persistent
-      RECLAIM_POLICY: Retain
+      APP_NAME: gitea
+      APP_NAMESPACE: apps
+      BACKUP_SCHEDULE: "*/30 * * * *"
+      SOURCE_PVC: "gitea-data"

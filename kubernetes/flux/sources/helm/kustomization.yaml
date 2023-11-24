@@ -8,7 +8,6 @@ resources:
 - charts/bitnami-charts.yaml
 - charts/bjw-s-charts.yaml
 - charts/coredns-charts.yaml
-- charts/csi-driver-nfs-charts.yaml
 - charts/drone-charts.yaml
 - charts/fairwinds-charts.yaml
 - charts/gitea-charts.yaml
@@ -18,11 +17,8 @@ resources:
 - charts/metallb-charts.yaml
 - charts/metrics-server-charts.yaml
 - charts/minio-charts.yaml
-- charts/postgres-operator-charts.yaml
-- charts/postgres-ui-charts.yaml
 - charts/prometheus-community-charts.yaml
 - charts/traefik-charts.yaml
-- charts/weave-gitops-charts.yaml
 - charts/cnpg-charts.yaml
 - charts/democratic-csi-charts.yaml
-- charts/crunchydata-charts.yaml
+- charts/k8tz-charts.yaml

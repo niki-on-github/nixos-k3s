@@ -8,11 +8,13 @@ spec:
   retryInterval: 2m0s
   timeout: 15m
   dependsOn:
-    - name: local-path
+    - name: local-hostpath-persistent
     - name: thanos
     - name: traefik
   path: "./kubernetes/core/monitoring/prometheus-stack/app"
   prune: true
+  wait: true
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system

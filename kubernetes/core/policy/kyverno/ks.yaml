@@ -35,6 +35,7 @@ spec:
   path: "./kubernetes/core/policy/kyverno/policies"
   prune: true
   force: true
+  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system

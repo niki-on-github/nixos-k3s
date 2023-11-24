@@ -9,6 +9,7 @@ spec:
   timeout: 5m
   path: "./kubernetes/core/database/postgres/operator"
   prune: true
+  force: true
   wait: true
   dependsOn:
     - name: prometheus-stack

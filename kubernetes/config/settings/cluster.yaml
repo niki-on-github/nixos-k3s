@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: flux-system
+  name: cluster-settings
+data:
+  CLUSTER_PODS_NETWORK_IP_POOL: "10.42.0.0/16"
+  CLUSTER_SERVICE_NETWORK_IP_POOL: "10.43.0.0/16"
+  GATEWAY_IP: "10.0.1.1"
+  HOST_NETWORK_IP: "10.0.1.0"
+  HOST_PATH_PREFIX: "/opt/k3s/data"
+  SVC_GITEA_SSH_IP: "10.0.1.200"
+  TIMEZONE: "Europe/Berlin"
+  POSTGRES_BOOTSTRAP_CMD: initdb
+  POSTGRES_BACKUP_ENDPOINT: "minio.backup.svc.cluster.local"
+  POSTGRES_BACKUP_BUCKET: "postgres"
+  VOLSYNC_BACKUP_BUCKET: "volsync"
+  MINIO_REGION: "local"
