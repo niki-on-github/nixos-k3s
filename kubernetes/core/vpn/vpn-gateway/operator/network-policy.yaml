@@ -9,12 +9,12 @@ spec:
   - from:
     # Only allow ingress from K8S
     - ipBlock:
-        cidr: "${CLUSTER_PODS_NETWORK_IP_POOL}"
+        cidr: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"
   egress:
   - to:
     # Only allow egress to K8S
     - ipBlock:
-        cidr: "${CLUSTER_PODS_NETWORK_IP_POOL}"
+        cidr: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"
   policyTypes:
     # - Ingress
     - Egress

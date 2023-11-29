@@ -28,8 +28,8 @@ spec:
               tag: v1.1.0
 
             env:
-              TZ: &tz "${TIMEZONE}"
-              POSTGRES_HOST: &postgresqlHost "${APP_NAME}-postgresql-rw.apps.svc.cluster.local"
+              TZ: &tz "${CONFIG_TIMEZONE}"
+              POSTGRES_HOST: &postgresqlHost "${APP_NAME}-postgresql-rw.${APP_NAMESPACE}.svc.cluster.local"
               POSTGRES_USER:
                 valueFrom:
                   secretKeyRef:

@@ -6,3 +6,5 @@ resources:
   - secrets/ca-certs.sops.yaml
   - secrets/cluster-secrets.sops.yaml
   - secrets/vpn-config.sops.yaml
+  - secrets/vault-root-token.sops.yaml
+  - secrets/vault-keys.sops.yaml

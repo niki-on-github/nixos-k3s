@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app vault-autounseal
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: vault-autounseal
+      version: 0.3.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: vault-autounseal-charts
+        namespace: flux-system
+
+  values:
+    image:
+      repository: kennyopennix/vault-autounseal
+      # TODO tag
+      tag: "latest"
+      
+    settings:
+      vault_url: "http://vault.${APP_NAMESPACE}.svc.cluster.local:8200"
+      vault_secret_shares: 3
+      vault_secret_threshold: 2
+      vault_root_token_secret: vault-root-token
+      vault_keys_secret: vault-keys

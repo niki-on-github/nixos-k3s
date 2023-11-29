@@ -49,6 +49,7 @@ spec:
 
     additionalArguments:
       - "--serverstransport.insecureskipverify=true"
+      - "--providers.kubernetescrd.allowCrossNamespace=true"      
       - "--entryPoints.websecure.forwardedHeaders.trustedIPs=10.0.0.0/8,192.168.0.0/16,172.16.0.0/12,127.0.0.1/32"
 
     providers:

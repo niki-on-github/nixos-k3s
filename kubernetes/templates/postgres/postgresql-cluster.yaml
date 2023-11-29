@@ -11,8 +11,8 @@ spec:
   backup:
     retentionPolicy: "${POSTGRES_BACKUP_RETENTION}"        
     barmanObjectStore:
-      destinationPath: &backupDestinationPath "s3://${POSTGRES_BACKUP_BUCKET}/${APP_NAME}"
-      endpointURL: &backupEndpoint "http://${POSTGRES_BACKUP_ENDPOINT}"    
+      destinationPath: &backupDestinationPath "s3://${CONFIG_MINIO_BACKUP_POSTGRES_BUCKET}/${APP_NAME}"
+      endpointURL: &backupEndpoint "http://${CONFIG_MINIO_BACKUP_ENDPOINT}"    
       s3Credentials:
         accessKeyId:
           name: &credentials ${APP_NAME}-postgresql-backup-credentials
@@ -41,7 +41,7 @@ spec:
             key: REGION
     
   bootstrap:
-    ${POSTGRES_BOOTSTRAP_CMD}:
+    ${POSTGRES_BOOTSTRAP_CMD:-recovery}:
       source: *db
       database: ${POSTGRES_DATABASE}
       owner: ${SECRET_DATABASE_USER}

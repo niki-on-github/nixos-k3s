@@ -13,6 +13,26 @@ in
 
   hardware.cpu."${cpu}".updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
+  security.pki.certificateFiles = [
+    ./secrets/ca-cert.crt
+  ];  
+  
+  age.secrets = {
+    flux-git-auth.file = ./secrets/flux-git-auth.yaml.age;
+    flux-sops-age.file = ./secrets/flux-sops-age.yaml.age;
+    minio-credentials = {
+      file = ./secrets/minio-credentials.age;
+      mode = "770";
+      owner = "minio";
+      group = "minio";
+    };
+  };
+
+  sops = {
+    defaultSopsFile = ./secrets/secrets.sops.yaml;
+    secrets.user-password.neededForUsers = true;
+  };
+  
   templates = {
     system = {
       setup = {
@@ -22,26 +42,20 @@ in
       };
     };
     services = {
-      singleNodeCluster = {
+      k3s = {
         enable = true;
         flux.enable = true;
+        minio = {
+          enable = true;
+          credentialsFile = config.age.secrets.minio-credentials.path;
+          buckets = ["volsync" "postgres"];
+        };
       };
     };
   };
 
-  security.pki.certificateFiles = [
-    ./secrets/ca-cert.crt
-  ];  
-  
-  age.secrets = {
-    flux-git-auth.file = ./secrets/flux-git-auth.yaml.age;
-    flux-sops-age.file = ./secrets/flux-sops-age.yaml.age;
-  };
-
-  sops = {
-    defaultSopsFile = ./secrets/secrets.sops.yaml;
-    secrets.user-password.neededForUsers = true;
-  };
+  # open ports for selfhosted unify-network-application
+  networking.firewall.allowedTCPPorts = [3478 10001];
 
   users = {
     groups = {
@@ -106,8 +120,8 @@ in
     "d /var/lib/rancher/k3s/server/manifests 0775 root data -"
     "L /home/${user}/.kube/config  - - - - /etc/rancher/k3s/k3s.yaml"
     "L /var/lib/rancher/k3s/server/manifests/flux.yaml - - - - /etc/flux.yaml"
-    "L /var/lib/rancher/k3s/server/manifests/flux-git-auth.yaml - - - - /run/agenix/flux-git-auth"
-    "L /var/lib/rancher/k3s/server/manifests/flux-sops-age.yaml - - - - /run/agenix/flux-sops-age"                                  
+    "L /var/lib/rancher/k3s/server/manifests/flux-git-auth.yaml - - - - ${config.age.secrets.flux-git-auth.path}"
+    "L /var/lib/rancher/k3s/server/manifests/flux-sops-age.yaml - - - - ${config.age.secrets.flux-sops-age.path}"                                  
   ];
   
   # required for deploy-rs
@@ -158,10 +172,10 @@ in
   };
 
   system.activationScripts.git-mirror.text = ''
-    mkdir -p /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r
-    chown git:data /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r
-    chmod 775 /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r
-    chmod g+s /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r  
-    ln -s -t /home/git /opt/k3s/data/persistent/v/apps-gitea-data/git/repositories/r 2>/dev/null || true
+    mkdir -p /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r
+    chown git:data /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r
+    chmod 775 /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r
+    chmod g+s /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r  
+    ln -s -t /home/git /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r 2>/dev/null || true
   '';
 }

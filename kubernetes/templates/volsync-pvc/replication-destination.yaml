@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/volsync.backube/replicationdestination_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: "${APP_NAME}-bootstrap"
+  namespace: "${APP_NAMESPACE}"
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    copyMethod: Direct
+    repository: "${APP_NAME}-restic-credentials"
+    cacheStorageClassName: local-temp
+    storageClassName: "local-persistent"
+    destinationPVC: "${APP_NAME}-pvc"

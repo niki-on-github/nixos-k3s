@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: operator
-      version: 5.0.10
+      version: 5.0.11
       interval: 15m
       sourceRef:
         kind: HelmRepository
@@ -22,9 +22,9 @@ spec:
       replicaCount: 1
       env:
         - name: MINIO_ROOT_USER
-          value: "${SECRET_MINIO_ACCESS_KEY_BASE64}"
+          value: "${SECRET_MINIO_CLUSTER_ACCESS_KEY_BASE64}"
         - name: MINIO_ROOT_PASSWORD
-          value: "${SECRET_MINIO_SECRET_KEY_BASE64}"
+          value: "${SECRET_MINIO_CLUSTER_SECRET_KEY_BASE64}"
         - name: MINIO_OPERATOR_TLS_ENABLE
           value: "off"
         - name: MINIO_CONSOLE_TLS_ENABLE

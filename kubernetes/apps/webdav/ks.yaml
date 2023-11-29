@@ -1,0 +1,43 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-webdav-pvc
+  namespace: flux-system
+spec:
+  interval: 15m
+  retryInterval: 2m0s
+  timeout: 5m
+  path: "./kubernetes/templates/volsync-pvc"
+  prune: true
+  force: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  postBuild:
+    substitute:
+      APP_NAME: webdav
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "16Gi"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-webdav
+  namespace: flux-system
+spec:
+  interval: 15m
+  retryInterval: 2m0s
+  timeout: 5m
+  path: "./kubernetes/apps/webdav/app"
+  prune: true
+  force: true
+  dependsOn:
+    - name: app-webdav-pvc  
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  postBuild:
+    substitute:
+      APP_NAME: webdav
+      APP_NAMESPACE: apps

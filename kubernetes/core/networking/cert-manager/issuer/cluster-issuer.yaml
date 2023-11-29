@@ -1,3 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+ name: self-signed-issuer
+ namespace: networking
+spec:
+ selfSigned: {}
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

@@ -1,0 +1,103 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.0.3
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: *app
+
+    controllers:
+      main:
+        initContainers:
+          init:
+            image:
+              repository: busybox
+              tag: "1.36.1"
+            command:
+            - "/bin/mkdir"
+            args:
+            - "-p"
+            - "/init/data"
+            - "/init/extensions"            
+
+        containers:
+          main:
+            image:
+              repository: freshrss/freshrss
+              tag: 1.21.0
+
+            dependsOn:
+              - init
+          
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+              CRON_MIN: "2,32"
+              PUBLISHED_PORT: &port 80
+              LISTEN: "0.0.0.0:80"
+              SERVER_DNS: "rss.${SECRET_DOMAIN}"
+              FRESHRSS_INSTALL: |-
+                --api_enabled
+                --db-base ${POSTGRES_DATABASE}
+                --db-host ${APP_NAME}-postgresql-rw.${APP_NAMESPACE}.svc.cluster.local
+                --db-password ${SECRET_DATABASE_PASSWORD}
+                --db-type pgsql
+                --db-user ${SECRET_DATABASE_USER}
+                --default_user admin
+                --language de
+              FRESHRSS_USER: |-
+                --api_password ${SECRET_WEBSERVICES_PASSWORD}
+                --email admin@cluster.local
+                --language de
+                --password ${SECRET_WEBSERVICES_PASSWORD}
+                --user admin
+      
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+
+    ingress:
+      main:
+        enabled: true
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "rss.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  name: main
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      data:
+        enabled: true
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          main:
+            init:
+              - path: /init
+            main:
+              - path: /var/www/FreshRSS/data
+                subPath: "data"
+              - path: /var/www/FreshRSS/extensions
+                subPath: "extensions"

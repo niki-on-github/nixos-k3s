@@ -70,7 +70,7 @@ spec:
               - "if wget -q -O- 'https://airvpn.org/api/whatismyip/' | grep -Eq '.airvpn.: true' ; then exit 0; else exit 1; fi"
           initialDelaySeconds: 30
           periodSeconds: 120
-          failureThreshold: 3
+          failureThreshold: 5
 
         networkPolicy:
           enabled: true
@@ -85,7 +85,7 @@ spec:
                 protocol: "${SECRET_VPN_PROTOCOL}"
             - to:
               - ipBlock:
-                  cidr: "${CLUSTER_PODS_NETWORK_IP_POOL}"
+                  cidr: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"
 
     routed_namespaces:
     - vpn-apps
@@ -95,5 +95,5 @@ spec:
       VPN_BLOCK_OTHER_TRAFFIC: true
       VPN_TRAFFIC_PORT: ${SECRET_VPN_PORT}
       VPN_LOCAL_CIDRS: "10.0.0.0/8 192.168.0.0/16"
-      NOT_ROUTED_TO_GATEWAY_CIDRS: "${CLUSTER_PODS_NETWORK_IP_POOL} ${CLUSTER_SERVICE_NETWORK_IP_POOL}"
+      NOT_ROUTED_TO_GATEWAY_CIDRS: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL} ${CONFIG_CLUSTER_SERVICE_NETWORK_IP_POOL}"
 

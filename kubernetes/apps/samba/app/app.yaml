@@ -1,0 +1,90 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.0.3
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: *app
+
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/crazy-max/samba
+              tag: 4.18.8
+
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+      
+    service:
+      main:
+        type: LoadBalancer
+        ports:
+          http:
+            enabled: false
+          samba:
+            enabled: true
+            port: 445
+            protocol: TCP
+
+    configMaps:
+      config:
+        enabled: true
+        data:
+          config.yml: |
+            auth:
+              - user: smb
+                group: smb
+                uid: 1000
+                gid: 1000
+                password: "${SECRET_WEBSERVICES_PASSWORD}"
+
+            global:
+              - "force user = smb"
+              - "force group = smb"
+
+            share:
+              - name: samba
+                path: /samba
+                browsable: yes
+                readonly: no
+                guestok: no
+                validusers: smb
+                writelist: smb
+                veto: no
+
+    persistence:
+      data:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 16Gi
+        storageClass: "local-persistent"
+        globalMounts:
+          - path: /samba
+      empty:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /data
+      config:
+        enabled: true
+        type: configMap
+        name: ${APP_NAME}-config
+        globalMounts:
+          - path: /data/config.yml
+            subPath: config.yml

@@ -3,4 +3,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
  - entertainment-planer/ks.yaml
+ - fresh-rss/ks.yaml
  - gitea/ks.yaml
+ - jdownloader/ks.yaml
+ - nzbget/ks.yaml
+ - paperless/ks.yaml
+ - samba/ks.yaml
+ - syncthing/ks.yaml
+ - unifi/ks.yaml
+ - vaultwarden/ks.yaml
+ - vault/ks.yaml
+ - vikunja/ks.yaml
+ - webdav/ks.yaml
+ - wikijs/ks.yaml
+ - navidrome/ks.yaml
+ - uptime-kuma/ks.yaml

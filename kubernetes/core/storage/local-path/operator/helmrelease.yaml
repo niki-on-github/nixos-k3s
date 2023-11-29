@@ -19,18 +19,18 @@ spec:
     csiDriver:
       name: "org.democratic-csi.${STORAGE_CLASS_NAME}"
       attachRequired: false
-      storageCapacity: true
+      storageCapacity: false
       fsGroupPolicy: File
 
     storageClasses:
-      - name: ${STORAGE_CLASS_NAME}
+      - name: &className "${STORAGE_CLASS_NAME}"
         defaultClass: false
         reclaimPolicy: ${RECLAIM_POLICY:=Retain}
         volumeBindingMode: WaitForFirstConsumer
         allowVolumeExpansion: false
 
     volumeSnapshotClasses:
-      - name: ${STORAGE_CLASS_NAME}
+      - name: *className
         deletionPolicy: ${RECLAIM_POLICY:=Retain}
         parameters:
           dummy: {}
@@ -42,13 +42,14 @@ spec:
         enabled: false
       externalProvisioner:
         enabled: true
+        image: registry.k8s.io/sig-storage/csi-provisioner:v3.6.2        
         extraArgs:
           - --leader-election=false
           - --node-deployment=true
           - --node-deployment-immediate-binding=false
           - --feature-gates=Topology=true
           - --strict-topology=true
-          - --enable-capacity=true
+          - --enable-capacity=false
           - --capacity-ownerref-level=1
       externalResizer:
         enabled: false
@@ -61,16 +62,16 @@ spec:
     node:
       driver:
         extraVolumeMounts:
-          - name: ${STORAGE_CLASS_NAME}
-            mountPath: "${HOST_PATH_PREFIX}/${PATH_POSTFIX}"            
+          - name: *className
+            mountPath: &path "${CONFIG_HOST_PATH_PREFIX}/${PATH_POSTFIX}"            
             mountPropagation: Bidirectional
    
       driverRegistrar:
         enabled: true
       extraVolumes:
-        - name: ${STORAGE_CLASS_NAME}
+        - name: *className
           hostPath:
-            path: "${HOST_PATH_PREFIX}/${PATH_POSTFIX}"
+            path: *path
             type: DirectoryOrCreate
  
     driver:
@@ -78,8 +79,8 @@ spec:
         driver: local-hostpath
         instance_id:
         local-hostpath:
-          shareBasePath: "${HOST_PATH_PREFIX}/${PATH_POSTFIX}"
-          controllerBasePath: "${HOST_PATH_PREFIX}/${PATH_POSTFIX}"
+          shareBasePath: *path
+          controllerBasePath: *path
           dirPermissionsMode: "0777"
           dirPermissionsUser: 0
           dirPermissionsGroup: 0

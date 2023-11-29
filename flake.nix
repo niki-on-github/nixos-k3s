@@ -44,7 +44,7 @@
       inherit (nixpkgs) lib;
       overlays = lib.flatten [
         nur.overlay
-        personalModules.overlays
+        personalModules.overrides
         personalModules.pkgs
       ];
       nixosDeployments = personalModules.utils.deploy.generateNixosDeployments {
@@ -60,7 +60,7 @@
       };
     in
     {
-      inherit (personalModules) formatter devShells packages nixosModules homeManagerModules nixosRoles;
+      inherit (personalModules) formatter devShells packages nixosModules homeManagerModules nixosRoles homeManagerRoles;
       inherit (nixosDeployments) nixosConfigurations deploy checks;
     };
 }

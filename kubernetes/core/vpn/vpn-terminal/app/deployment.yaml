@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpn-terminal
+  namespace: vpn-apps
+  labels:
+    app: vpn-terminal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpn-terminal
+  template:
+    metadata:
+      labels:
+        app: vpn-terminal
+    spec:
+      containers:
+      - name: network-tools
+        image: jonlabelle/network-tools
+        tty: true
+        stdin: true
+        command:
+        - /bin/bash

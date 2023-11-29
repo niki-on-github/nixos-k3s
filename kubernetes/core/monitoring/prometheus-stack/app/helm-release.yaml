@@ -74,7 +74,7 @@ spec:
 
     grafana:
       enabled: false
-      defaultDashboardsTimezone: "${TIMEZONE}"
+      defaultDashboardsTimezone: "${CONFIG_TIMEZONE}"
       forceDeployDatasources: false
       forceDeployDashboards: true
 

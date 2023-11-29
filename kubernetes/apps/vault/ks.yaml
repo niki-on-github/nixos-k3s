@@ -1,0 +1,64 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-vault
+  namespace: flux-system
+spec:
+  interval: 15m
+  retryInterval: 2m0s
+  timeout: 5m
+  path: "./kubernetes/apps/vault/app"
+  prune: true
+  force: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  postBuild:
+    substitute:
+      APP_NAME: vault
+      APP_NAMESPACE: apps
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-vault-autounseal
+  namespace: flux-system
+spec:
+  interval: 15m
+  retryInterval: 2m0s
+  timeout: 5m
+  path: "./kubernetes/apps/vault/autounseal"
+  prune: true
+  force: true
+  dependsOn:
+    - name: app-vault
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  postBuild:
+    substitute:
+      APP_NAMESPACE: apps
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-vault-backup
+  namespace: flux-system
+spec:
+  interval: 15m
+  retryInterval: 2m0s
+  timeout: 5m
+  path: "./kubernetes/templates/volsync"
+  prune: true
+  force: true
+  dependsOn:
+    - name: app-vault
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  postBuild:
+    substitute:
+      APP_NAME: vault
+      APP_NAMESPACE: apps
+      PVC_NAME: "data-vault-0"

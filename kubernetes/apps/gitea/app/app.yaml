@@ -25,13 +25,13 @@ spec:
           main:
             image:
               repository: gitea/gitea
-              tag: "1.21.0"
+              tag: "1.21.1"
 
             env:
               USER_UID: "1000"
               USER_GID: "1000"
-              SSH_LISTEN_PORT: 222
-              SSH_PORT: 222
+              SSH_LISTEN_PORT: &sshPort 222
+              SSH_PORT: *sshPort
               LFS_START_SERVER: "true"
               APP_NAME: "Gitea"
               DOMAIN: "git.${SECRET_DOMAIN}"
@@ -51,11 +51,14 @@ spec:
         ports:
           http:
             port: 3000
+      ssh:
+        controller: main
+        type: LoadBalancer
+        ports: 
           ssh:
-            type: LoadBalancer
-            port: 222
-            externalTrafficPolicy: Local
-            loadBalancerIP: "${SVC_GITEA_SSH_IP}"
+            enabled: true
+            port: *sshPort
+            protocol: TCP
 
     ingress:
       main:
@@ -78,9 +81,6 @@ spec:
     persistence:
       data:
         enabled: true
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 32Gi
-        storageClass: "local-persistent"
+        existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /data

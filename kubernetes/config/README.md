@@ -5,10 +5,8 @@
 ### Encrypt
 
 ```bash
-sops --age=$AGE_PUBLIC_KEY --encrypt --encrypted-regex '^(data|stringData)$' --in-place ./cluster-secrets.example.yaml
+sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place ./cluster-secrets.example.yaml
 ```
-
-with `AGE_PUBLIC_KEY` from `/opt/k3s/.age/sops.agekey`.
 
 ### Decrypt
 
@@ -18,7 +16,7 @@ sops --decrypt --in-place ./cluster-secrets.example.yaml
 
 ### Edit Secrets on new PC
 
-Add the `AGE-SECRET-KEY` from `/opt/k3s/.age/sops.agekey` to `~/.config/sops/age/keys.txt` (Create the file if does not exists). Now you can use the sops encrypt and decrypt commands on your computer.
+Add the `AGE-SECRET-KEY` to `~/.config/sops/age/keys.txt` (Create the file if does not exists). Now you can use the sops encrypt and decrypt commands on your computer.
 
 ### sops config
 
@@ -31,4 +29,24 @@ With `.sops.yaml` config in project root it is possible to use `sops --encrypt -
 ```bash
 kubectl -n vpn-gateway create secret generic openvpn-config --dry-run=client --from-file=vpnConfigfile=./INPUT_FILENAME.ovpn -o yaml > vpn-config.sops.yaml
 sops --encrypt --in-place vpn-config.sops.yaml
+```
+
+## Self Singed CA
+
+```bash
+kubectl -n networking create secret tls internal-ca --dry-run=client --cert=ca.crt --key=ca.key -o yaml > ca-certs.sops.yaml
+sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place ca-certs.sops.yaml
+```
+
+NOTE: `ca.key` must be without passphrase! Remove with `openssl rsa -in ca.key -out ca2.key`
+
+## Vault auto-unseal
+
+To init vault with new keys delete the file `./secrets/vault-root-token.sops.yaml` and `./secrets/vault-keys.sops.yaml` and remove them from `./kustomization.yaml`. After cluster initialisation with flux you have to export the new keys and add them as before.
+
+```bash
+kubectl get secrets vault-root-token -o yaml -n apps > vault-root-token.sops.yaml
+kubectl get secrets vault-keys -o yaml -n apps > vault-keys.sops.yaml
+sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place vault-root-token.sops.yaml
+sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place vault-keys.sops.yaml
 ```
