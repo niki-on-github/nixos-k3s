@@ -177,5 +177,8 @@ in
     chmod 775 /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r
     chmod g+s /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r  
     ln -s -t /home/git /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r 2>/dev/null || true
+    mkdir -p /usr/local/bin
+    echo -e "#!/usr/bin/env bash\n#This file avoid errors with gitea hooks for our nixos git server" > /usr/local/bin/gitea
+    chmod +x /usr/local/bin/gitea
   '';
 }

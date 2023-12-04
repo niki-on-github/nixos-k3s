@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.0.3
+      version: 2.3.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -51,7 +51,7 @@ spec:
           main:
             image:
               repository: ghcr.io/niki-on-github/serien-and-movie-crawler
-              tag: v1.0.6
+              tag: v1.1.0
 
             env:
               TZ: *tz

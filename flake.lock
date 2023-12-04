@@ -303,11 +303,11 @@
     },
     "nur": {
       "locked": {
-        "lastModified": 1701254572,
-        "narHash": "sha256-M/Z7ApHDD1xO9uAFpcNjvrsKvEMBlyDAa+e+OWeFR4g=",
+        "lastModified": 1701333924,
+        "narHash": "sha256-w953OKiXjECq44lI+vA1YR0XW/Np/B4OrIIm/d/GntU=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "06928454918d1f13ec9c8156d47910c4318928e8",
+        "rev": "f0d92d2737c97b37804ca485d10148ee9abccf69",
         "type": "github"
       },
       "original": {
@@ -339,11 +339,11 @@
         "nur": "nur_2"
       },
       "locked": {
-        "lastModified": 1701257032,
-        "narHash": "sha256-1cApZv15sVVtdAgwK0Glb8FUpB5oo7asG//UecHgqGI=",
+        "lastModified": 1701343899,
+        "narHash": "sha256-oVX+giBhVID5dSLQyCgdrJCG4nsrrzXi96W/H/FP/LU=",
         "ref": "refs/heads/main",
-        "rev": "0799d0de74c668b25bbaf4e3286d0c7c3dd3a539",
-        "revCount": 489,
+        "rev": "23798fcb862c9b56b933859bb0feabeee2d7582d",
+        "revCount": 497,
         "type": "git",
         "url": "https://git.server01.lan/r/nixos-modules.git"
       },

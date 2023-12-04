@@ -15,7 +15,7 @@ spec:
     kind: GitRepository
     name: flux-system
   dependsOn:
-    - name: external-snapshotter
+    - name: snapshot-controller
   postBuild:
     substitute:
       STORAGE_CLASS_NAME: local-temp
@@ -39,7 +39,7 @@ spec:
     kind: GitRepository
     name: flux-system
   dependsOn:
-    - name: external-snapshotter
+    - name: snapshot-controller
   postBuild:
     substitute:
       STORAGE_CLASS_NAME: local-persistent

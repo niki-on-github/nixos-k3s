@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.0.3
+      version: 2.3.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -37,10 +37,7 @@ spec:
           main:
             image:
               repository: freshrss/freshrss
-              tag: 1.21.0
-
-            dependsOn:
-              - init
+              tag: 1.22.1
           
             env:
               TZ: "${CONFIG_TIMEZONE}"

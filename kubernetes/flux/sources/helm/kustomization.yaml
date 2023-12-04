@@ -25,3 +25,4 @@ resources:
 - charts/prometheus-community-charts.yaml
 - charts/traefik-charts.yaml
 - charts/vault-autounseal-charts.yaml
+- charts/piraeus-charts.yaml

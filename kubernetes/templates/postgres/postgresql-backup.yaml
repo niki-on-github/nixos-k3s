@@ -6,5 +6,6 @@ metadata:
 spec:
   schedule: "${POSTGRES_BACKUP_SCHEDULE}"
   backupOwnerReference: self
+  immediate: true
   cluster:
     name: ${APP_NAME}-postgresql

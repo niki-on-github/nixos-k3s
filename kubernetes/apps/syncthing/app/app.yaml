@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.0.3
+      version: 2.3.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -25,7 +25,7 @@ spec:
           main:
             image:
               repository: syncthing/syncthing
-              tag: 1.24.0
+              tag: 1.26.1
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

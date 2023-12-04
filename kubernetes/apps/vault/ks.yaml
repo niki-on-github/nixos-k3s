@@ -18,6 +18,7 @@ spec:
     substitute:
       APP_NAME: vault
       APP_NAMESPACE: apps
+      PVC_CAPACITY: "8Gi"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -39,26 +40,3 @@ spec:
   postBuild:
     substitute:
       APP_NAMESPACE: apps
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: app-vault-backup
-  namespace: flux-system
-spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
-  path: "./kubernetes/templates/volsync"
-  prune: true
-  force: true
-  dependsOn:
-    - name: app-vault
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  postBuild:
-    substitute:
-      APP_NAME: vault
-      APP_NAMESPACE: apps
-      PVC_NAME: "data-vault-0"

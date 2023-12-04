@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: 24.0.0
+      version: 25.0.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -64,7 +64,8 @@ spec:
 
     ports:
       web:
-        redirectTo: websecure
+        redirectTo: 
+          port: "websecure"
       websecure:
         tls:
           enabled: true

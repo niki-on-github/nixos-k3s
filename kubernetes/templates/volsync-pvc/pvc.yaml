@@ -5,8 +5,13 @@ metadata:
   namespace: ${APP_NAMESPACE}
 spec:
   accessModes:
-    - "ReadWriteMany"
+    - "ReadWriteOnce"
   resources:
     requests:
       storage: "${PVC_CAPACITY:-1Gi}"
   storageClassName: "local-persistent"
+  # see https://github.com/backube/volsync/issues/627#issuecomment-1688603593
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: "${APP_NAME}-bootstrap"

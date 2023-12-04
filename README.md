@@ -19,7 +19,7 @@ This repository provides the **Infrastructure as Code**[^1] (IaC) and **GitOps**
 
 ## Description
 
-A single node k3s cluster which can be fully reproducibly deployed with a single command. At the same time the node contains the git server which represents the GitOps state of the cluster. To solve the chicken edge problem an additional git server is configured on operating system level which has partial access to the repositories of the main git server which is running in k3s to have the cluster configurable even in case of configuration errors.
+A single node k3s cluster which can be **fully reproducibly deployed with a single command**. At the same time the node contains the git server which represents the GitOps state of the cluster. To solve the chicken edge problem an additional git server is configured on operating system level which has partial access to the repositories of the main git server which is running in k3s to have the cluster configurable even in case of configuration errors.
 
 ## Setup
 
@@ -38,5 +38,15 @@ This is only necessarry when the NixOS system configuration in this repository h
 ```bash
 nix run '.#update-system' -- supermicro-k3s ${IP}
 ```
+
+## Pushing to multiple git repositories
+
+Use the following to add several push urls to your origin:
+
+```bash
+git remote set-url --add --push origin git://original/repo.git
+git remote set-url --add --push origin git://another/repo.git
+```
+
 
 <br>

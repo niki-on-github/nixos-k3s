@@ -13,7 +13,7 @@ spec:
   wait: true
   force: true
   dependsOn:
-    - name: external-snapshotter
+    - name: snapshot-controller
     - name: minio
     - name: prometheus-stack
   sourceRef:

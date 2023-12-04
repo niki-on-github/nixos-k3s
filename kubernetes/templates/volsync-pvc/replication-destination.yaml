@@ -8,8 +8,12 @@ spec:
   trigger:
     manual: restore-once
   restic:
-    copyMethod: Direct
+    copyMethod: Snapshot
     repository: "${APP_NAME}-restic-credentials"
     cacheStorageClassName: local-temp
     storageClassName: "local-persistent"
-    destinationPVC: "${APP_NAME}-pvc"
+    volumeSnapshotClassName: "local-persistent"
+    accessModes:
+    - "ReadWriteOnce"
+    capacity: "${PVC_CAPACITY:-1Gi}"
+      
