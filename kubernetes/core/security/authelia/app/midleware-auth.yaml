@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth
+  namespace: security
+spec:
+  forwardAuth:
+    address: "http://authelia.security.svc:9091/api/verify?rd=https://auth.${SECRET_DOMAIN}"
+    trustForwardHeader: true
+    authResponseHeaders:
+      - X-Forwarded-User
+      - Remote-User
+      - Remote-Groups
+      - Remote-Name
+      - Remote-Email

@@ -1,0 +1,66 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.4.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: *app
+
+    controllers:
+      main:
+        containers:
+          main:
+            pod:
+              securityContext:
+                privileged: true
+                fsGroup: 0
+                runAsUser: 0
+                runAsGroup: 0
+
+            image:
+              repository: vegardit/gitea-act-runner
+              tag: "0.2.6"
+
+            env:
+              TZ: "${TIMEZONE}"
+              GITEA_INSTANCE_URL: "https://git.${SECRET_DOMAIN}"
+              GITEA_RUNNER_REGISTRATION_TOKEN: "${SECRET_GITEA_RUNNER_TOKEN}"
+              GITEA_INSTANCE_INSECURE: true
+              GITEA_RUNNER_LOG_EFFECTIVE_CONFIG: true
+              GITEA_RUNNER_UID: 0
+              GITEA_RUNNER_GID: 0
+              GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "--add-host=git.${SECRET_DOMAIN}:host-gateway -e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
+
+    service:
+      main:
+        enabled: false
+        
+    ingress:
+      main:
+        enabled: false
+         
+    persistence:
+      data:
+        enabled: true
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /data
+      docker:
+        enabled: true
+        type: hostPath
+        hostPath: /var/run/docker.sock
+        globalMounts:
+          - path: /var/run/docker.sock

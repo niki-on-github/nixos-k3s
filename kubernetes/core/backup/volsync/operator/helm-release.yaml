@@ -17,6 +17,10 @@ spec:
         namespace: flux-system
 
   values:
+    image:
+      repository: ghcr.io/niki-on-github/volsync
+      pullPolicy: IfNotPresent
+      tag: "dev"
     manageCRDs: true
     metrics:
       disableAuth: true

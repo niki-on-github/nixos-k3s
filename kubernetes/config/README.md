@@ -50,3 +50,12 @@ kubectl get secrets vault-keys -o yaml -n apps > vault-keys.sops.yaml
 sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place vault-root-token.sops.yaml
 sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place vault-keys.sops.yaml
 ```
+
+## Authelia Keys
+
+```bash
+openssl genrsa -out private.pem 4096
+kubectl -n security create secret generic authelia-keys --dry-run=client --from-file=oidcIssuerPrivateKey=./private.pem -o yaml > authelia-keys.sops.yam
+rm private.pem
+sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place authelia-keys.sops.yaml
+```

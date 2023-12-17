@@ -1,0 +1,107 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.4.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: *app
+
+    controllers:
+      main:
+        initContainers:
+          init:
+            image:
+              repository: busybox
+              tag: "1.36.1"
+            command:
+            - "/bin/sh"
+            args:
+            - "/init.sh"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/home-assistant/home-assistant
+              tag: 2023.12.3
+          
+            env:
+              # NOTE: hass does not support env-variables for configuration directly, but you can use env variables in configuration.yaml with `!env_var VAR_NAME`
+              HASS_TRUSTED_PROXIES: ${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}
+              HASS_RECORDER_DB_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: "${APP_NAME}-postgresql-credentials"
+                    key: url
+
+    service:
+      main:
+        ports:
+          http:
+            port: 8123
+
+    ingress:
+      main:
+        enabled: true
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "hass.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  name: main
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    configMaps:
+      scripts:
+        enabled: true
+        data:
+          init.sh: |
+            #!/bin/sh
+            echo "run $0"
+            cp -nv /init/* /config/ 
+                        
+    persistence:
+      config:
+        enabled: true
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          main:
+            main:
+              - path: /config
+            init:
+              - path: /config
+      init:
+        enabled: true
+        type: configMap
+        name: home-assistant-init
+        advancedMounts:
+          main:
+            init:
+              - path: /init
+      scripts:
+        enabled: true
+        type: configMap
+        name: ${APP_NAME}-scripts
+        advancedMounts:
+          main:
+            init:
+              - path: /init.sh
+                subPath: init.sh

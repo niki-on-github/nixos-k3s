@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.3.0
+      version: 2.4.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -85,6 +85,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
         hosts:
           - host: &ingress "planer.${SECRET_DOMAIN}"
             paths:

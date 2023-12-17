@@ -1,14 +1,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app email2signal
-  namespace: notification
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
 spec:
   interval: 15m
   chart:
     spec:
       chart: app-template
-      version: 2.3.0
+      version: 2.4.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -81,10 +81,7 @@ spec:
     persistence:
       data:
         enabled: true
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: "local-persistent"
+        existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
           main:
             main:

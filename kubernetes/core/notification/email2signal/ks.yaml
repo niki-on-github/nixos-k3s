@@ -9,6 +9,7 @@ spec:
   timeout: 15m
   dependsOn:
     - name: traefik
+    - name: volsync
     - name: local-hostpath-persistent
   path: "./kubernetes/core/notification/email2signal/app"
   prune: true
@@ -17,4 +18,8 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-
+  postBuild:
+    substitute:
+      APP_NAME: email2signal
+      APP_NAMESPACE: notification
+      PVC_CAPACITY: "1Gi"

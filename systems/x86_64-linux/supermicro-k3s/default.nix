@@ -2,8 +2,9 @@
 let
   user = "nix";
   cpu = "intel";
-  dnsName = "server02";
+  domain = "server02";
   ip = "10.0.1.200";
+  gateway = "10.0.1.1";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -51,11 +52,36 @@ in
           buckets = ["volsync" "postgres"];
         };
       };
+      docker = {
+        enable = true;
+        gatewayIp = "${gateway}";
+      };
     };
   };
 
-  # open ports for selfhosted unify-network-application
-  networking.firewall.allowedTCPPorts = [3478 10001];
+  services.gitea = {
+    enable = true;
+    settings = {
+      server = {
+        HTTP_PORT = 3000;
+        ROOT_URL = "http://${domain}:3000/";
+        DOMAIN = "${domain}";
+        SSH_DOMAIN = "${domain}";
+      };
+      service = {
+        DISABLE_REGISTRATION = true;
+      };
+    };
+  };
+
+  environment = {
+    systemPackages = with pkgs; [
+      ser2net
+    ];
+  };
+
+  # open ports for gitea, selfhosted unify-network-application and Ser2Net Zigbee adapter
+  networking.firewall.allowedTCPPorts = [22 3000 3478 10001 20108];
 
   users = {
     groups = {
@@ -71,35 +97,21 @@ in
         description = "nix user";
         createHome = true;
         # use `mkpasswd -m sha-512 | tr -d '\n'` to get the password hash for your sops file
-        passwordFile = config.sops.secrets.user-password.path;
+        hashedPasswordFile = config.sops.secrets.user-password.path;
         home = "/home/${user}";
         extraGroups = [
           "audit"
+          "dialout"
           "users"
           "sshusers"
           "storage"
           "wheel"
         ];
+        #TODO declarative way to add this to gitea webui ssh keys?
         openssh.authorizedKeys.keyFiles = [
           ./secrets/ssh.server02.lan.pub
         ];
       };
-      git = {
-        isNormalUser = true;
-        uid = 1000;
-        description = "git user";
-        createHome = true;
-        home = "/home/git";
-        shell = "${pkgs.git}/bin/git-shell";
-        passwordFile = config.sops.secrets.user-password.path;
-        extraGroups = [
-          "users"
-          "sshusers"
-        ];
-        openssh.authorizedKeys.keyFiles = [
-          ./secrets/ssh.server02.lan.pub
-        ];
-      };    
     };
   };
 
@@ -132,8 +144,8 @@ in
   # - 'ssh://git@server02.lan/home/git/r/gitops-homelab.git'
   # - 'ssh://git@server02.lan/~/r/gitops-homelab.git' => ~ is not supported in flux git repo url!
   # flux git secret:
-  # 1. flux create secret git flux-git-auth --url="ssh://git@${dnsName}.lan/~/r/gitops-homelab.git" --private-key-file={{ .PRIVATE_SSH_KEYFILE }} --export > flux-git-secret.yaml
-  # 2. manually change the knwon_hosts to `ssh-keyscan ${dnsName}` ssh-ed25519 output
+  # 1. flux create secret git flux-git-auth --url="ssh://git@${domain}/~/r/gitops-homelab.git" --private-key-file={{ .PRIVATE_SSH_KEYFILE }} --export > flux-git-secret.yaml
+  # 2. manually change the knwon_hosts to `ssh-keyscan ${domain}` ssh-ed25519 output
   # 3. encrypt yaml with age
   environment.etc."flux.yaml" = {
     mode = "0750";
@@ -149,7 +161,7 @@ in
           branch: main
         secretRef:
           name: flux-git-auth
-        url: ssh://git@${dnsName}.lan/home/git/r/nixos-k3s.git
+        url: ssh://gitea@${domain}.lan/r/nixos-k3s.git
       ---
       apiVersion: kustomize.toolkit.fluxcd.io/v1
       kind: Kustomization
@@ -171,14 +183,28 @@ in
     '';
   };
 
-  system.activationScripts.git-mirror.text = ''
-    mkdir -p /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r
-    chown git:data /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r
-    chmod 775 /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r
-    chmod g+s /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r  
-    ln -s -t /home/git /opt/k3s/data/persistent/v/apps-gitea-pvc/git/repositories/r 2>/dev/null || true
-    mkdir -p /usr/local/bin
-    echo -e "#!/usr/bin/env bash\n#This file avoid errors with gitea hooks for our nixos git server" > /usr/local/bin/gitea
-    chmod +x /usr/local/bin/gitea
-  '';
+  # Config for ConBee II
+  environment.etc."ser2net.yaml" = {
+    mode = "0755";
+    text = ''
+      connection: &con01
+        accepter: tcp,20108
+        connector: serialdev,/dev/ttyACM0,115200n81,nobreak,local
+        options:
+          kickolduser: true
+    '';
+  };
+
+  systemd.services.ser2net = {
+    wantedBy = [ "multi-user.target" ];
+    description = "Serial to network proxy";
+    after = [ "network.target" "dev-ttyACM0.device" ];
+    serviceConfig = {
+        Type = "simple";
+        User = "root"; # todo user with only dialout group?
+        ExecStart = ''${pkgs.ser2net}/bin/ser2net -n -c /etc/ser2net.yaml''; 
+        ExecReload = ''kill -HUP $MAINPID'';
+        Restart = "on-failure";
+      };
+  };
 }

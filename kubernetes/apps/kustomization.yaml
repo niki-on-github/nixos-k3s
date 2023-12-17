@@ -6,15 +6,21 @@ resources:
  - fresh-rss/ks.yaml
  - gitea/ks.yaml
  - jdownloader/ks.yaml
+ - mosquitto/ks.yaml
+ - navidrome/ks.yaml
  - nzbget/ks.yaml
  - paperless/ks.yaml
  - samba/ks.yaml
  - syncthing/ks.yaml
  - unifi/ks.yaml
- - vaultwarden/ks.yaml
+ - uptime-kuma/ks.yaml
  - vault/ks.yaml
+ - vaultwarden/ks.yaml
  - vikunja/ks.yaml
  - webdav/ks.yaml
  - wikijs/ks.yaml
- - navidrome/ks.yaml
- - uptime-kuma/ks.yaml
+ - zigbee2mqtt/ks.yaml
+ - home-assistant/ks.yaml
+ - gitea-runner/ks.yaml
+ - solaredge/ks.yaml
+ - nodered/ks.yaml

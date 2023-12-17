@@ -1,0 +1,191 @@
+apiVersion: v1
+type: Opaque
+kind: Secret
+metadata:
+  name: ${APP_NAME}-secret
+  namespace: ${APP_NAMESPACE}
+stringData:
+  AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD: "${SECRET_WEBSERVICES_PASSWORD}"
+  AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET: "${SECRET_AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET}"
+  AUTHELIA_JWT_SECRET: "${SECRET_AUTHELIA_JWT_SECRET}"
+  AUTHELIA_SESSION_SECRET: "${SECRET_AUTHELIA_SESSION_SECRET}"
+  AUTHELIA_STORAGE_ENCRYPTION_KEY: "${SECRET_AUTHELIA_STORAGE_ENCRYPTION_KEY}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${APP_NAME}-configmap
+  namespace: ${APP_NAMESPACE}
+data:
+  configuration.yaml: |
+    authentication_backend:
+      password_reset:
+        disable: true
+      refresh_interval: 1m
+      ldap:
+        address: ldap://lldap.security.svc.cluster.local:389
+        implementation: custom
+        timeout: 5s
+        start_tls: false
+        base_dn: dc=home,dc=lan
+        additional_users_dn: ou=people
+        users_filter: (&({username_attribute}={input})(objectClass=person))
+        additional_groups_dn: ou=groups
+        groups_filter: (member={dn})
+        group_search_mode: filter
+        user: uid=admin,ou=people,dc=home,dc=lan
+        password: password
+        attributes:
+          username: uid
+          display_name: displayName
+          mail: mail
+          member_of: memberOf
+          group_name: cn
+
+    session:
+      same_site: lax
+      inactivity: 5m
+      expiration: 1h
+      remember_me: 1M
+      cookies:
+        - name: session
+          domain: ${SECRET_DOMAIN}
+          authelia_url: https://auth.${SECRET_DOMAIN}
+          default_redirection_url: https://${SECRET_DOMAIN}
+ 
+    notifier:
+      disable_startup_check: true
+      filesystem:
+        filename: /config/notification.txt
+ 
+    totp:
+      disable: false
+      issuer: authelia.com
+
+    webauthn:
+      disable: true
+
+    duo_api:
+      disable: true
+
+    access_control:
+      default_policy: one_factor
+      networks:
+        - name: internal
+          networks: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+      rules: []
+    identity_providers:
+      oidc:
+        cors:
+          endpoints: ["authorization", "token", "revocation", "introspection"]
+          allowed_origins_from_client_redirect_uris: true
+        clients:
+          - id: grafana
+            description: Grafana
+            secret: "${SECRET_GRAFANA_OAUTH_CLIENT_SECRET}"
+            public: false
+            authorization_policy: one_factor
+            pre_configured_consent_duration: 1y
+            scopes: ["openid", "profile", "groups", "email"]
+            redirect_uris: ["https://grafana.${SECRET_DOMAIN}/login/generic_oauth"]
+            userinfo_signed_response_alg: none
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.4.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  values:
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        containers:
+          main:
+            image:
+              repository: ghcr.io/authelia/authelia
+              tag: v4.38.0-beta3
+            env:
+              AUTHELIA_SERVER_PORT: &port 9091
+              AUTHELIA_SERVER_DISABLE_HEALTHCHECK: "true"
+              AUTHELIA_TELEMETRY_METRICS_ADDRESS: tcp://0.0.0.0:8080
+              AUTHELIA_TELEMETRY_METRICS_ENABLED: "true"
+              AUTHELIA_THEME: dark
+              X_AUTHELIA_CONFIG: /config/configuration.yaml
+              X_AUTHELIA_CONFIG_FILTERS: expand-env
+              AUTHELIA_STORAGE_POSTGRES_DATABASE:
+                valueFrom:
+                  secretKeyRef:
+                    name: &dbCredentials "${APP_NAME}-postgresql-credentials"
+                    key: database
+              AUTHELIA_STORAGE_POSTGRES_ADDRESS: 
+                valueFrom:
+                  secretKeyRef:
+                    name: *dbCredentials
+                    key: uri
+              AUTHELIA_STORAGE_POSTGRES_USERNAME: 
+                valueFrom:
+                  secretKeyRef:
+                    name: *dbCredentials
+                    key: username
+              AUTHELIA_STORAGE_POSTGRES_PASSWORD: 
+                valueFrom:
+                  secretKeyRef:
+                    name: *dbCredentials
+                    key: password
+              AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: authelia-keys
+                    key: oidcIssuerPrivateKey
+            envFrom:
+              - secretRef:
+                  name: ${APP_NAME}-secret
+ 
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+          metrics:
+            port: 8080
+
+    ingress:
+      main:
+        enabled: true
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "auth.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  name: main
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+
+    persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: ${APP_NAME}-configmap
+        globalMounts:
+          - path: /config/configuration.yaml
+            subPath: configuration.yaml
+            readOnly: true

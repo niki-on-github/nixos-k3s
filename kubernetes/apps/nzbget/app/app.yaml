@@ -1,45 +1,3 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ${APP_NAME}-scripts
-  namespace: ${APP_NAMESPACE}
-data:
-  GetPw.py: |
-    #!/usr/bin/python3
-    ##############################################################################
-    ### NZBGET SCAN SCRIPT                                     ###
-    #
-    # Scans filename of incoming NZBs for embedded passwords.
-    #
-    ##############################################################################
-    ### OPTIONS                                                                ###
-    # The RegEx to match the password in the filename.
-    #regex=(.*)\{\{(.*)\}\}.nzb
-
-    ### NZBGET SCAN SCRIPT                                     ###
-    ##############################################################################
-
-    import re
-    import getopt
-    import sys
-    import os
-
-    nzbfile = os.environ.get('NZBNP_NZBNAME')
-    regex = os.environ.get('NZBPO_REGEX')
-
-    if nzbfile:
-      pattern = re.compile(regex)
-      match = pattern.search(nzbfile)
-      password = ""
-      name = nzbfile
-      if match:
-        name = match.group(1)
-        password = match.group(2)
-
-      print("[NZB] NZBNAME=" + name)
-      if password:
-        print("[NZB] NZBPR_*Unpack:Password=" + password)
----
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -54,7 +12,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.3.0
+      version: 2.4.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -67,24 +25,11 @@ spec:
 
     controllers:
       main:
-        initContainers:
-          init:
-            image:
-              repository: busybox
-              tag: "1.36.1"
-            command:
-            - "/bin/mkdir"
-            args:
-            - "-p"
-            - "/init/config"
-            - "/init/downloads"         
-
         containers:
           main:
             image:
               repository: ghcr.io/linuxserver/nzbget
-              # TODO tag
-              tag: "latest"
+              tag: "v21.1-ls138"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"
@@ -118,22 +63,25 @@ spec:
               - *ingress
         
     persistence:
-      # NOTE: For the vpn routed apps insied the vpn-apps namespace we can not use volsync to an external server because the access is blocked.
-      data:
+      # NOTE: For the vpn routed apps insied the vpn-apps namespace we can not 
+      # - use volsync to an external server because the access is blocked.
+      # - use an init container to provision subPaths in storage volumes because the gateway init container cause conflicts
+      config:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: "local-persistent"
+        globalMounts:
+          - path: /config
+      downloads:
         enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 32Gi
         storageClass: "local-persistent"
-        advancedMounts:
-          main:
-            init:
-              - path: /init
-            main:
-              - path: /config
-                subPath: config
-              - path: /downloads
-                subPath: downloads
+        globalMounts:
+          - path: /downloads
       scripts:
         enabled: true
         type: configMap

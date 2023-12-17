@@ -8,3 +8,4 @@ resources:
   - secrets/vpn-config.sops.yaml
   - secrets/vault-root-token.sops.yaml
   - secrets/vault-keys.sops.yaml
+  - secrets/authelia-keys.sops.yaml

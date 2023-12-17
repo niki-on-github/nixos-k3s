@@ -3,3 +3,9 @@ kind: Kustomization
 namespace: vpn-apps
 resources:
   - app.yaml
+configMapGenerator:
+  - name: nzbget-scripts
+    files:
+      - scripts/GetPw.py
+generatorOptions:
+  disableNameSuffixHash: true

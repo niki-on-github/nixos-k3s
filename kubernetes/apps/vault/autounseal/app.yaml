@@ -18,8 +18,7 @@ spec:
   values:
     image:
       repository: kennyopennix/vault-autounseal
-      # TODO tag
-      tag: "latest"
+      tag: "main"
       
     settings:
       vault_url: "http://vault.${APP_NAMESPACE}.svc.cluster.local:8200"

@@ -18,7 +18,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.3.0
+      version: 2.4.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -35,8 +35,7 @@ spec:
           main:
             image:
               repository: vikunja/api
-              # TODO tag              
-              tag: latest
+              tag: "0.21.0"
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
@@ -71,8 +70,7 @@ spec:
           main:
             image:
               repository: vikunja/frontend
-              # TODO tag
-              tag: latest
+              tag: "0.21.0"
 
             env:
               TZ: *tz

@@ -1,0 +1,86 @@
+apiVersion: v1
+type: Opaque
+kind: Secret
+metadata:
+  name: ${APP_NAME}-secret
+  namespace: ${APP_NAMESPACE}
+stringData:
+  mosquitto_pwd: |
+    ${SECRET_DATABASE_USER}:${SECRET_DATABASE_PASSWORD}
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.4.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: *app
+
+    controllers:
+      main:
+        initContainers:
+          init-config:
+            image:
+              repository: public.ecr.aws/docker/library/eclipse-mosquitto
+              tag: 2.0.18
+            command:
+              - "/bin/sh"
+              - "-c"
+            args:
+              - cp /tmp/secret/* /mosquitto/external_config/;
+                mosquitto_passwd -U /mosquitto/external_config/mosquitto_pwd;
+                chmod 0600 /mosquitto/external_config/mosquitto_pwd;
+
+        containers:
+          main:
+            image:
+              repository: public.ecr.aws/docker/library/eclipse-mosquitto
+              tag: 2.0.18      
+
+    service:
+      main:
+        ports:
+          http:
+            enabled: false
+          mqtt:
+            enabled: true
+            port: 1883
+        
+    persistence:
+      data:
+        enabled: true
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /data
+      configfile:
+        type: configMap
+        name: mosquitto-configmap
+        advancedMounts:
+          main:
+            main:
+              - path: /mosquitto/config/mosquitto.conf
+                subPath: mosquitto.conf
+      secret:
+        type: secret
+        name: ${APP_NAME}-secret
+        advancedMounts:
+          main:
+            init-config:
+              - path: /tmp/secret
+      externalconfig:
+        type: emptyDir
+        globalMounts:
+          - path: /mosquitto/external_config

@@ -16,3 +16,4 @@ resources:
   - resources/system.yaml
   - resources/vpn-apps.yaml
   - resources/vpn-gateway.yaml
+  - resources/security.yaml
