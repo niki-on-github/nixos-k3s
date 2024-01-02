@@ -2,9 +2,15 @@
 let
   user = "nix";
   cpu = "intel";
-  domain = "server02";
-  ip = "10.0.1.200";
+  domain = "server02.lan";
+  ip = "10.0.1.11";
+  dns = "10.0.1.1";
+  subnet = 24;
   gateway = "10.0.1.1";
+  interface = "eno3";
+  cpufreqmax = 2000000; 
+  bridge = "br1";
+  disk = "/dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNF0MA23122T";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -27,19 +33,40 @@ in
       owner = "minio";
       group = "minio";
     };
+    "sops-age-keys.txt" = {
+        file = ./secrets/sops-age-keys.txt.age;
+        path = "/home/${user}/.config/sops/age/keys.txt";
+        owner = "${user}";
+        group = "users";
+        mode = "600";
+      };
   };
 
   sops = {
     defaultSopsFile = ./secrets/secrets.sops.yaml;
     secrets.user-password.neededForUsers = true;
   };
-  
+
+  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+  networking = {
+    defaultGateway = "${gateway}";
+    nameservers = [ "${dns}" ];
+    bridges = {
+      "${bridge}" = {
+        interfaces = [ "${interface}" ];
+      };
+    };
+    interfaces."${bridge}".ipv4.addresses = [ 
+      { address = "${ip}"; prefixLength = subnet; }
+    ];
+  };
+
   templates = {
     system = {
       setup = {
         enable = true;
         encrypt = true;
-        disk = "/dev/disk/by-id/ata-SanDisk_SDSSDH3_512G_191805802811";
+        disk = disk;
       };
     };
     services = {
@@ -50,17 +77,51 @@ in
           enable = true;
           credentialsFile = config.age.secrets.minio-credentials.path;
           buckets = ["volsync" "postgres"];
+          dataDir = ["/mnt/backup/minio"];
         };
       };
-      docker = {
+      kvm = {
         enable = true;
-        gatewayIp = "${gateway}";
+        cockpit.enable = false; # broken
+        platform = "${cpu}";
+        user = "${user}";
+      };
+      docker = {
+        enable = false; # we use now dind in k3s
+        dns = "${dns}";
       };
     };
   };
 
+  boot.initrd.luks.devices."crypt_01" = {
+    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S626NZFR300623P-part1";
+    preLVM = true;
+    keyFile = "/disk.key";
+    allowDiscards = true;
+    fallbackToPassword = true;
+  };
+
+  boot.initrd.luks.devices."crypt_02" = {
+    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_212507A00254-part1";
+    preLVM = true;
+    keyFile = "/disk.key";
+    allowDiscards = true;
+    fallbackToPassword = true;
+  };
+  
+  fileSystems."/mnt/backup" = {
+    device = "/dev/disk/by-label/data01";
+    fsType = "btrfs";
+    options = ["defaults" "noatime" "compress=zstd" "subvol=@data"];
+    neededForBoot = true; # gitea and minio store data here so ensure to first mount the drive
+  };
+  
   services.gitea = {
     enable = true;
+    lfs.enable = true;
+    stateDir = "/mnt/backup/gitea";
+    useWizard = false; # broken
+    group = "data";
     settings = {
       server = {
         HTTP_PORT = 3000;
@@ -71,7 +132,15 @@ in
       service = {
         DISABLE_REGISTRATION = true;
       };
+      actions = {
+        ENABLED = true;
+      };
     };
+  };
+
+  powerManagement = {
+    cpuFreqGovernor = "ondemand";
+    cpufreq.max = cpufreqmax;
   };
 
   environment = {
@@ -80,14 +149,17 @@ in
     ];
   };
 
-  # open ports for gitea, selfhosted unify-network-application and Ser2Net Zigbee adapter
-  networking.firewall.allowedTCPPorts = [22 3000 3478 10001 20108];
+  # open ports for gitea, selfhosted unify-network-application, syncthing and Ser2Net Zigbee adapter
+  networking.firewall = {
+    allowedTCPPorts = [22 80 222 443 445 3000 8080 20108 22000];
+    allowedUDPPorts = [3478 10001 21027];
+  };
 
   users = {
     groups = {
       data = { 
         name = "data"; 
-        members = ["git" "${user}"]; 
+        members = ["${user}"]; 
         gid = 1000;
       };
     };
@@ -112,6 +184,9 @@ in
           ./secrets/ssh.server02.lan.pub
         ];
       };
+      root = {
+        hashedPasswordFile = config.sops.secrets.user-password.path;
+      };
     };
   };
 
@@ -121,24 +196,28 @@ in
       ${user} = import ./home.nix;
     };
   };
-  
+
+  # TODO why do we need to fix the folder permission of mapped age secrets?
   systemd.tmpfiles.rules = [
+    "d /mnt/backup 0775 root data -" # must be owned by root to solve gitea folder transition issues!
     "d /opt/k3s 0775 ${user} data -"
     "d /opt/k3s/data 0775 ${user} data -"
-    "d /mnt/backup 0775 ${user} data -"
-    "d /mnt/backup/k3s 0775 ${user} data -"
-    "d /mnt/backup/k3s/minio 0775 ${user} data -"
+    "d /home/${user}/.config 0775 ${user} data -"
+    "d /home/${user}/.config/sops 0775 ${user} data -"
+    "d /home/${user}/.config/sops/age 0775 ${user} data -"
     "d /home/${user}/.kube 0775 ${user} data -"
     "d /var/lib/rancher/k3s/server/manifests 0775 root data -"
     "L /home/${user}/.kube/config  - - - - /etc/rancher/k3s/k3s.yaml"
-    "L /var/lib/rancher/k3s/server/manifests/flux.yaml - - - - /etc/flux.yaml"
+    "L /var/lib/rancher/k3s/server/manifests/flux.yaml - - - - /etc/k3s/flux.yaml"
     "L /var/lib/rancher/k3s/server/manifests/flux-git-auth.yaml - - - - ${config.age.secrets.flux-git-auth.path}"
     "L /var/lib/rancher/k3s/server/manifests/flux-sops-age.yaml - - - - ${config.age.secrets.flux-sops-age.path}"                                  
+    "L /var/lib/rancher/k3s/server/manifests/00-coredns-custom.yaml - - - - /etc/k3s/coredns-custom.yaml" # use 00- prefix to deploy this first                                 
   ];
   
   # required for deploy-rs
   nix.settings.trusted-users = [ "root" "${user}" ];
 
+  # NOTE: we use the ssh key not the git key
   # git url schmeas: 
   # - 'git@server02.lan:r/gitops-homelab.git'
   # - 'ssh://git@server02.lan/home/git/r/gitops-homelab.git'
@@ -147,7 +226,7 @@ in
   # 1. flux create secret git flux-git-auth --url="ssh://git@${domain}/~/r/gitops-homelab.git" --private-key-file={{ .PRIVATE_SSH_KEYFILE }} --export > flux-git-secret.yaml
   # 2. manually change the knwon_hosts to `ssh-keyscan ${domain}` ssh-ed25519 output
   # 3. encrypt yaml with age
-  environment.etc."flux.yaml" = {
+  environment.etc."k3s/flux.yaml" = {
     mode = "0750";
     text = ''
       apiVersion: source.toolkit.fluxcd.io/v1
@@ -161,7 +240,7 @@ in
           branch: main
         secretRef:
           name: flux-git-auth
-        url: ssh://gitea@${domain}.lan/r/nixos-k3s.git
+        url: ssh://gitea@${domain}/r/nixos-k3s.git
       ---
       apiVersion: kustomize.toolkit.fluxcd.io/v1
       kind: Kustomization
@@ -183,6 +262,35 @@ in
     '';
   };
 
+  # NOTE this config map is optional used by k3s coredns see https://github.com/k3s-io/k3s/blob/master/manifests/coredns.yaml
+  environment.etc."k3s/coredns-custom.yaml" = {
+    mode = "0750";
+    text = ''  
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: coredns-custom
+        namespace: kube-system
+      data:
+        domain.server: |
+          ${domain}:53 {
+            errors
+            health
+            ready
+            hosts {
+              ${ip} ${domain}
+              fallthrough
+            }
+            prometheus :9153
+            forward . /etc/resolv.conf
+            cache 30
+            loop
+            reload
+            loadbalance          
+          }
+    '';
+  };
+  
   # Config for ConBee II
   environment.etc."ser2net.yaml" = {
     mode = "0755";

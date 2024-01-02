@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app "${APP_NAME}"
@@ -50,6 +50,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
         hosts:
           - host: &ingress "nzbget.${SECRET_DOMAIN}"
             paths:

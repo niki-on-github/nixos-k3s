@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app "${APP_NAME}"
@@ -29,7 +29,7 @@ spec:
           main:
             image:
               repository: jlesage/jdownloader-2
-              tag: v23.11.2
+              tag: v23.12.2
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}
@@ -22,6 +22,20 @@ spec:
     controllers:
       main:
         initContainers:
+          bootstrap:
+            image:
+              repository: ghcr.io/niki-on-github/k8s-app-bootstrap
+              tag: "v0.0.3"
+            env:
+              DESTINATION: "/init"
+              NAME: "${APP_NAME}"
+              FILEBROWSER_USER: "admin"
+              FILEBROWSER_URL: "http://filebrowser.system.svc.cluster.local"
+              FILEBROWSER_DIR: "bootstrap"
+              FILEBROWSER_PASSWORD: "${SECRET_WEBSERVICES_PASSWORD}"
+              STRIP_ARCHIVE_ROOT: true
+
+
           init:
             image:
               repository: busybox
@@ -39,7 +53,7 @@ spec:
             image:
               # renovate: datasource=docker
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.1.3
+              tag: 2.2.1
 
             env:
               COMPOSE_PROJECT_NAME: paperless
@@ -99,6 +113,8 @@ spec:
         existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
           main:
+            bootstrap:
+              - path: /init
             init:
               - path: /init
             main:

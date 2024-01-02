@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}
@@ -26,6 +26,9 @@ spec:
             image:
               repository: vault
               tag: "1.13.3"
+            args: 
+              - "server"
+              - "-config=/config.hcl"
 
             securityContext:
               capabilities:
@@ -56,11 +59,13 @@ spec:
               - *ingress
         
     configMaps:
-      config:
+      configmap:
         enabled: true
         data:
           config.hcl: |
             ui = true
+
+            api_addr = "http://0.0.0.0:8200"
 
             listener "tcp" {
               address     = "0.0.0.0:8200"
@@ -70,8 +75,6 @@ spec:
             storage "file" {
               path = "/vault/file"
             }
-
-            api_addr = "http://127.0.0.1:8200"
 
             disable_mlock = false
       
@@ -84,7 +87,7 @@ spec:
       config:
         enabled: true
         type: configMap
-        name: ${APP_NAME}-config
+        name: ${APP_NAME}-configmap
         globalMounts:
-          - path: /vault/config//config.yml
-            subPath: config.yml
+          - path: /config.hcl
+            subPath: config.hcl

@@ -90,7 +90,7 @@ data:
             redirect_uris: ["https://grafana.${SECRET_DOMAIN}/login/generic_oauth"]
             userinfo_signed_response_alg: none
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}

@@ -1,5 +1,5 @@
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: postgres-operator
@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: cloudnative-pg
-      version: 0.19.1
+      version: 0.20.0
       interval: 1h
       sourceRef:
         kind: HelmRepository

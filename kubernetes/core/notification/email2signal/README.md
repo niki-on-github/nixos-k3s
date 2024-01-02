@@ -1,6 +1,6 @@
 # email2signal
 
-Forward received emails to signal-cli-rest-api.
+Forward received emails to dockerized [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api).
 
 ## Testing
 

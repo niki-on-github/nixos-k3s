@@ -6,7 +6,7 @@ metadata:
 spec:
   sourcePVC: "${APP_NAME}-pvc"
   trigger:
-    schedule: "*/30 * * * *"
+    schedule: "0 3 * * *"
   restic:
     repository: "${APP_NAME}-restic-credentials"
     copyMethod: Clone

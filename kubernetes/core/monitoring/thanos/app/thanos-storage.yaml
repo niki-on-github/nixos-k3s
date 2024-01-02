@@ -59,7 +59,7 @@ spec:
     region: "local"
     objectLock: false
   pools:
-  - name: pool-0
+  - name: thanos-pool-0
     servers: 1
     volumesPerServer: 1
     volumeClaimTemplate:

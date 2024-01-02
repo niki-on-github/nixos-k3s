@@ -6,7 +6,7 @@ metadata:
 spec:
   insecureSkipVerify: true
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}
@@ -44,7 +44,7 @@ spec:
         containers:
           main:
             image:
-              repository: nexusforge/unifi-docker
+              repository: ghcr.io/jacobalberty/unifi-docker
               tag: "v8.0.24"
 
             env:
@@ -68,7 +68,7 @@ spec:
             enabled: true
             port: 3478
             protocol: UDP
-      device-communication:
+      control:
         controller: main
         enabled: true
         type: LoadBalancer
@@ -77,6 +77,15 @@ spec:
             enabled: true
             port: 8080
             protocol: TCP
+      discovery:
+        controller: main
+        enabled: true
+        type: LoadBalancer
+        ports:
+          listen:
+            enabled: true
+            port: 10001
+            protocol: UDP
 
     ingress:
       main:

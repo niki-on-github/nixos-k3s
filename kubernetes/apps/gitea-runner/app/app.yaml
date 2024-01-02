@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}
@@ -23,26 +23,27 @@ spec:
       main:
         containers:
           main:
-            pod:
-              securityContext:
-                privileged: true
-                fsGroup: 0
-                runAsUser: 0
-                runAsGroup: 0
+            securityContext:
+              privileged: true
+              fsGroup: 1000
+              runAsUser: 1000
+              runAsGroup: 1000
 
             image:
               repository: vegardit/gitea-act-runner
-              tag: "0.2.6"
+              tag: "dind-rootless-0.2.6"
 
             env:
-              TZ: "${TIMEZONE}"
-              GITEA_INSTANCE_URL: "https://git.${SECRET_DOMAIN}"
+              GITEA_INSTANCE_URL: "http://gitea.${APP_NAMESPACE}.svc.cluster.local:3000"
               GITEA_RUNNER_REGISTRATION_TOKEN: "${SECRET_GITEA_RUNNER_TOKEN}"
+              GITEA_RUNNER_LOG_LEVEL: "info"
+              GITEA_RUNNER_JOB_CONTAINER_PRIVILEGED: false
               GITEA_INSTANCE_INSECURE: true
               GITEA_RUNNER_LOG_EFFECTIVE_CONFIG: true
-              GITEA_RUNNER_UID: 0
-              GITEA_RUNNER_GID: 0
-              GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "--add-host=git.${SECRET_DOMAIN}:host-gateway -e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
+              GITEA_RUNNER_UID: 1000
+              GITEA_RUNNER_GID: 1000
+              #GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "--add-host=git.${SECRET_DOMAIN}:host-gateway -e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
+              GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "-e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
 
     service:
       main:

@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: ${STORAGE_CLASS_NAME}-provisioner
@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: democratic-csi
-      version: "0.14.2"
+      version: "0.14.3"
       sourceRef:
         name: democratic-csi-charts
         kind: HelmRepository
@@ -42,7 +42,6 @@ spec:
         enabled: false
       externalProvisioner:
         enabled: true
-        image: registry.k8s.io/sig-storage/csi-provisioner:v3.6.2        
         extraArgs:
           - --leader-election=false
           - --node-deployment=true

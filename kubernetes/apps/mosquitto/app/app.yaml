@@ -8,7 +8,7 @@ stringData:
   mosquitto_pwd: |
     ${SECRET_DATABASE_USER}:${SECRET_DATABASE_PASSWORD}
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}

@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}
@@ -34,7 +34,7 @@ spec:
           main:
             image:
               repository: ghcr.io/home-assistant/home-assistant
-              tag: 2023.12.3
+              tag: 2023.12.4
           
             env:
               # NOTE: hass does not support env-variables for configuration directly, but you can use env variables in configuration.yaml with `!env_var VAR_NAME`

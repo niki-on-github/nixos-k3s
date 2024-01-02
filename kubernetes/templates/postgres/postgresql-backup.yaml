@@ -4,7 +4,8 @@ metadata:
   name: ${APP_NAME}-postgresql-backup
   namespace: ${APP_NAMESPACE}
 spec:
-  schedule: "${POSTGRES_BACKUP_SCHEDULE}"
+  # schedule: "${POSTGRES_BACKUP_SCHEDULE}"
+  schedule: "0 0 0 */3 * *"
   backupOwnerReference: self
   immediate: true
   cluster:

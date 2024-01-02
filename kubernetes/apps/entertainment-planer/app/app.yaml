@@ -1,4 +1,4 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}
@@ -25,7 +25,7 @@ spec:
           main:
             image:
               repository: ghcr.io/niki-on-github/serien-and-movie-planer
-              tag: v1.1.0
+              tag: v1.2.1
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
@@ -51,7 +51,7 @@ spec:
           main:
             image:
               repository: ghcr.io/niki-on-github/serien-and-movie-crawler
-              tag: v1.1.0
+              tag: v1.2.1
 
             env:
               TZ: *tz
@@ -87,7 +87,7 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
           traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
         hosts:
-          - host: &ingress "planer.${SECRET_DOMAIN}"
+          - host: &ingress "smp.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix

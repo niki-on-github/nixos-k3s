@@ -8,7 +8,7 @@ stringData:
   # TODO var for jwt secret in config
   jwtSecret: ${SECRET_DATABASE_PASSWORD}
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}
@@ -35,7 +35,7 @@ spec:
           main:
             image:
               repository: vikunja/api
-              tag: "0.21.0"
+              tag: "0.22.0"
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
@@ -70,7 +70,7 @@ spec:
           main:
             image:
               repository: vikunja/frontend
-              tag: "0.21.0"
+              tag: "0.22.0"
 
             env:
               TZ: *tz

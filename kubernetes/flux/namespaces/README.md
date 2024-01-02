@@ -1,3 +1,3 @@
-# namespaces
+# k8s namespaces
 
-All my kubernetes namespaces. I put them in a separate folder to allow an configuration of individual cluster resources before they exists.
+All my kubernetes namespaces. I put them in a separate folder and deploy them first to allow the configuration of individual cluster resources before they exists.
