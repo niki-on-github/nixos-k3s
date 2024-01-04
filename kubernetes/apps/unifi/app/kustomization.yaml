@@ -4,3 +4,4 @@ namespace: ${APP_NAMESPACE}
 resources:
   - ../../../templates/volsync-pvc
   - app.yaml
+  - unifi-udp-discovery.yaml

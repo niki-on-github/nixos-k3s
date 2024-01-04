@@ -11,6 +11,8 @@ spec:
   prune: true
   wait: true
   force: true
+  dependsOn:
+    - name: prometheus-stack  
   sourceRef:
     kind: GitRepository
     name: flux-system

@@ -6,11 +6,11 @@
   programs.ssh = {
     enable = true;
     matchBlocks = {
-      "git.server01.lan" = {
+      "git.server02.lan" = {
         port = 222;
-        hostname = "git.server01.lan";
+        hostname = "git.server02.lan";
         user = "git";
-        identityFile = "~/.ssh/git.server01.lan";
+        identityFile = "~/.ssh/git.server02.lan";
       };
     };
   };

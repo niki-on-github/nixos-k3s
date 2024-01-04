@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: unifi-udp-discovery
+  namespace: ${APP_NAMESPACE}
+spec:
+  selector:
+    matchLabels:
+      app: unifi
+  template:
+    metadata:
+      labels:
+        app: unifi
+    spec:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      containers:
+      - name: unifi-udp-discovery
+        image: busybox:1.36.1
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /host
+          name: host
+        command: [ "/bin/sh", "-c", "--" ]
+        args: [ "chroot /host /nix/var/nix/profiles/system/sw/bin/kubectl-relay -n ${APP_NAMESPACE} --server.namespace networking --address 0.0.0.0 deploy/${APP_NAME} 10001:10001@udp" ]
+      volumes:
+      - name: host
+        hostPath:
+          path: /

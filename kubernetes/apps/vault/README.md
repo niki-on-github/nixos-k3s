@@ -29,3 +29,10 @@ medusa export host -m kv1 --address="https://vault.server01.lan" --token="$TOKEN
 VAULT_TOKEN="$TOKEN" VAULT_ADDR=https://vault.server02.lan vault secrets enable -path=host kv
 medusa import --insecure -m kv1 --address="https://vault.server02.lan" --token="$TOKEN" host host.yaml
 ```
+
+
+## Create Token
+
+```bash
+VAULT_TOKEN="$ROOT_TOKEN" VAULT_ADDR=https://vault.server02.lan vault token create -id=$NEW_TOKEN
+```

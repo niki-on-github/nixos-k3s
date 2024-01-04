@@ -22,6 +22,10 @@ spec:
     deployment:
       replicas: 1
 
+    service:
+      externalIPs:
+        - "${CONFIG_KUBE_VIP_IP}"
+  
     logs:
       general:
         level: INFO

@@ -66,8 +66,10 @@ spec:
           http:
             port: 3000
       ssh:
+        enabled: true
         controller: main
         type: LoadBalancer
+        loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
         ports: 
           ssh:
             enabled: true

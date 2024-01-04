@@ -38,20 +38,16 @@ spec:
         ports:
           http:
             port: 8384
-      discovery:
+      load-balancer:
         controller: main
         enabled: true
         type: LoadBalancer
+        loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
         ports:
           discovery:
             enabled: true
             port: 21027
             protocol: UDP
-      listen:
-        controller: main
-        enabled: true
-        type: LoadBalancer
-        ports:
           listen:
             enabled: true
             port: 22000

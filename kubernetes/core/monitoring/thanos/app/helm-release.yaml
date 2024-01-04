@@ -17,14 +17,27 @@ spec:
         namespace: flux-system
 
   values:
+    objstoreConfig:
+      type: s3
+      config:
+        insecure: true
+
     query:
       enabled: true
       replicaCount: 1
       replicaLabels:
-        - replica
+        - __replica__
       dnsDiscovery:
-        sidecarsService: prometheus-thanos-discovery
+        enabled: true
+        sidecarsService: kube-prometheus-stack-thanos-discovery
         sidecarsNamespace: monitoring
+      stores:
+        - "thanos-storegateway.monitoring.svc.cluster.local:10901"
+      ingress:
+        enabled: false
+
+    queryFrontend:
+      enabled: true
       ingress:
         enabled: true
         hostname: &host "thanos.${SECRET_DOMAIN}"
@@ -35,9 +48,6 @@ spec:
         extraTls:
           - hosts:
               - *host
-
-    queryFrontend:
-      enabled: false
 
     bucketweb:
       enabled: true
@@ -53,7 +63,6 @@ spec:
     storegateway:
       enabled: true
       replicaCount: 1
-      podAntiAffinityPreset: hard
       persistence:
         enabled: true
         storageClass: "local-persistent"

@@ -11,6 +11,8 @@ kind: HelmRelease
 metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
+  labels:
+    app: unifi
 spec:
   interval: 15m
   chart:
@@ -59,30 +61,21 @@ spec:
           http:
             port: 8443
             protocol: HTTPS
-      stun:
+      load-balancer:
         controller: main
         enabled: true
         type: LoadBalancer
+        loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
         ports:
-          discovery:
+          stun:
             enabled: true
             port: 3478
             protocol: UDP
-      control:
-        controller: main
-        enabled: true
-        type: LoadBalancer
-        ports:
-          listen:
+          control:
             enabled: true
             port: 8080
             protocol: TCP
-      discovery:
-        controller: main
-        enabled: true
-        type: LoadBalancer
-        ports:
-          listen:
+          discovery:
             enabled: true
             port: 10001
             protocol: UDP

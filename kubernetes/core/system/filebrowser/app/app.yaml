@@ -39,7 +39,7 @@ spec:
           main:
             image:
               repository: filebrowser/filebrowser
-              tag: "v2.26.0-s6"
+              tag: "v2.27.0-s6"
           
             env:
               TZ: "${CONFIG_TIMEZONE}"

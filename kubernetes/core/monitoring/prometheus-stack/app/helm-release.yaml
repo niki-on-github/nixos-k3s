@@ -1,7 +1,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: prometheus-stack
+  name: kube-prometheus-stack
   namespace: monitoring
 spec:
   interval: 15m
@@ -17,9 +17,6 @@ spec:
         namespace: flux-system
 
   values:
-    # required to get thanos discovery working
-    fullnameOverride: prometheus
-
     alertmanager:
       config:
         global:
@@ -85,7 +82,7 @@ spec:
     prometheus:
       prometheusSpec:
         replicas: 1
-        replicaExternalLabelName: "replica"
+        replicaExternalLabelName: "__replica__"
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
@@ -93,6 +90,10 @@ spec:
         retention: 6h
         enableAdminAPI: true
         walCompression: true
+        enableFeatures:
+          - auto-gomaxprocs
+          - memory-snapshot-on-shutdown
+          - new-service-discovery-manager
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -102,6 +103,9 @@ spec:
                 requests:
                   storage: 5Gi
         thanos:
+          image: quay.io/thanos/thanos:v0.33.0
+          # renovate: datasource=docker depName=quay.io/thanos/thanos
+          version: "0.33.0"
           objectStorageConfig:
             name: thanos-objstore-config
             key: objstore.yml

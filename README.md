@@ -2,8 +2,6 @@
 
 My NixOS based K3S Cluster configuration hosted on my personal Git Server. Feel free to look around. Be aware that not all configuration files are available in my public repository.
 
-**NOTE:** This repository is currently a proof of concept for my upcoming K3s Cluster, it has not yet been used productively!
-
 ## Overview
 
 This repository provides the **Infrastructure as Code**[^1] (IaC) and **GitOps**[^2] State for the following tools:
@@ -19,7 +17,7 @@ This repository provides the **Infrastructure as Code**[^1] (IaC) and **GitOps**
 
 ## Description
 
-A single node k3s cluster which can be **fully reproducibly deployed with a single command**. At the same time the node contains the git server which represents the GitOps state of the cluster. To solve the chicken edge problem an additional git server is configured on operating system level which has partial access to the repositories of the main git server which is running in k3s to have the cluster configurable even in case of configuration errors.
+A single node k3s cluster which can be **fully reproducibly deployed with a single command**. At the same time the node contains the git server which represents the GitOps state of the cluster. To solve the chicken edge problem an additional git server is configured on operating system level which serves the infra repositories to have the cluster configurable even in case of configuration errors. For backup purpose i recommend to setup a mirror of the infra repositories inside the k3s git server to use the config driven k3s backup methods.
 
 ## Setup
 
@@ -30,6 +28,9 @@ Boot the nixos minimal iso and set the root user password to access the live iso
 ```bash
 nix run '.#install-system' -- supermicro-k3s root@${IP}
 ```
+
+> [!NOTE] 
+> On my supermicro board i can not boot the official nixos minimal iso. Selecting an enty in the live ios grub menu result in loding the default boot device. Workaround is to boot an arch linux iso and use the command from above, which aotomatically uses kexec to load nixos setup.
 
 ### Update (System)
 

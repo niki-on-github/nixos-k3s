@@ -18,12 +18,13 @@ resources:
 - charts/hashicorp-charts.yaml
 - charts/jetstack-charts.yaml
 - charts/k8tz-charts.yaml
+- charts/kube-vip-charts.yaml
 - charts/kyverno-charts.yaml
-- charts/metallb-charts.yaml
 - charts/metrics-server-charts.yaml
 - charts/minio-charts.yaml
+- charts/piraeus-charts.yaml
 - charts/prometheus-community-charts.yaml
+- charts/stakater-charts.yaml
 - charts/traefik-charts.yaml
 - charts/vault-autounseal-charts.yaml
-- charts/piraeus-charts.yaml
-- charts/stakater-charts.yaml
+

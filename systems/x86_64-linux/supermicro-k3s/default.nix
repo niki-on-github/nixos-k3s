@@ -145,7 +145,11 @@ in
 
   environment = {
     systemPackages = with pkgs; [
+      gnutar
       ser2net
+      par2cmdline
+      rsync
+      gzip
     ];
   };
 
@@ -224,7 +228,7 @@ in
   # - 'ssh://git@server02.lan/~/r/gitops-homelab.git' => ~ is not supported in flux git repo url!
   # flux git secret:
   # 1. flux create secret git flux-git-auth --url="ssh://git@${domain}/~/r/gitops-homelab.git" --private-key-file={{ .PRIVATE_SSH_KEYFILE }} --export > flux-git-secret.yaml
-  # 2. manually change the knwon_hosts to `ssh-keyscan ${domain}` ssh-ed25519 output
+  # 2. manually change the knwon_hosts to `ssh-keyscan -p 22 ${domain}` ssh-ed25519 output
   # 3. encrypt yaml with age
   environment.etc."k3s/flux.yaml" = {
     mode = "0750";
@@ -315,4 +319,38 @@ in
         Restart = "on-failure";
       };
   };
+
+  systemd.services.minio-backup = {
+      serviceConfig.Type = "oneshot";
+      path = [
+        pkgs.findutils
+        pkgs.gnutar
+        pkgs.gzip
+      ];
+      script = ''
+        echo "Start minio backup now"
+        mkdir -p /mnt/backup/${domain}/rsync/data/minio
+        mkdir -p /mnt/backup/${domain}/rsync/log
+        mkdir -p /mnt/backup/${domain}/archiv
+        ${pkgs.rsync}/bin/rsync \
+          -av \
+          --delete \
+          --log-file="/mnt/backup/${domain}/rsync/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
+          /mnt/backup/minio/ /mnt/backup/${domain}/rsync/data/minio/
+        export BACKUP_ARCHIVE_NAME="backup_$(date +%Y-%m-%d).tar.gz"
+        tar -I 'gzip --fast' -cf "/mnt/backup/${domain}/archiv/$BACKUP_ARCHIVE_NAME" /mnt/backup/${domain}/rsync/data/minio
+        pushd /mnt/backup/${domain}/archiv
+        ${pkgs.par2cmdline}/bin/par2create -r5 -n1 "/mnt/backup/${domain}/archiv/$BACKUP_ARCHIVE_NAME"
+        popd
+        find /mnt/backup/${domain}/archiv/*.tar.gz* -mtime +30 -exec rm {} \;
+        echo "minio backup completed"
+      '';
+    };
+
+    systemd.timers.minio-backup = {
+      wantedBy = [ "timers.target" ];
+      partOf = [ "minio-backup.service" ];
+      timerConfig.OnCalendar = [ "Sun 05:00:00" ];
+    };
+  
 }

@@ -33,6 +33,7 @@ spec:
     service:
       main:
         type: LoadBalancer
+        loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
         ports:
           http:
             enabled: false

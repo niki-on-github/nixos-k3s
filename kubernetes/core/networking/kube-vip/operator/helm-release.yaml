@@ -1,0 +1,56 @@
+# see https://kube-vip.io/docs/usage/cloud-provider/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubevip
+  namespace: kube-system
+data:
+  cidr-global: "${CONFIG_KUBE_VIP_IP}/32"
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: kube-vip
+  namespace: networking
+  annotations:
+    meta.helm.sh/release-namespace: "networking"
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kube-vip
+      version: 0.4.4
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: kube-vip-charts
+        namespace: flux-system
+
+  values:
+    config:
+      address: &address "${CONFIG_KUBE_VIP_IP}"
+    env:
+      # vip_interface: "${CONFIG_KUBE_VIP_INTERFACE}" # auto detect
+      vip_leaderelection: "true"
+      cp_enable: "true"
+      svc_election: "true"
+      address: *address
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: kube-vip-cloud-provider
+  namespace: networking
+  annotations:
+    meta.helm.sh/release-namespace: "networking"
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kube-vip-cloud-provider
+      version: 0.2.2
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: kube-vip-charts
+        namespace: flux-system
