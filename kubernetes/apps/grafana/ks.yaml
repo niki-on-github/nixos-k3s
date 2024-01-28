@@ -10,7 +10,8 @@ spec:
   dependsOn:
     - name: traefik
     - name: prometheus-stack
-  path: "./kubernetes/core/monitoring/grafana/app"
+    - name: app-tailscale
+  path: "./kubernetes/apps/grafana/app"
   prune: true
   wait: true
   force: true

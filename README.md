@@ -30,7 +30,7 @@ nix run '.#install-system' -- supermicro-k3s root@${IP}
 ```
 
 > [!NOTE] 
-> On my supermicro board i can not boot the official nixos minimal iso. Selecting an enty in the live ios grub menu result in loding the default boot device. Workaround is to boot an arch linux iso and use the command from above, which aotomatically uses kexec to load nixos setup.
+> On my supermicro board i can not boot the official nixos minimal iso. Selecting an enty in the live iso grub menu result in loading the default boot device. Workaround is to boot an arch linux iso and use the command from above, which aotomatically uses kexec to load nixos setup.
 
 ### Update (System)
 

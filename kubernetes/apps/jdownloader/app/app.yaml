@@ -12,7 +12,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -29,7 +29,7 @@ spec:
           main:
             image:
               repository: jlesage/jdownloader-2
-              tag: v23.12.2
+              tag: v24.01.1
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

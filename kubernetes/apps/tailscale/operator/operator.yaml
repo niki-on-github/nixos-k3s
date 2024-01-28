@@ -1,0 +1,27 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: tailscale-operator
+      version: 1.56.1
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: tailscale-charts
+        namespace: flux-system
+
+  values:
+    oauth:
+      clientId: "${SECRET_TAILSCALE_OAUTH_CLIENT_ID}"
+      clientSecret: "${SECRET_TAILSCALE_OAUTH_CLIENT_SECRET}"
+
+    proxyConfig:
+      # required setup on tailscale webui: https://tailscale.com/kb/1236/kubernetes-operator?q=operator#setting-up-the-kubernetes-operator
+      defaultTags: "tag:k8s"
+
+    

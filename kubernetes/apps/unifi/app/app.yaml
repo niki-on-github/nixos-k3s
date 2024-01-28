@@ -18,7 +18,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -47,7 +47,7 @@ spec:
           main:
             image:
               repository: ghcr.io/jacobalberty/unifi-docker
-              tag: "v8.0.24"
+              tag: "v8.0.26"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

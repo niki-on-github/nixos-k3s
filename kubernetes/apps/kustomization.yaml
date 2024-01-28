@@ -24,3 +24,6 @@ resources:
  - gitea-runner/ks.yaml
  - solaredge/ks.yaml
  - nodered/ks.yaml
+ - harbor/ks.yaml
+ - tailscale/ks.yaml
+ - grafana/ks.yaml

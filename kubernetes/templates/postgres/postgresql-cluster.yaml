@@ -7,12 +7,19 @@ metadata:
     cnpg.io/skipEmptyWalArchiveCheck: enabled
 spec:
   instances: 1
+
+  monitoring:
+    enablePodMonitor: true
+    # Ref: https://github.com/cloudnative-pg/cloudnative-pg/issues/2501
+    podMonitorMetricRelabelings:
+      - { sourceLabels: ["cluster"], targetLabel: cnpg_cluster, action: replace }
+      - { regex: cluster, action: labeldrop }
  
   backup:
     retentionPolicy: "${POSTGRES_BACKUP_RETENTION}"        
     barmanObjectStore:
-      destinationPath: &backupDestinationPath "s3://${CONFIG_MINIO_BACKUP_POSTGRES_BUCKET}/${APP_NAME}"
-      endpointURL: &backupEndpoint "http://${CONFIG_MINIO_BACKUP_ENDPOINT}"    
+      destinationPath: "s3://${CONFIG_MINIO_BACKUP_POSTGRES_BUCKET}/${APP_NAME}"
+      endpointURL: "http://${CONFIG_MINIO_BACKUP_DEST_ENDPOINT}"    
       s3Credentials:
         accessKeyId:
           name: &credentials ${APP_NAME}-postgresql-backup-credentials
@@ -27,8 +34,8 @@ spec:
   externalClusters:
     - name: *db
       barmanObjectStore:
-        destinationPath: *backupDestinationPath
-        endpointURL: *backupEndpoint
+        destinationPath: "s3://${CONFIG_MINIO_BACKUP_POSTGRES_BUCKET}/${APP_NAME}"
+        endpointURL: "http://${CONFIG_MINIO_BACKUP_SRC_ENDPOINT}"
         s3Credentials:  
           accessKeyId:
             name: *credentials

@@ -12,3 +12,4 @@ resources:
   - database
   - monitoring
   - system
+  - flux-system

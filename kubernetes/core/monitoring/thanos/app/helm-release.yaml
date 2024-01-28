@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: thanos
-      version: 12.20.1
+      version: 12.22.0
       interval: 15m
       sourceRef:
         kind: HelmRepository
@@ -31,8 +31,8 @@ spec:
         enabled: true
         sidecarsService: kube-prometheus-stack-thanos-discovery
         sidecarsNamespace: monitoring
-      stores:
-        - "thanos-storegateway.monitoring.svc.cluster.local:10901"
+      #stores:
+      #  - "thanos-storegateway.monitoring.svc.cluster.local:10901"
       ingress:
         enabled: false
 
@@ -54,11 +54,15 @@ spec:
 
     compactor:
       enabled: true
-      retentionResolutionRaw: 14d
+      extraFlags:
+        - --delete-delay=30m
+      retentionResolutionRaw: 7d
       retentionResolution5m: 30d
-      retentionResolution1h: 180d
+      retentionResolution1h: 90d
       persistence:
-        enabled: false
+        enabled: true
+        storageClass: "local-persistent"
+        size: 10Gi
 
     storegateway:
       enabled: true
@@ -66,11 +70,12 @@ spec:
       persistence:
         enabled: true
         storageClass: "local-persistent"
+        size: "1Gi"
 
     metrics:
       enabled: true
       serviceMonitor:
-        enabled: false
+        enabled: true
 
     existingObjstoreSecret: thanos-objstore-config
 

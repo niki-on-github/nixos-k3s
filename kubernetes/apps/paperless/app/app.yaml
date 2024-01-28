@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -22,20 +22,6 @@ spec:
     controllers:
       main:
         initContainers:
-          bootstrap:
-            image:
-              repository: ghcr.io/niki-on-github/k8s-app-bootstrap
-              tag: "v0.0.3"
-            env:
-              DESTINATION: "/init"
-              NAME: "${APP_NAME}"
-              FILEBROWSER_USER: "admin"
-              FILEBROWSER_URL: "http://filebrowser.system.svc.cluster.local"
-              FILEBROWSER_DIR: "bootstrap"
-              FILEBROWSER_PASSWORD: "${SECRET_WEBSERVICES_PASSWORD}"
-              STRIP_ARCHIVE_ROOT: true
-
-
           init:
             image:
               repository: busybox
@@ -53,7 +39,7 @@ spec:
             image:
               # renovate: datasource=docker
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.2.1
+              tag: 2.4.2
 
             env:
               COMPOSE_PROJECT_NAME: paperless
@@ -81,7 +67,7 @@ spec:
             image:
               # renovate: datasource=docker
               repository: docker.io/library/redis
-              tag: 7.2.3
+              tag: 7.2.4
 
     service:
       main:

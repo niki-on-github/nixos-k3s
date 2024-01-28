@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -21,25 +21,11 @@ spec:
 
     controllers:
       main:
-        initContainers:
-          bootstrap:
-            image:
-              repository: ghcr.io/niki-on-github/k8s-app-bootstrap
-              tag: "v0.0.3"
-            env:
-              DESTINATION: "/data"
-              NAME: "${APP_NAME}"
-              FILEBROWSER_USER: "admin"
-              FILEBROWSER_URL: "http://filebrowser.system.svc.cluster.local"
-              FILEBROWSER_DIR: "bootstrap"
-              FILEBROWSER_PASSWORD: "${SECRET_WEBSERVICES_PASSWORD}"
-              STRIP_ARCHIVE_ROOT: true
-
         containers:
           main:
             image:
               repository: gitea/gitea
-              tag: "1.21.3"
+              tag: "1.21.4"
 
             env:
               USER_UID: "1000"

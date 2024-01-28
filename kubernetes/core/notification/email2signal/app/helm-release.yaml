@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -36,11 +36,11 @@ spec:
           main:
             image:
               repository: ghcr.io/niki-on-github/email2signal
-              tag: "v1.0.0"
+              tag: "v1.1.5"
 
             env:
               TZ: *tz
-              SIGNAL_REST_URL: "http://signal-api.notification.svc:8080"
+              SIGNAL_REST_URL: "http://${APP_NAME}.${APP_NAMESPACE}.svc:8080"
               SENDER_NUMBER: "\\${SECRET_SIGNAL_PHONE_NUMBER}"
               SMTP_HOST: ""
               SMTP_USER: ""

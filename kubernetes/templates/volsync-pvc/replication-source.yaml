@@ -8,7 +8,7 @@ spec:
   trigger:
     schedule: "0 3 * * *"
   restic:
-    repository: "${APP_NAME}-restic-credentials"
+    repository: "${APP_NAME}-restic-dest-credentials"
     copyMethod: Clone
     cacheStorageClassName: local-temp
     pruneIntervalDays: 14

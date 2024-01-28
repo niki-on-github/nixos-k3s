@@ -11,6 +11,7 @@ spec:
     - name: minio
     - name: traefik
     - name: local-hostpath-persistent
+    - name: prometheus-crds
   path: "./kubernetes/core/monitoring/thanos/app"
   prune: true
   wait: true

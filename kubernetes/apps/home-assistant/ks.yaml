@@ -36,6 +36,7 @@ spec:
   force: true
   dependsOn:
     - name: app-home-assistant-db
+    - name: app-tailscale
   sourceRef:
     kind: GitRepository
     name: flux-system

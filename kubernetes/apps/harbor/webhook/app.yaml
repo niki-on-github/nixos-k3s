@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: harbor-container-webhook
+      version: 0.6.2
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: harbor-container-webhook-charts
+        namespace: flux-system
+
+  values:
+    rules:
+      - name: 'docker.io rewrite rule'
+        matches:
+          - '^docker.io'
+        replace: "harbor.${SECRET_DOMAIN}/docker_hub"
+        checkUpstream: false

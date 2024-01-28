@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -59,9 +59,3 @@ spec:
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /data
-      docker:
-        enabled: true
-        type: hostPath
-        hostPath: /var/run/docker.sock
-        globalMounts:
-          - path: /var/run/docker.sock

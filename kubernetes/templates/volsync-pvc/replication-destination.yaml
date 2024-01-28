@@ -9,7 +9,7 @@ spec:
     manual: restore-once
   restic:
     copyMethod: Snapshot
-    repository: "${APP_NAME}-restic-credentials"
+    repository: "${APP_NAME}-restic-src-credentials"
     cacheStorageClassName: local-temp
     storageClassName: "local-persistent"
     volumeSnapshotClassName: "local-persistent"

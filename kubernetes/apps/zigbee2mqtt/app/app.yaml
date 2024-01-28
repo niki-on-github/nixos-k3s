@@ -7,9 +7,11 @@ metadata:
 stringData:
   ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD: ${SECRET_DATABASE_PASSWORD}
   ZIGBEE2MQTT_CONFIG_MQTT_USER: ${SECRET_DATABASE_USER}
-  ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID: "GENERATE" 
-  ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID: "GENERATE"
-  ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY: "GENERATE"
+  ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID: !!str ${SECRET_ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID}
+  ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY: !!str ${SECRET_ZIGBEE2MQTT_CONFIG_NETWORK_KEY}
+  #ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY: "GENERATE"
+  #ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID: "GENERATE" 
+  #ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID: "GENERATE"
   #ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID: "0x1a62" 
   #ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID: "[221, 221, 221, 221, 221, 221, 221, 221]"
   #ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY: "[ 1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 13 ]"
@@ -24,7 +26,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -41,7 +43,7 @@ spec:
           main:
             image:
               repository: ghcr.io/koenkk/zigbee2mqtt
-              tag: 1.35.0
+              tag: 1.35.1
 
             env:
               TZ: "${CONFIG_TIMEZONE}"
@@ -71,7 +73,8 @@ spec:
               ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: deconz
               ZIGBEE2MQTT_CONFIG_SERIAL_BAUDRATE: 115200
               ZIGBEE2MQTT_CONFIG_SERIAL_DISABLE_LED: false
-              ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: "false"      
+              ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: "false"
+              ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID: ${SECRET_ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID}
             envFrom:
               - secretRef:
                   name: ${APP_NAME}-secret

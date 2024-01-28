@@ -37,6 +37,7 @@ spec:
   wait: true
   dependsOn:
     - name: app-vikunja-db
+    - name: app-tailscale
   sourceRef:
     kind: GitRepository
     name: flux-system

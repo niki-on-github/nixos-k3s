@@ -12,7 +12,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -25,17 +25,29 @@ spec:
 
     controllers:
       main:
+        initContainers:
+          init:
+            image:
+              repository: busybox
+              tag: "1.36.1"
+            command:
+            - "/bin/sh"
+            args:
+            - "/init.sh"
+
         containers:
           main:
             image:
-              repository: ghcr.io/linuxserver/nzbget
-              tag: "v21.1-ls138"
+              repository: nzbgetcom/nzbget
+              tag: "v22.0"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"
               UMASK: "000"
-              NZBGET_USER: "root"
-              NZBGET_PASS: "${SECRET_WEBSERVICES_PASSWORD}"
+              NZBGET_USER: ""
+              NZBGET_PASS: ""
+              PUID: 1000
+              PGID: 1000
       
 
     service:
@@ -62,7 +74,18 @@ spec:
         tls:
           - hosts:
               - *ingress
-        
+
+    configMaps:
+      setup:
+        enabled: true
+        data:
+          init.sh: |
+            #!/bin/sh
+            echo "run $0"
+            mkdir -p /downloads/scripts
+            cp -v /scripts/* /downloads/scripts/
+            chmod 777 -R /downloads/scripts/
+            
     persistence:
       # NOTE: For the vpn routed apps insied the vpn-apps namespace we can not 
       # - use volsync to an external server because the access is blocked.
@@ -87,7 +110,18 @@ spec:
         enabled: true
         type: configMap
         name: ${APP_NAME}-scripts
+        defaultMode: 493
         advancedMounts:
           main:
-            main:
-              - path: /downloads/scripts
+            init:
+              - path: /scripts
+      setup:
+        enabled: true
+        type: configMap
+        name: ${APP_NAME}-setup
+        defaultMode: 493
+        advancedMounts:
+          main:
+            init:
+              - path: /init.sh
+                subPath: init.sh

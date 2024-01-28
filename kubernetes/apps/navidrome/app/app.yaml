@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -25,7 +25,7 @@ spec:
           main:
             image:
               repository: deluan/navidrome
-              tag: "0.50.2"
+              tag: "0.51.0"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

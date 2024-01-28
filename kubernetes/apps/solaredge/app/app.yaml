@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.4.0
+      version: 2.5.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -25,14 +25,36 @@ spec:
           main:
             image:
               repository: ghcr.io/niki-on-github/solaredge-modbus-rest-api
-              tag: "v0.0.1"
+              tag: "v0.0.4"
 
             env:
               MODBUS_HOST: "${SECRET_SOLAREDGE_INVERTER_IP}"
               MODBUS_PORT: "1502"
               MODBUS_TIMEOUT: "1"
-              MODBUS_UNIT: "1"      
+              MODBUS_UNIT: "1"   
 
+          influxdb:
+            image:
+              repository: ghcr.io/niki-on-github/solaredge-modbus-rest-api
+              tag: "v0.0.4"
+
+            command:
+              - "/usr/local/bin/python3"
+            args:
+              - "example_influxdb_v2.py"
+              - "${SECRET_SOLAREDGE_INVERTER_IP}"
+              - "1502"
+              - "--influx_url"
+              - "influxdb.monitoring.svc.cluster.local:8086"
+              - "--influx_org"
+              - "${CONFIG_INFLUXDB_ORG}"
+              - "--influx_bucket"
+              - "solaredge"
+              - "--influx_token"
+              - "${SECRET_INFLUXDB_ADMIN_TOKEN}"
+              - "--interval"
+              - "30"
+   
     service:
       main:
         ports:
