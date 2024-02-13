@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: grafana
-      version: 7.2.4
+      version: 7.3.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -41,6 +41,9 @@ spec:
       dashboards:
         enabled: true
         searchNamespace: ALL
+        labelValue: ""
+        label: grafana_dashboard
+        folderAnnotation: grafana_folder
 
       datasources:
         enabled: true

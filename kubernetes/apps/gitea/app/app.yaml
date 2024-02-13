@@ -25,7 +25,7 @@ spec:
           main:
             image:
               repository: gitea/gitea
-              tag: "1.21.4"
+              tag: "1.21.5"
 
             env:
               USER_UID: "1000"

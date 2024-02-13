@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: app-tailscale
+  name: tailscale
   namespace: flux-system
 spec:
   interval: 15m
@@ -16,4 +16,4 @@ spec:
   postBuild:
     substitute:
       APP_NAME: tailscale
-      APP_NAMESPACE: apps
+      APP_NAMESPACE: networking

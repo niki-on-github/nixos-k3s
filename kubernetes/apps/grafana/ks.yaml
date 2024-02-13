@@ -6,16 +6,18 @@ metadata:
 spec:
   interval: 15m
   retryInterval: 2m0s
-  timeout: 15m
+  timeout: 5m
+  path: "./kubernetes/apps/grafana/app"
   dependsOn:
     - name: traefik
     - name: prometheus-stack
-    - name: app-tailscale
-  path: "./kubernetes/apps/grafana/app"
+    - name: tailscale
   prune: true
-  wait: true
   force: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-
+  postBuild:
+    substitute:
+      APP_NAME: grafana
+      APP_NAMESPACE: monitoring

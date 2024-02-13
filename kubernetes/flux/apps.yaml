@@ -5,7 +5,7 @@ metadata:
   name: apps
   namespace: flux-system
 spec:
-  interval: 2m
+  interval: 5m
   timeout: 15m
   retryInterval: 30s
   dependsOn:
@@ -65,7 +65,7 @@ spec:
           upgrade:
             force: true
             remediation:
-              retries: -1
+              retries: 3
       target:
         group: helm.toolkit.fluxcd.io
         version: v2beta1

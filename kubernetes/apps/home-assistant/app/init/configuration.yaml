@@ -16,3 +16,5 @@ http:
   use_x_forwarded_for: true
   trusted_proxies:
   - !env_var HASS_TRUSTED_PROXIES
+
+python_script:

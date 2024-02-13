@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: app-fresh-rss-db
+  name: fresh-rss-db
   namespace: flux-system
 spec:
   interval: 15m
@@ -25,7 +25,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: app-fresh-rss
+  name: fresh-rss
   namespace: flux-system
 spec:
   interval: 15m
@@ -35,7 +35,7 @@ spec:
   prune: true
   force: true
   dependsOn:
-    - name: app-fresh-rss-db
+    - name: fresh-rss-db
   sourceRef:
     kind: GitRepository
     name: flux-system

@@ -1,0 +1,100 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.5.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/analogj/scrutiny
+              tag: v0.7.2-web
+          
+            env:
+              TZ: "${TIMEZONE}"
+              SCRUTINY_API_ENDPOINT: "http://localhost:8080"
+              SCRUTINY_WEB_INFLUXDB_HOST: "influxdb.monitoring.svc.cluster.local"
+              SCRUTINY_WEB_INFLUXDB_TOKEN: "${SECRET_INFLUXDB_ADMIN_TOKEN}"
+              SCRUTINY_WEB_INFLUXDB_ORG: "${CONFIG_INFLUXDB_ORG}"
+              SCRUTINY_WEB_INFLUXDB_BUCKET: "scrutiny"
+              SCRUTINY_WEB_INFLUXDB_INIT_USERNAME: "admin"
+              SCRUTINY_WEB_INFLUXDB_INIT_PASSWORD: "${SECRET_DATABASE_PASSWORD}"
+              SCRUTINY_WEB_INFLUXDB_PORT: 8086
+
+          collector:
+            image:
+              repository: ghcr.io/analogj/scrutiny
+              tag: v0.7.2-collector
+            env:
+              TZ: "${TIMEZONE}"
+              COLLECTOR_API_ENDPOINT: "http://scrutiny.${APP_NAMESPACE}.svc.cluster.local:8080"
+              COLLECTOR_RUN_STARTUP: "true"
+            securityContext:
+              privileged: true
+              capabilities:
+                add: ["SYS_RAWIO", "SYS_ADMIN"]
+
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+
+    ingress:
+      main:
+        enabled: true
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
+        hosts:
+          - host: &ingress "smart.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  name: main
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      config:
+        enabled: true
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          main:
+            main:
+              - path: /opt/scrutiny/config
+      dev:
+        enabled: true
+        type: hostPath
+        hostPath: /dev
+        advancedMounts:
+          main:
+            collector:
+              - path: /dev
+      udev:
+        enabled: true
+        type: hostPath
+        hostPath: /run/udev
+        advancedMounts:
+          main:
+            collector:
+              - path: /run/udev
+          

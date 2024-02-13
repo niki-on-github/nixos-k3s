@@ -60,14 +60,8 @@
       "labels": ["type/minor"]
     },
     {
-      "description": "Automatically patch-level updates",
       "matchUpdateTypes": ["patch", "digest"],
-      "labels": ["type/patch"],
-      "automerge": true,
-      "automergeType": "branch",
-      "requiredStatusChecks": null,
-      "ignoreTests": true,
-      "stabilityDays": 1
+      "labels": ["type/patch"]
     },
     {
       "matchDatasources": ["helm"],

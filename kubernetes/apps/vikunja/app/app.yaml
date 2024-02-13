@@ -35,7 +35,7 @@ spec:
           main:
             image:
               repository: vikunja/api
-              tag: "0.22.0"
+              tag: "0.22.1"
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
@@ -70,7 +70,7 @@ spec:
           main:
             image:
               repository: vikunja/frontend
-              tag: "0.22.0"
+              tag: "0.22.1"
 
             env:
               TZ: *tz

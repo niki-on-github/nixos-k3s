@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: app-vikunja-db
+  name: vikunja-db
   namespace: flux-system
 spec:
   interval: 15m
@@ -25,7 +25,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: app-vikunja
+  name: vikunja
   namespace: flux-system
 spec:
   interval: 15m
@@ -36,8 +36,8 @@ spec:
   force: true
   wait: true
   dependsOn:
-    - name: app-vikunja-db
-    - name: app-tailscale
+    - name: vikunja-db
+    - name: tailscale
   sourceRef:
     kind: GitRepository
     name: flux-system

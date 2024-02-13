@@ -47,7 +47,7 @@ spec:
           main:
             image:
               repository: ghcr.io/jacobalberty/unifi-docker
-              tag: "v8.0.26"
+              tag: "v8.0.28"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

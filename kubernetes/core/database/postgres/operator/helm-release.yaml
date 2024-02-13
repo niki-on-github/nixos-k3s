@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: cloudnative-pg
-      version: 0.20.0
+      version: 0.20.1
       interval: 1h
       sourceRef:
         kind: HelmRepository

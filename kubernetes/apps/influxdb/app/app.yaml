@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: influxdb
-      version: 5.13.0
+      version: 5.13.6
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -27,12 +27,15 @@ spec:
         retention: "90d"
 
     influxdb:
-       initdbScripts: 
-          init_script.sh: |
-            #!/bin/sh
-            influx bucket create -n solaredge -o ${CONFIG_INFLUXDB_ORG} -r 0
-            influx bucket create -n telegraf-opnsense -o ${CONFIG_INFLUXDB_ORG} -r 90d
-            influx bucket create -n telegraf-server -o ${CONFIG_INFLUXDB_ORG} -r 90d
+      updateStrategy:
+        type: Recreate
+      initdbScripts: 
+        init_script.sh: |
+          #!/bin/sh
+          influx bucket create -n solaredge -o ${CONFIG_INFLUXDB_ORG} -r 0
+          influx bucket create -n telegraf-opnsense -o ${CONFIG_INFLUXDB_ORG} -r 90d
+          influx bucket create -n telegraf-server -o ${CONFIG_INFLUXDB_ORG} -r 90d
+          influx bucket create -n scrutiny -o ${CONFIG_INFLUXDB_ORG} -r 90d
 
     ingress:
       enabled: true

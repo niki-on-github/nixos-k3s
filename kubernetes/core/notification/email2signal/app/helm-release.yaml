@@ -25,7 +25,7 @@ spec:
           main:
             image:
               repository: bbernhard/signal-cli-rest-api
-              tag: "0.80"
+              tag: "0.81"
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"

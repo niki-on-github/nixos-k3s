@@ -7,7 +7,7 @@ spec:
   interval: 15m
   retryInterval: 2m0s
   timeout: 5m
-  path: "./kubernetes/core/monitoring/influxdb/app"
+  path: "./kubernetes/apps/influxdb/app"
   prune: true
   force: true
   wait: true

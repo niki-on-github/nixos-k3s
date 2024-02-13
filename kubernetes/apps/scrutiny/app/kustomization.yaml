@@ -4,5 +4,3 @@ namespace: ${APP_NAMESPACE}
 resources:
   - ../../../templates/volsync-pvc
   - app.yaml
- # enable this to get deiscovery for new devices:
- #  - unifi-udp-discovery.yaml

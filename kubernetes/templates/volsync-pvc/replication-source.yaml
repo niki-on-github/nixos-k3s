@@ -7,7 +7,11 @@ spec:
   sourcePVC: "${APP_NAME}-pvc"
   trigger:
     schedule: "0 3 * * *"
+    # change/inc below to perform a manual backup schedule once
+    manual: "manual-backup-0003"
   restic:
+    # NOTE: when your repository has a stale lock that prevents backups increment the number in string below to perform an unlock before the next backup
+    unlock: "unlock-00001"
     repository: "${APP_NAME}-restic-dest-credentials"
     copyMethod: Clone
     cacheStorageClassName: local-temp

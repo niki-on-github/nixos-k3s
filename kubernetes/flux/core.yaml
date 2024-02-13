@@ -5,7 +5,7 @@ metadata:
   name: core
   namespace: flux-system
 spec:
-  interval: 3m
+  interval: 5m
   timeout: 3m
   retryInterval: 30s
   dependsOn:
@@ -73,7 +73,7 @@ spec:
             force: true
             cleanupOnFail: true
             remediation:
-              retries: -1
+              retries: 3
               remediateLastFailure: true
       target:
         group: helm.toolkit.fluxcd.io

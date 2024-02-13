@@ -34,7 +34,7 @@ spec:
           main:
             image:
               repository: ghcr.io/home-assistant/home-assistant
-              tag: 2024.1.5
+              tag: 2024.2.0
           
             env:
               # NOTE: hass does not support env-variables for configuration directly, but you can use env variables in configuration.yaml with `!env_var VAR_NAME`
@@ -92,6 +92,7 @@ spec:
             #!/bin/sh
             echo "run $0"
             cp -nv /init/* /config/ 
+            mkdir -p /config/python_scripts
                         
     persistence:
       config:

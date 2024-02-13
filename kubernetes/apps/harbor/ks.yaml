@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: app-harbor
+  name: harbor
   namespace: flux-system
 spec:
   interval: 15m
@@ -23,7 +23,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: app-harbor-webhook
+  name: harbor-webhook
   namespace: flux-system
 spec:
   interval: 15m
@@ -33,7 +33,7 @@ spec:
   prune: true
   force: true
   dependsOn:
-    - name: app-harbor
+    - name: harbor
   sourceRef:
     kind: GitRepository
     name: flux-system

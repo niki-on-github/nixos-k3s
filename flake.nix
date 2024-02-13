@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs = {
-      url = "github:NixOS/nixpkgs/nixos-23.05";
+      url = "github:NixOS/nixpkgs/nixos-23.11";
     };
 
     nixpkgs-unstable = {
@@ -22,7 +22,7 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-23.05";
+      url = "github:nix-community/home-manager/release-23.11";
     };
 
     nur = {
@@ -35,7 +35,7 @@
     };
 
     personalModules = {
-      url = "git+https://git.server01.lan/r/nixos-modules.git";
+      url = "git+https://git.k8s.lan/r/nixos-modules.git";
     };
   };
 
