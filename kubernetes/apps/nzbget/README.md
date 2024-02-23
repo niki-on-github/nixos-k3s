@@ -4,6 +4,8 @@ NZBGet is a binary downloader, which downloads files from Usenet based on inform
 
 ## Setup
 
+Default login is `nzbget:tegbzn6789`.
+
 1. Change the default login in Settings -> Security -> ControlUsername and ControlPassword.
 2. Then change the umask setting in Settings -> Security -> UMask to `000` and save all changes
 3. Apply all changes Reload the configuration with Settings -> System -> Reload

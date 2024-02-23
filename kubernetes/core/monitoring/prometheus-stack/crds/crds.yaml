@@ -8,8 +8,9 @@ spec:
   interval: 30m
   url: https://github.com/prometheus-community/helm-charts.git
   ref:
+    # TODO trace me via renovate
     # renovate: datasource=github-releases depName=prometheus-community/helm-charts
-    tag: kube-prometheus-stack-55.8.1
+    tag: kube-prometheus-stack-56.8.0
   ignore: |
     # exclude all
     /*

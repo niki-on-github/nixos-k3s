@@ -1,23 +1,18 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: nzbget
+  name: vpn-terminal
   namespace: flux-system
 spec:
   interval: 15m
   retryInterval: 2m0s
-  timeout: 5m
-  path: "./kubernetes/apps/nzbget/app"
-  prune: true
-  force: true
+  timeout: 15m
   dependsOn:
     - name: vpn-gateway
+  path: "./kubernetes/apps/vpn-terminal/app"
+  prune: true
+  force: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  postBuild:
-    substitute:
-      APP_NAME: nzbget
-      APP_NAMESPACE: vpn-apps
-      PVC_CAPACITY: "1Gi"
 

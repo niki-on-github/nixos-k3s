@@ -7,5 +7,3 @@ metadata:
     volsync.backube/privileged-movers: "true"
   labels:
     goldilocks.fairwinds.com/enabled: "true"
-    vpn-routed-gateway: "true"
-

@@ -60,6 +60,7 @@ spec:
           name: not-used
         spec:
           install:
+            createNamespace: true
             remediation:
               retries: -1
           upgrade:

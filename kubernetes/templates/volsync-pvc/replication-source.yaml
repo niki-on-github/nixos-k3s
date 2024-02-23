@@ -8,7 +8,10 @@ spec:
   trigger:
     schedule: "0 3 * * *"
     # change/inc below to perform a manual backup schedule once
-    manual: "manual-backup-0003"
+    # TODO enable manual sync diable scheduling!?
+    # see https://github.com/backube/volsync/discussions/576
+    # bad sw design?
+    # manual: "manual-backup-0003"
   restic:
     # NOTE: when your repository has a stale lock that prevents backups increment the number in string below to perform an unlock before the next backup
     unlock: "unlock-00001"

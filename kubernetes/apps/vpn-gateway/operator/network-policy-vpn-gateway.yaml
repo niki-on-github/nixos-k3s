@@ -1,0 +1,32 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "vpn-gateway-network-policy"
+  namespace: "vpn-gateway"
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: vpn-gateway
+      app.kubernetes.io/name: pod-gateway 
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: vpn-apps
+  - toCIDR: 
+    - "0.0.0.0/0"
+    toPorts:
+    - ports:
+      - port: ${yaml_str_tag:=!!str} ${SECRET_VPN_PORT}
+        protocol: "${SECRET_VPN_PROTOCOL}"
+  # Allow forward of local dns requests
+  - toEndpoints:
+     - matchLabels:
+        k8s:io.kubernetes.pod.namespace: kube-system
+        k8s-app: kube-dns
+    toPorts:
+    - ports:
+       - port: "53"
+         protocol: ANY
+      rules:
+        dns:
+          - matchPattern: "*.vpn-gateway.svc.cluster.local"

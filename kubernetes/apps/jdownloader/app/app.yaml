@@ -23,6 +23,10 @@ spec:
     global:
       nameOverride: *app
 
+    defaultPodOptions:
+      labels:
+        vpn: "true"
+        
     controllers:
       main:
         containers:
@@ -61,15 +65,9 @@ spec:
               - *ingress
         
     persistence:
-      # NOTE: For the vpn routed apps insied the vpn-apps namespace we can not 
-      # - use volsync to an external server because the access is blocked.
-      # - use an init container to provision subPaths in storage volumes because the gateway init container cause conflicts
       config:
         enabled: true
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: "local-persistent"
+        existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /config
       downloads:

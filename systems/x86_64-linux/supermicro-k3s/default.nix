@@ -24,6 +24,11 @@ in
     ./secrets/ca-cert.crt
   ];  
   
+  # TODO cilium does not work with firewall enabled
+  # using `networking.firewall.package = pkgs.iptables-legacy` does not work
+  # for more details see https://github.com/cilium/cilium/issues/4825
+  networking.firewall.enable = false;   
+  
   age.secrets = {
     flux-git-auth.file = ./secrets/flux-git-auth.yaml.age;
     flux-sops-age.file = ./secrets/flux-sops-age.yaml.age;
@@ -72,12 +77,28 @@ in
     services = {
       k3s = {
         enable = true;
-        flux.enable = true;
-        minio = {
-          enable = true;
-          credentialsFile = config.age.secrets.minio-credentials.path;
-          buckets = ["volsync" "postgres"];
-          dataDir = ["/mnt/backup/minio"];
+        gitops = {
+          toolkit = "flux"; 
+        };
+        network = {
+          cni = "cilium";
+          cilium.settings = [
+            # NOTE: Required settings for pod-gateway
+            # see: https://github.com/cilium/cilium/issues/27560
+            "routingMode=native"
+            "ipv4NativeRoutingCIDR=10.42.0.0/16"
+            "autoDirectNodeRoutes=true"
+            "ipam.mode=kubernetes"
+            "ipam.operator.clusterPoolIPv4PodCIDRList=10.42.0.0/16"
+          ];
+        };
+        addons = {
+          minio = {
+            enable = true;
+            credentialsFile = config.age.secrets.minio-credentials.path;
+            buckets = ["volsync" "postgres"];
+            dataDir = ["/mnt/backup/minio"];
+          };
         };
       };
       kvm = {
@@ -85,10 +106,6 @@ in
         cockpit.enable = false; # broken
         platform = "${cpu}";
         user = "${user}";
-      };
-      docker = {
-        enable = false; # we use now dind in k3s
-        dns = "${dns}";
       };
     };
   };

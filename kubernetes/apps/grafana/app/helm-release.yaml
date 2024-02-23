@@ -46,7 +46,7 @@ spec:
         folderAnnotation: grafana_folder
 
       datasources:
-        enabled: true
+        enabled: false
         searchNamespace: ALL
 
     dashboardProviders:
@@ -93,6 +93,15 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/thanos
+          - name: cilium
+            orgId: 1
+            folder: Cilium
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /tmp/dashboards/cilium
+
 
     dashboards:
       default:
@@ -217,6 +226,8 @@ spec:
       - grafana-piechart-panel
       - grafana-worldmap-panel
       - grafana-clock-panel
+      - isovalent-hubble-datasource
+
 
     serviceMonitor:
       enabled: true

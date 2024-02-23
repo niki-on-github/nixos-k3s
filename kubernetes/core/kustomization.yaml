@@ -8,7 +8,6 @@ resources:
   - policy
   - storage
   - security
-  - vpn
   - database
   - monitoring
   - system

@@ -40,9 +40,6 @@ spec:
         ports:
           http:
             port: 80
-          websocket:
-            enabled: true
-            port: 3012
 
     ingress:
       main:
@@ -58,16 +55,6 @@ spec:
                 service:
                   name: main
                   port: http
-              - path: /notifications/hub/negotiate
-                pathType: Prefix
-                service:
-                  name: main
-                  port: http
-              - path: /notifications/hub
-                pathType: Prefix
-                service:
-                  name: main
-                  port: websocket
         tls:
           - hosts:
               - *ingress

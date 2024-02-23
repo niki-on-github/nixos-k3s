@@ -10,6 +10,8 @@ spec:
   path: "./kubernetes/apps/jdownloader/app"
   prune: true
   force: true
+  dependsOn:
+    - name: vpn-gateway  
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -17,3 +19,5 @@ spec:
     substitute:
       APP_NAME: jdownloader
       APP_NAMESPACE: vpn-apps
+      PVC_CAPACITY: "1Gi"
+

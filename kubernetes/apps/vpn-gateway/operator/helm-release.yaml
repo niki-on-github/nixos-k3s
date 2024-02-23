@@ -1,4 +1,3 @@
-
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -19,7 +18,22 @@ spec:
 
   #See https://github.com/angelnu/helm-charts/blob/main/charts/apps/pod-gateway/values.yaml
   values:
+    DNS: "172.16.0.1,1.1.1.1"
 
+    routed_namespaces:
+    - vpn-apps
+
+    settings:
+      # dns for *.svc.cluster.local
+      DNS_LOCAL_CIDRS: "local"
+      VXLAN_IP_NETWORK: "172.16.0"
+      VXLAN_ID: 42
+      VPN_INTERFACE: tun0
+      VPN_BLOCK_OTHER_TRAFFIC: true
+      VPN_TRAFFIC_PORT: ${SECRET_VPN_PORT}
+      VPN_LOCAL_CIDRS: "10.0.0.0/8 192.168.0.0/16"
+      NOT_ROUTED_TO_GATEWAY_CIDRS: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL} ${CONFIG_CLUSTER_SERVICE_NETWORK_IP_POOL}"
+      
     image:
       repository: ghcr.io/angelnu/pod-gateway
       tag: "v1.10.0"
@@ -33,9 +47,7 @@ spec:
       gatewayDefault: true
       gatewayLabel: setGateway
       gatewayAnnotation: setGateway
-      namespaceSelector:
-        label: "vpn-routed-gateway"
-
+ 
     addons:
       vpn:
         enabled: true
@@ -44,6 +56,11 @@ spec:
           image:
             repository: docker.io/qmcgaw/gluetun
             tag: "v3.37.0"
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
 
         env:
         - name: VPN_SERVICE_PROVIDER
@@ -59,6 +76,8 @@ spec:
         # firewall is confgured in vpn-gateway container
         - name: FIREWALL
           value: "off"
+        - name: DNS_PLAINTEXT_ADDRESS
+          value: "1.1.1.1"
 
         configFileSecret: openvpn-config
 
@@ -74,27 +93,20 @@ spec:
           timeoutSeconds: 20
 
         networkPolicy:
-          enabled: true
-
-          egress:
-            - to:
-              - ipBlock:
-                  cidr: 0.0.0.0/0
-              ports:
-              # VPN traffic
-              - port: ${SECRET_VPN_PORT}
-                protocol: "${SECRET_VPN_PROTOCOL}"
-            - to:
-              - ipBlock:
-                  cidr: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"
-
-    routed_namespaces:
-    - vpn-apps
-
-    settings:
-      VPN_INTERFACE: tun0
-      VPN_BLOCK_OTHER_TRAFFIC: true
-      VPN_TRAFFIC_PORT: ${SECRET_VPN_PORT}
-      VPN_LOCAL_CIDRS: "10.0.0.0/8 192.168.0.0/16"
-      NOT_ROUTED_TO_GATEWAY_CIDRS: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL} ${CONFIG_CLUSTER_SERVICE_NETWORK_IP_POOL}"
-
+          #NOTE: For cilium we define the network policy via CiliumNetworkPolicy
+          enabled: false
+    
+  postRenderers:
+    - kustomize: 
+        patches:
+          - target: 
+              kind: MutatingWebhookConfiguration
+              name: vpn-gateway-pod-gateway
+            patch: |
+              - op: remove
+                path: /webhooks/0/namespaceSelector              
+              - op: add
+                path: /webhooks/0/objectSelector
+                value:
+                  matchLabels:
+                    vpn: "true"
