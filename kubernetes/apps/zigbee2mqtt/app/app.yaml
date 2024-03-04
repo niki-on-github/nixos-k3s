@@ -26,7 +26,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.5.0
+      version: 2.6.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -43,7 +43,7 @@ spec:
           main:
             image:
               repository: ghcr.io/koenkk/zigbee2mqtt
-              tag: 1.35.0
+              tag: 1.35.3
 
             env:
               TZ: "${CONFIG_TIMEZONE}"
@@ -91,6 +91,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
         hosts:
           - host: &ingress "zigbee.${SECRET_DOMAIN}"
             paths:

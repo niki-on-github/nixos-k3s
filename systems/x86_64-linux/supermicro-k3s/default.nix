@@ -367,7 +367,7 @@ in
     systemd.timers.minio-backup = {
       wantedBy = [ "timers.target" ];
       partOf = [ "minio-backup.service" ];
-      timerConfig.OnCalendar = [ "Sun 05:00:00" ];
+      timerConfig.OnCalendar = [ "Mon 05:00:00" ];
     };
   
 }

@@ -6,6 +6,6 @@ metadata:
   name: k8tz-charts
   namespace: flux-system
 spec:
-  interval: 30m
+  interval: 1h
   url: https://k8tz.github.io/k8tz/
   timeout: 3m

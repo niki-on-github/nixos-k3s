@@ -1,0 +1,35 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: external-minio
+  namespace: storage
+spec:
+  type: ExternalName
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+  externalName: ${CONFIG_MINIO_BACKUP_EXTERNAL_NAME}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: external-minio-ingress
+  namespace: storage
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: &host external-minio.${SECRET_DOMAIN}
+    http:
+      paths:
+      - backend:
+          service:
+            name: external-minio
+            port:
+              number: 9000
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - *host
+        

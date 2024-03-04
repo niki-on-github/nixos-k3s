@@ -12,6 +12,7 @@ spec:
   force: true
   dependsOn:
     - name: vpn-gateway
+    - name: network-share-storage
   sourceRef:
     kind: GitRepository
     name: flux-system

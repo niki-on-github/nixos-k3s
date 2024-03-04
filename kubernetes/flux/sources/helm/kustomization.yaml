@@ -10,6 +10,7 @@ resources:
 - charts/cilium-charts.yaml
 - charts/cnpg-charts.yaml
 - charts/coredns-charts.yaml
+- charts/csi-driver-nfs-charts.yaml
 - charts/democratic-csi-charts.yaml
 - charts/drone-charts.yaml
 - charts/fairwinds-charts.yaml

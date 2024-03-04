@@ -16,7 +16,7 @@ spec:
     # NOTE: when your repository has a stale lock that prevents backups increment the number in string below to perform an unlock before the next backup
     unlock: "unlock-00001"
     repository: "${APP_NAME}-restic-dest-credentials"
-    copyMethod: Clone
+    copyMethod: Direct
     cacheStorageClassName: local-temp
     pruneIntervalDays: 14
     retain:

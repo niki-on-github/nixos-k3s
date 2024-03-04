@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.5.0
+      version: 2.6.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           main:
             image:
               repository: ghcr.io/coder/code-server
-              tag: 4.21.1
+              tag: 4.21.2
             env:
               TZ: ${CONFIG_TIMEZONE}
             args:

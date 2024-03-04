@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
 - minio/ks.yaml
 - local-path/ks.yaml
+- csi-driver-nfs/ks.yaml

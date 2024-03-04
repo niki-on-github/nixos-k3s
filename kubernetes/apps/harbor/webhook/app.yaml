@@ -20,5 +20,9 @@ spec:
       - name: 'docker.io rewrite rule'
         matches:
           - '^docker.io'
+        excludes:
+          # prevent a deadlock
+          - '^docker.io/.*coredns:.*$'
+          - '^docker.io/.*harbor:.*$'
         replace: "harbor.${SECRET_DOMAIN}/docker_hub"
         checkUpstream: false

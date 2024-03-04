@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m
-  timeout: 3m
+  timeout: 15m
   retryInterval: 30s
   dependsOn:
   - name: flux-system
@@ -68,14 +68,12 @@ spec:
           install:
             createNamespace: true
             remediation:
-              retries: -1
-              remediateLastFailure: true
+              retries: 3
           upgrade:
             force: true
             cleanupOnFail: true
             remediation:
               retries: 3
-              remediateLastFailure: true
       target:
         group: helm.toolkit.fluxcd.io
         version: v2beta1

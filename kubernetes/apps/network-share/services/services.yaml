@@ -1,0 +1,203 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.5.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: *app
+
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/crazy-max/samba
+              tag: 4.18.9
+
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+
+      nfs:
+        containers:
+          main:          
+            image:
+              repository: ghcr.io/niki-on-github/nfs-server
+              tag: "v1.1.0"
+              
+            securityContext:
+              privileged: true
+              capabilities:
+                add: ["SYS_ADMIN", "SETPCAP"]
+            env:
+              # NOTE: use ';' as path seperator
+              CREATE_DIRECTORIES: "/srv/nfs/pv;/srv/nfs/Filme;/srv/nfs/Musik;/srv/nfs/Serien"
+
+      ftp:
+        containers:
+          main:
+            image:
+              repository: stilliard/pure-ftpd
+              tag: latest
+
+            env:
+              PUBLICHOST: "${CONFIG_KUBE_VIP_IP}"
+              FTP_USER_NAME: ftp
+              FTP_USER_PASS: ${SECRET_WEBSERVICES_PASSWORD}
+              FTP_USER_HOME: /home/ftp
+      
+    service:
+      main:
+        type: LoadBalancer
+        loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
+        ports:
+          http:
+            enabled: false
+          samba:
+            enabled: true
+            port: 445
+            protocol: TCP
+            
+      nfs:
+        controller: nfs
+        ports:
+          nfs:
+            enabled: true
+            port: 2049
+            protocol: TCP
+            
+      ftp:
+        controller: ftp
+        type: LoadBalancer
+        loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
+        ports:
+          ftp:
+            enabled: true
+            port: 21
+            protocol: TCP
+          ftp30000:
+            enabled: true
+            port: 30000
+            protocol: TCP
+          ftp30001:
+            enabled: true
+            port: 30001
+            protocol: TCP
+          ftp30002:
+            enabled: true
+            port: 30002
+            protocol: TCP
+          ftp30003:
+            enabled: true
+            port: 30003
+            protocol: TCP
+          ftp30004:
+            enabled: true
+            port: 30004
+            protocol: TCP
+          ftp30005:
+            enabled: true
+            port: 30005
+            protocol: TCP
+          ftp30006:
+            enabled: true
+            port: 30006
+            protocol: TCP
+          ftp30007:
+            enabled: true
+            port: 30007
+            protocol: TCP
+          ftp30008:
+            enabled: true
+            port: 30008
+            protocol: TCP
+          ftp30009:
+            enabled: true
+            port: 30009
+            protocol: TCP
+
+    configMaps:
+      config:
+        enabled: true
+        data:
+          exports: |
+            /srv/nfs ${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}(rw,async,no_subtree_check,no_auth_nlm,insecure,no_root_squash,fsid=0)
+          config.yml: |
+            auth:
+              - user: smb
+                group: smb
+                uid: 1000
+                gid: 1000
+                password: "${SECRET_WEBSERVICES_PASSWORD}"
+
+            global:
+              - "force user = smb"
+              - "force group = smb"
+
+            share:
+              - name: samba
+                path: /samba
+                browsable: yes
+                readonly: no
+                guestok: no
+                validusers: smb
+                writelist: smb
+                veto: no
+
+    persistence:
+      data:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 128Gi
+        storageClass: "local-persistent"
+        advancedMounts:
+          main:
+            main:
+            - path: /samba
+          nfs:
+            main:
+            - path: /srv/nfs
+          ftp:
+            main:
+            - path: /home/ftp
+              
+      empty:
+        enabled: true
+        type: emptyDir
+        advancedMounts:
+          main:
+            main:
+            - path: /data
+
+      nfs:
+        enabled: true
+        type: configMap
+        name: ${APP_NAME}-config
+        advancedMounts:
+          nfs:
+            main:
+            - path: /etc/exports
+              subPath: exports
+                
+      samba:
+        enabled: true
+        type: configMap
+        name: ${APP_NAME}-config
+        advancedMounts:
+          main:
+            main:
+            - path: /data/config.yml
+              subPath: config.yml

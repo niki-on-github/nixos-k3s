@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.5.0
+      version: 2.6.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -22,7 +22,7 @@ spec:
           main:
             image:
               repository: ghcr.io/analogj/scrutiny
-              tag: v0.7.2-web
+              tag: v0.7.3-web
           
             env:
               TZ: "${TIMEZONE}"
@@ -38,7 +38,7 @@ spec:
           collector:
             image:
               repository: ghcr.io/analogj/scrutiny
-              tag: v0.7.2-collector
+              tag: v0.7.3-collector
             env:
               TZ: "${TIMEZONE}"
               COLLECTOR_API_ENDPOINT: "http://scrutiny.${APP_NAMESPACE}.svc.cluster.local:8080"

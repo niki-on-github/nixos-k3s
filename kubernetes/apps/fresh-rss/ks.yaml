@@ -36,6 +36,7 @@ spec:
   force: true
   dependsOn:
     - name: fresh-rss-db
+    - name: tailscale
   sourceRef:
     kind: GitRepository
     name: flux-system

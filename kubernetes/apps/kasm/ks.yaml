@@ -1,20 +1,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: samba
+  name: kasm
   namespace: flux-system
 spec:
   interval: 15m
   retryInterval: 2m0s
   timeout: 5m
-  path: "./kubernetes/apps/samba/app"
+  path: "./kubernetes/apps/kasm/app"
   prune: true
   force: true
-  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
   postBuild:
     substitute:
-      APP_NAME: samba
+      APP_NAME: kasm
       APP_NAMESPACE: apps

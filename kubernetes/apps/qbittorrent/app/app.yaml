@@ -1,0 +1,120 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app "${APP_NAME}"
+  namespace: &ns "${APP_NAMESPACE}"
+  annotations:
+    app.kubernetes.io/managed-by: "Helm"
+    meta.helm.sh/release-name: *app
+    meta.helm.sh/release-namespace: *ns
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.6.0
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: *app
+
+    defaultPodOptions:
+      # Fix hostname needed for an static IP from pod-gateway
+      # Must macht name in pod-gateway publicPorts section
+      hostname: qbittorrent
+      labels:
+        vpn: "true"
+        
+    controllers:
+      main:
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
+
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/qbittorrent
+              tag: "4.6.3@sha256:a4ad890e8c4a287c17d12ca22eb1d84a046aba2efbd882bf7d6eb12459f6a70c"
+
+            # NOTE: Open shell in pod change setting in WebUI and observe the config value via `cat /config/qBittorrent/qBittorrent.conf`           
+            # For more details see https://github.com/onedr0p/containers/tree/main/apps/qbittorrent
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+              QBITTORRENT__PORT: &port 8080
+              QBITTORRENT__BT_PORT: &fwPort ${SECRET_VPN_FORWARDED_PORT}
+              # NOTE disable webui password and use authelia for auth
+              # TODO Bug only 0.0.0.0/0 works specify the POD Network or local network does not work!
+              QBT_Preferences__WebUI__AuthSubnetWhitelist: "0.0.0.0/0"
+              QBT_Preferences__WebUI__ReverseProxySupportEnabled: true
+              QBT_Preferences__WebUI__TrustedReverseProxiesList: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL};${CONFIG_CLUSTER_SERVICE_NETWORK_IP_POOL}"
+              QBT_Preferences__WebUI__AlternativeUIEnabled: false
+              QBT_Preferences__WebUI__AuthSubnetWhitelistEnabled: true
+              QBT_Preferences__WebUI__UseUPnP: false
+              QBT_Preferences__WebUI__CSRFProtection: false
+              QBT_Preferences__WebUI__HostHeaderValidation: false
+              QBT_Preferences__WebUI__Address:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP      
+              # NOTE: must match static ip configuration in vpn-gateway publicPorts section
+              QBT_BitTorrent__Session__InterfaceAddress: "172.16.0.10"
+              QBT_BitTorrent__Session__Interface: vxlan0
+              QBT_BitTorrent__Session__InterfaceName: vxlan0
+              QBT_BitTorrent__Session__DefaultSavePath: &downloadsPath "/downloads"
+              QBT_BitTorrent__Session__GlobalUPSpeedLimit: "1000"
+              QBT_BitTorrent__Session__AnonymousModeEnabled: true
+              QBT_BitTorrent__Session__DHTEnabled: false
+              QBT_BitTorrent__Session__LSDEnabled: false
+              QBT_BitTorrent__Session__PeXEnabled: false
+              QBT_Network__PortForwardingEnabled: false
+
+      
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+
+    ingress:
+      main:
+        enabled: true
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
+        hosts:
+          - host: &ingress "qbittorrent.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  name: main
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      config:
+        enabled: true
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /config
+      downloads:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 64Gi
+        storageClass: "${CONFIG_NFS_STORAGE_CLASS_NAME}"
+        globalMounts:
+          - path: *downloadsPath

@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.5.0
+      version: 2.6.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -84,6 +84,21 @@ spec:
         tls:
           - hosts:
               - *ingress
+
+      tailscale:
+        enabled: true
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  name: main
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
         
     persistence:
       data:

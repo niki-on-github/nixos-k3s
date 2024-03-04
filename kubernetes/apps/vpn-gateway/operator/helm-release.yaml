@@ -18,21 +18,30 @@ spec:
 
   #See https://github.com/angelnu/helm-charts/blob/main/charts/apps/pod-gateway/values.yaml
   values:
-    DNS: "172.16.0.1,1.1.1.1"
+    DNS: "172.16.0.1,${SECRET_VPN_DNS}"
 
     routed_namespaces:
     - vpn-apps
 
     settings:
-      # dns for *.svc.cluster.local
+      #NOTE: dns for *.svc.cluster.local
       DNS_LOCAL_CIDRS: "local"
       VXLAN_IP_NETWORK: "172.16.0"
       VXLAN_ID: 42
-      VPN_INTERFACE: tun0
+      VXLAN_GATEWAY_FIRST_DYNAMIC_IP: 20
+      VPN_INTERFACE: ${SECRET_VPN_INTERFACE}
       VPN_BLOCK_OTHER_TRAFFIC: true
       VPN_TRAFFIC_PORT: ${SECRET_VPN_PORT}
       VPN_LOCAL_CIDRS: "10.0.0.0/8 192.168.0.0/16"
       NOT_ROUTED_TO_GATEWAY_CIDRS: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL} ${CONFIG_CLUSTER_SERVICE_NETWORK_IP_POOL}"
+
+    publicPorts:
+    - hostname: qbittorrent
+      #NOTE: Assing static ip for VXLAN_IP_NETWORK must be lower than VXLAN_GATEWAY_FIRST_DYNAMIC_IP
+      IP: 10
+      ports:
+      - type: tcp
+        port: ${SECRET_VPN_FORWARDED_PORT}
       
     image:
       repository: ghcr.io/angelnu/pod-gateway
@@ -57,18 +66,13 @@ spec:
             repository: docker.io/qmcgaw/gluetun
             tag: "v3.37.0"
 
-        securityContext:
-          capabilities:
-            add:
-              - NET_ADMIN
-
         env:
         - name: VPN_SERVICE_PROVIDER
           value: custom
         - name: VPN_TYPE
-          value: openvpn
+          value: ${SECRET_VPN_TYP}
         - name: VPN_INTERFACE
-          value: tun0
+          value: ${SECRET_VPN_INTERFACE}
         - name: OPENVPN_CUSTOM_CONFIG
           value: /gluetun/config.conf
         - name: DOT
@@ -77,7 +81,7 @@ spec:
         - name: FIREWALL
           value: "off"
         - name: DNS_PLAINTEXT_ADDRESS
-          value: "1.1.1.1"
+          value: ${SECRET_VPN_DNS}
 
         configFileSecret: openvpn-config
 
@@ -87,6 +91,8 @@ spec:
               - "sh"
               - "-c"
               - "if wget -q -O- 'https://airvpn.org/api/whatismyip/' | grep -Eq '.airvpn.: true' ; then exit 0; else exit 1; fi"
+              # TODO the following is not parsable YAMLtoJSON could not find expected :
+              # - "if wget -q -O- '${SECRET_VPN_LIVENESS_PROBE_URL}' | grep -Eq '${SECRET_VPN_LIVENESS_PROBE_EXPECTED_CONTENT}' ; then exit 0; else exit 1; fi"
           initialDelaySeconds: 30
           periodSeconds: 120
           failureThreshold: 5
@@ -95,7 +101,9 @@ spec:
         networkPolicy:
           #NOTE: For cilium we define the network policy via CiliumNetworkPolicy
           enabled: false
-    
+
+  # NOTE: The helm chart use a namespaceSelector but i want a objectSelector for the vpn routing to prevent the volsync backup routed throug the pod-gateway
+  # TODO Better is to have namespaceSelector with option to exlude specific objects, but i dont konw if this is possible
   postRenderers:
     - kustomize: 
         patches:

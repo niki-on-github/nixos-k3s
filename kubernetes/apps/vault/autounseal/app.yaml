@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: vault-autounseal
-      version: 0.3.0
+      version: 0.5.2
       interval: 1h
       sourceRef:
         kind: HelmRepository

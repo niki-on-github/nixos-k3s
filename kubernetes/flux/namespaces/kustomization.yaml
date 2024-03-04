@@ -7,13 +7,14 @@ resources:
   - resources/database.yaml
   - resources/home-automation.yaml
   - resources/kubevirt.yaml
+  - resources/media.yaml
   - resources/minio-operator.yaml
   - resources/monitoring.yaml
   - resources/networking.yaml
   - resources/notification.yaml
   - resources/policy.yaml
+  - resources/security.yaml
   - resources/storage.yaml
   - resources/system.yaml
   - resources/vpn-apps.yaml
   - resources/vpn-gateway.yaml
-  - resources/security.yaml

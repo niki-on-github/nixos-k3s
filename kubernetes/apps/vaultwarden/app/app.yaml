@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.5.0
+      version: 2.6.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -25,7 +25,7 @@ spec:
           main:
             image:
               repository: vaultwarden/server
-              tag: 1.30.3
+              tag: 1.30.5
 
             env:
               DATA_FOLDER: "data"

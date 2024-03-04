@@ -6,4 +6,5 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h
+  timeout: 3m
   url: https://kubernetes-sigs.github.io/metrics-server

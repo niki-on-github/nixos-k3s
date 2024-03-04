@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.5.0
+      version: 2.6.0
       interval: 1h
       sourceRef:
         kind: HelmRepository
@@ -39,7 +39,7 @@ spec:
             image:
               # renovate: datasource=docker
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.5.0
+              tag: 2.5.4
 
             env:
               COMPOSE_PROJECT_NAME: paperless
