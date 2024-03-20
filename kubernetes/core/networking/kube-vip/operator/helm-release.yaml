@@ -15,12 +15,10 @@ metadata:
   annotations:
     meta.helm.sh/release-namespace: "networking"
 spec:
-  interval: 5m
   chart:
     spec:
       chart: kube-vip
       version: 0.4.4
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: kube-vip-charts
@@ -44,12 +42,10 @@ metadata:
   annotations:
     meta.helm.sh/release-namespace: "networking"
 spec:
-  interval: 5m
   chart:
     spec:
       chart: kube-vip-cloud-provider
       version: 0.2.2
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: kube-vip-charts

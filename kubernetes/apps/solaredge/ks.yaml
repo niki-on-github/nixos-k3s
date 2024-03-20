@@ -4,17 +4,9 @@ metadata:
   name: solaredge
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/solaredge/app"
-  prune: true
-  force: true
   dependsOn:
     - name: influxdb
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: solaredge

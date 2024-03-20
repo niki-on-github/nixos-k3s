@@ -4,24 +4,28 @@ metadata:
   name: "${APP_NAME}-backup"
   namespace: "${APP_NAMESPACE}"
 spec:
+  # Set this when recover a cluster see https://github.com/backube/volsync/issues/627
+  paused: false
   sourcePVC: "${APP_NAME}-pvc"
   trigger:
-    schedule: "0 3 * * *"
-    # change/inc below to perform a manual backup schedule once
-    # TODO enable manual sync diable scheduling!?
+    schedule: ${yaml_str_tag:=!!str} ${BACKUP_SCHEDULE:-"0 3 * * *"}
+    # NOTE: change/inc below to perform a manual backup schedule once
+    # TODO: Currently we can only use one trigger, why?
     # see https://github.com/backube/volsync/discussions/576
-    # bad sw design?
-    # manual: "manual-backup-0003"
+    # manual: "manual-backup-0004"
   restic:
     # NOTE: when your repository has a stale lock that prevents backups increment the number in string below to perform an unlock before the next backup
-    unlock: "unlock-00001"
+    unlock: "unlock-00004"
     repository: "${APP_NAME}-restic-dest-credentials"
     copyMethod: Direct
     cacheStorageClassName: local-temp
-    pruneIntervalDays: 14
+    pruneIntervalDays: 7
     retain:
-      hourly: 6
-      daily: 5
-      weekly: 4
-      monthly: 2
-      yearly: 1
+      daily: ${BACKUP_RETAIN_DAILY:-7}
+      weekly: ${BACKUP_RETAIN_WEEKLY:-2}
+      monthly: ${BACKUP_RETAIN_MONTHLY:-1}
+
+    # TODO add with v0.9.0
+    #moverResources:
+    #  limits:
+    #    cpu: "500m"

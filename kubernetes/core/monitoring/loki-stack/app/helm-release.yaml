@@ -5,12 +5,10 @@ metadata:
   name: loki-stack
   namespace: monitoring
 spec:
-  interval: 15m
   chart:
     spec:
       chart: loki-stack
-      version: 2.10.1
-      interval: 1h
+      version: 2.10.2
       sourceRef:
         kind: HelmRepository
         name: grafana-charts

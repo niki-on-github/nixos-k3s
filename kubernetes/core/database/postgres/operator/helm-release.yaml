@@ -7,12 +7,10 @@ metadata:
   annotations:
     meta.helm.sh/release-namespace: "database"
 spec:
-  interval: 5m
   chart:
     spec:
       chart: cloudnative-pg
-      version: 0.20.1
-      interval: 1h
+      version: 0.20.2
       sourceRef:
         kind: HelmRepository
         name: cnpg-charts

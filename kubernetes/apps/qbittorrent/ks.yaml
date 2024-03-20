@@ -4,18 +4,10 @@ metadata:
   name: qbittorrent
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 3m
-  timeout: 5m
   path: "./kubernetes/apps/qbittorrent/app"
-  prune: true
-  force: true
   dependsOn:
     - name: vpn-gateway  
     - name: network-share-storage
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: qbittorrent

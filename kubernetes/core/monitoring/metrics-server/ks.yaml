@@ -4,16 +4,6 @@ metadata:
   name: metrics-server
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
   path: "./kubernetes/core/monitoring/metrics-server/app"
   dependsOn:
     - name: prometheus-crds
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-

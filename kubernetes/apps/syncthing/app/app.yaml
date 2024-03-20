@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -25,7 +23,7 @@ spec:
           main:
             image:
               repository: syncthing/syncthing
-              tag: 1.27.3
+              tag: 1.27.4
 
             env:
               TZ: "${CONFIG_TIMEZONE}"
@@ -76,4 +74,4 @@ spec:
         enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
-          - path: /sync
+          - path: /var/syncthing

@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -36,7 +34,7 @@ spec:
           main:
             image:
               repository: ghcr.io/niki-on-github/email2signal
-              tag: "v1.1.5"
+              tag: "v1.2.2"
 
             env:
               TZ: *tz

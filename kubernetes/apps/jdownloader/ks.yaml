@@ -4,18 +4,10 @@ metadata:
   name: jdownloader
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/jdownloader/app"
-  prune: true
-  force: true
   dependsOn:
     - name: vpn-gateway  
     - name: network-share-storage
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: jdownloader

@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -32,7 +30,6 @@ spec:
               TZ: &tz "${CONFIG_TIMEZONE}"
               DB_TYPE: postgres
               DB_PORT: 5432
-              DB_HOST: &postgresqlHost "${APP_NAME}-postgresql-rw.${APP_NAMESPACE}.svc.cluster.local"            
               DB_USER:
                 valueFrom:
                   secretKeyRef:
@@ -48,6 +45,12 @@ spec:
                   secretKeyRef:
                     name: *postgresqlCredentials
                     key: database
+              DB_HOST: 
+                valueFrom:
+                  secretKeyRef:
+                    name: *postgresqlCredentials
+                    key: uri
+
                  
     service:
       main:

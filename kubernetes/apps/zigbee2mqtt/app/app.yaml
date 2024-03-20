@@ -22,12 +22,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -43,7 +41,7 @@ spec:
           main:
             image:
               repository: ghcr.io/koenkk/zigbee2mqtt
-              tag: 1.35.3
+              tag: 1.36.0
 
             env:
               TZ: "${CONFIG_TIMEZONE}"
@@ -91,7 +89,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
         hosts:
           - host: &ingress "zigbee.${SECRET_DOMAIN}"
             paths:

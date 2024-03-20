@@ -14,12 +14,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -42,7 +40,6 @@ spec:
               VIKUNJA_SERVICE_FRONTENDURL: "https://vikunja.${SECRET_DOMAIN}/"              
               VIKUNJA_SERVICE_ENABLEREGISTRATION: "true"
               VIKUNJA_DATABASE_TYPE: postgres
-              VIKUNJA_DATABASE_HOST: &postgresqlHost "${APP_NAME}-postgresql-rw.${APP_NAMESPACE}.svc.cluster.local"
               VIKUNJA_DATABASE_USER:
                 valueFrom:
                   secretKeyRef:
@@ -58,6 +55,11 @@ spec:
                   secretKeyRef:
                     name: *postgresqlCredentials
                     key: database
+              VIKUNJA_DATABASE_HOST: 
+                valueFrom:
+                  secretKeyRef:
+                    name: *postgresqlCredentials
+                    key: uri
               VIKUNJA_SERVICE_JWTSECRET:
                 valueFrom:
                   secretKeyRef:

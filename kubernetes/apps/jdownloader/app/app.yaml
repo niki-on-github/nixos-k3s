@@ -8,12 +8,10 @@ metadata:
     meta.helm.sh/release-name: *app
     meta.helm.sh/release-namespace: *ns
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -25,7 +23,7 @@ spec:
 
     defaultPodOptions:
       labels:
-        vpn: "true"
+        vpn: "enabled"
         
     controllers:
       main:
@@ -51,7 +49,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
         hosts:
           - host: &ingress "jdownloader.${SECRET_DOMAIN}"
             paths:

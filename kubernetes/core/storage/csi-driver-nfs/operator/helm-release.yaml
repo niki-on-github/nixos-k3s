@@ -5,7 +5,6 @@ metadata:
   name: &app csi-driver-nfs
   namespace: storage
 spec:
-  interval: 15m
   chart:
     spec:
       chart: *app
@@ -18,3 +17,14 @@ spec:
   values:
     controller:
       replicas: 1
+      
+  postRenderers:
+    - kustomize: 
+        patches:
+          - target: 
+              kind: Deployment
+              name: csi-nfs-controller
+            patch: |
+              - op: remove
+                path: /spec/template/spec/hostNetwork
+  

@@ -5,13 +5,20 @@ metadata:
   namespace: "vpn-apps"
 spec:
   endpointSelector:
-    matchLabels:
-      vpn: "true"
+    matchExpressions:
+    - key: vpn
+      operator: In
+      values:
+        - "enabled"
+        - "test-network-policy"
   egressDeny:
   - toEntities:
     - "world"
   egress:
   - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: media
+        app.kubernetes.io/name: network-share
     - matchLabels:
         k8s:io.kubernetes.pod.namespace: vpn-gateway
         app.kubernetes.io/name: pod-gateway
@@ -19,13 +26,14 @@ spec:
      - matchLabels:
         k8s:io.kubernetes.pod.namespace: kube-system
         k8s-app: kube-dns
-    toPorts:
-    - ports:
-       - port: "53"
-         protocol: ANY
-      rules:
-        dns:
-          - matchPattern: "*.vpn-gateway.svc.cluster.local"
+    # TODO borken when using with kube-proxy replacement since v1.15 see https://github.com/cilium/cilium/issues/30744
+    #toPorts:
+    #- ports:
+    #   - port: "53"
+    #     protocol: ANY
+    #  rules:
+    #    dns:
+    #      - matchPattern: "*.vpn-gateway.svc.cluster.local"
   ingress:
   - fromEndpoints:
     - matchLabels:

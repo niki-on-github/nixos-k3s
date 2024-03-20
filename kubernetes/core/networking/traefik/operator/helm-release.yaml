@@ -7,12 +7,10 @@ metadata:
   annotations:
     meta.helm.sh/release-namespace: "networking"
 spec:
-  interval: 5m
   chart:
     spec:
       chart: traefik
       version: 26.1.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: traefik-charts
@@ -70,6 +68,7 @@ spec:
       web:
         redirectTo: 
           port: "websecure"
+          priority: 10
       websecure:
         tls:
           enabled: true

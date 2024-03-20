@@ -4,18 +4,9 @@ metadata:
   name: vpn-gateway
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
+  path: "./kubernetes/apps/vpn-gateway/operator"
+  wait: true
   dependsOn:
     - name: cert-manager
     - name: cert-manager-issuer
     - name: cilium
-  path: "./kubernetes/apps/vpn-gateway/operator"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-

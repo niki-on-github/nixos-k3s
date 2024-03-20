@@ -4,7 +4,6 @@ metadata:
   name:   ${APP_NAME}-code
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 30m
   chart:
     spec:
       chart: app-template
@@ -22,7 +21,7 @@ spec:
           main:
             image:
               repository: ghcr.io/coder/code-server
-              tag: 4.21.2
+              tag: 4.22.1
             env:
               TZ: ${CONFIG_TIMEZONE}
             args:
@@ -48,7 +47,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
         hosts:
           - host: &host hass-code.${SECRET_DOMAIN}
             paths:

@@ -4,19 +4,9 @@ metadata:
   name: thanos
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
+  path: "./kubernetes/core/monitoring/thanos/app"
   dependsOn:
     - name: minio
     - name: traefik
     - name: local-hostpath-persistent
     - name: prometheus-crds
-  path: "./kubernetes/core/monitoring/thanos/app"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-

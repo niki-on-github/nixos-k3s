@@ -4,13 +4,10 @@ metadata:
   name: vpn-gateway
   namespace: vpn-gateway
 spec:
-  interval: 15m
-  timeout: 15m
   chart:
     spec:
       chart: pod-gateway
       version: 6.5.1
-      interval: 15m
       sourceRef:
         kind: HelmRepository
         name: angelnu-charts
@@ -87,12 +84,11 @@ spec:
 
         livenessProbe:
           exec:
+            # NOTE: Avoide colon `:` inside the SECRET_VPN_LIVENESS_PROBE variable due to YAMLToJSON: YAMLToJSON: yaml: could not find expected ':' ERROR
             command:
               - "sh"
               - "-c"
-              - "if wget -q -O- 'https://airvpn.org/api/whatismyip/' | grep -Eq '.airvpn.: true' ; then exit 0; else exit 1; fi"
-              # TODO the following is not parsable YAMLtoJSON could not find expected :
-              # - "if wget -q -O- '${SECRET_VPN_LIVENESS_PROBE_URL}' | grep -Eq '${SECRET_VPN_LIVENESS_PROBE_EXPECTED_CONTENT}' ; then exit 0; else exit 1; fi"
+              - ${SECRET_VPN_LIVENESS_PROBE}
           initialDelaySeconds: 30
           periodSeconds: 120
           failureThreshold: 5
@@ -117,4 +113,4 @@ spec:
                 path: /webhooks/0/objectSelector
                 value:
                   matchLabels:
-                    vpn: "true"
+                    vpn: "enabled"

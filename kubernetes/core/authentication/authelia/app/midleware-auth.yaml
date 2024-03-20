@@ -2,10 +2,10 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: auth
-  namespace: security
+  namespace: authentication
 spec:
   forwardAuth:
-    address: "http://authelia.security.svc:9091/api/verify?rd=https://auth.${SECRET_DOMAIN}"
+    address: "http://authelia.authentication.svc:9091/api/verify?rd=https://auth.${SECRET_DOMAIN}"
     trustForwardHeader: true
     authResponseHeaders:
       - X-Forwarded-User

@@ -5,16 +5,7 @@ metadata:
   name: traefik-crds
   namespace: flux-system
 spec:
-  interval: 15m
-  timeout: 15m
-  retryInterval: 30s
   path: "./kubernetes/core/networking/traefik/crds"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -22,19 +13,10 @@ metadata:
   name: traefik
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/core/networking/traefik/operator"
-  prune: true
-  wait: true
-  force: true
   dependsOn:
     - name: kube-vip
     - name: traefik-crds
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   healthChecks:
     - apiVersion: apiextensions.k8s.io/v1
       kind: CustomResourceDefinition
@@ -70,16 +52,7 @@ metadata:
   name: traefik-settings
   namespace: flux-system
 spec:
-  interval: 15m
-  timeout: 15m
-  retryInterval: 30s
+  path: "./kubernetes/core/networking/traefik/settings"
   dependsOn:
     - name: traefik
     - name: cert-manager
-  path: "./kubernetes/core/networking/traefik/settings"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system

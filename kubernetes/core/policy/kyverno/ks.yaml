@@ -5,16 +5,7 @@ metadata:
   name: kyverno-operator
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
   path: "./kubernetes/core/policy/kyverno/operator"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   healthChecks:
   - apiVersion: apps/v1
     kind: Deployment
@@ -27,15 +18,6 @@ metadata:
   name: kyverno-policies
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
+  path: "./kubernetes/core/policy/kyverno/policies"
   dependsOn:
     - name: kyverno-operator
-  path: "./kubernetes/core/policy/kyverno/policies"
-  prune: true
-  force: true
-  wait: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system

@@ -4,16 +4,8 @@ metadata:
   name: harbor
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/harbor/app"
-  prune: true
-  force: true
   wait: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: harbor
@@ -26,17 +18,9 @@ metadata:
   name: harbor-webhook
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/harbor/webhook"
-  prune: true
-  force: true
   dependsOn:
     - name: harbor
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: harbor-webhook

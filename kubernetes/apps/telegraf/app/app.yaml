@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -25,7 +23,7 @@ spec:
           main:
             image:
               repository: telegraf
-              tag: "1.29.5"
+              tag: "1.30.0"
 
             env:
               HOST_PROC: "/rootfs/proc"

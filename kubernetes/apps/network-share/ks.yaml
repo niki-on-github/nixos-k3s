@@ -4,16 +4,8 @@ metadata:
   name: network-share
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/network-share/services"
-  prune: true
-  force: true
   wait: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: network-share
@@ -25,18 +17,10 @@ metadata:
   name: network-share-storage
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/network-share/storage"
-  prune: true
-  force: true
   wait: true
   dependsOn:
     - name: network-share
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAMESPACE: media

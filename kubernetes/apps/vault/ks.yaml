@@ -4,16 +4,8 @@ metadata:
   name: vault
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/vault/app"
-  prune: true
-  force: true
   wait: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: vault
@@ -26,17 +18,9 @@ metadata:
   name: vault-autounseal
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/vault/autounseal"
-  prune: true
-  force: true
   dependsOn:
     - name: vault
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAMESPACE: apps

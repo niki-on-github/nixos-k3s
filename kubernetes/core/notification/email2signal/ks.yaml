@@ -4,20 +4,11 @@ metadata:
   name: email2signal
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
+  path: "./kubernetes/core/notification/email2signal/app"
   dependsOn:
     - name: traefik
     - name: volsync
     - name: local-hostpath-persistent
-  path: "./kubernetes/core/notification/email2signal/app"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: email2signal

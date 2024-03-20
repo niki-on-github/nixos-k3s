@@ -4,7 +4,6 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 30m
   chart:
     spec:
       chart: reloader
@@ -13,7 +12,6 @@ spec:
         kind: HelmRepository
         name: stakater-charts
         namespace: flux-system
-      interval: 30m  
 
   values:
     reloader:

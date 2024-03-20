@@ -20,6 +20,12 @@ spec:
           - resources:
               kinds:
                 - Pod
+      exclude:
+        any:
+          - resources:
+              selector:
+                matchLabels:
+                  app.kubernetes.io/created-by: volsync
       mutate:
         foreach:
           - list: "request.object.spec.containers"

@@ -4,15 +4,7 @@ metadata:
   name: it-tools
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 3m
-  timeout: 5m
   path: "./kubernetes/apps/it-tools/app"
-  prune: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: it-tools

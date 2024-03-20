@@ -4,25 +4,14 @@ metadata:
   name: authelia-db
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/templates/postgres"
-  prune: true
-  force: true
-  wait: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   dependsOn:
     - name: postgres-operator
   postBuild:
     substitute:
       APP_NAME: authelia
-      APP_NAMESPACE: security
+      APP_NAMESPACE: authentication
       POSTGRES_DATABASE: "authelia"
-      POSTGRES_BACKUP_SCHEDULE: "0 0 * * * *"
-      POSTGRES_BACKUP_RETENTION: "30d"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -30,16 +19,7 @@ metadata:
   name: authelia
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
-  path: "./kubernetes/core/security/authelia/app"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
+  path: "./kubernetes/core/authentication/authelia/app"
   dependsOn:
     - name: traefik
     - name: lldap
@@ -47,4 +27,4 @@ spec:
   postBuild:
     substitute:
       APP_NAME: authelia
-      APP_NAMESPACE: security
+      APP_NAMESPACE: authentication

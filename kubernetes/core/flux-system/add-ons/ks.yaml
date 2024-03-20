@@ -10,14 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *appname
-  interval: 10m
   path: ./kubernetes/core/flux-system/add-ons/app
-  prune: true
-  wait: false
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   dependsOn:
     - name: prometheus-crds
     - name: prometheus-stack

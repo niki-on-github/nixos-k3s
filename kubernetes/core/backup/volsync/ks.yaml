@@ -5,18 +5,8 @@ metadata:
   name: volsync
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
   path: "./kubernetes/core/backup/volsync/operator"
-  prune: true
-  wait: true
-  force: true
   dependsOn:
     - name: snapshot-controller
     - name: minio
-    - name: prometheus-stack
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-
+    - name: prometheus-crds

@@ -4,17 +4,9 @@ metadata:
   name: zigbee2mqtt
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/zigbee2mqtt/app"
-  prune: true
-  force: true
   dependsOn:
     - name: mosquitto  
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: zigbee2mqtt

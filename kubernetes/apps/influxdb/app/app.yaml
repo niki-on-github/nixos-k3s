@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: influxdb
-      version: 5.17.1
-      interval: 1h
+      version: 5.18.1
       sourceRef:
         kind: HelmRepository
         name: bitnami-charts

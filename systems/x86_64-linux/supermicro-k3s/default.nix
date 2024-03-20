@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, nixpkgs-unstable, inputs, ... }:
 let
   user = "nix";
   cpu = "intel";
@@ -8,9 +8,11 @@ let
   subnet = 24;
   gateway = "10.0.1.1";
   interface = "eno3";
-  cpufreqmax = 2000000; 
+  cpufreqmax = 2100000; 
   bridge = "br1";
   disk = "/dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNF0MA23122T";
+  # NOTE: I was not able to get pod-gateway working with cilium kube-proxy replacement, everything else worked. For now we use the default k3s kube-proxy
+  kubeProxyReplacemen = false;
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -24,10 +26,25 @@ in
     ./secrets/ca-cert.crt
   ];  
   
-  # TODO cilium does not work with firewall enabled
-  # using `networking.firewall.package = pkgs.iptables-legacy` does not work
-  # for more details see https://github.com/cilium/cilium/issues/4825
-  networking.firewall.enable = false;   
+  networking.firewall = {
+    enable = true;
+    # NOTE: required for cilium when using without kube-proxy replacement to get working livenes probe for pods
+    checkReversePath = if kubeProxyReplacemen then true else "loose";     
+    allowedTCPPorts = [
+      3000 # nixos gitea
+      8080 # unifi control
+      18089 # monerod rpc
+      20108 # zigbee adapter via serial2net
+      22000 # syncthing local discovery
+    ];
+    allowedUDPPorts = [
+      3478 # unifi stun
+      10001 # unifi discovery
+      21027 # syncthing discovery broadcast
+    ];
+  };
+
+  services.k3s.package = nixpkgs-unstable.k3s; 
   
   age.secrets = {
     flux-git-auth.file = ./secrets/flux-git-auth.yaml.age;
@@ -67,6 +84,10 @@ in
   };
 
   templates = {
+    apps = {
+      modernUnix.enable = true;
+      monitoring.enable = true;
+    };
     system = {
       setup = {
         enable = true;
@@ -82,15 +103,37 @@ in
         };
         network = {
           cni = "cilium";
-          cilium.settings = [
-            # NOTE: Required settings for pod-gateway
-            # see: https://github.com/cilium/cilium/issues/27560
-            "routingMode=native"
-            "ipv4NativeRoutingCIDR=10.42.0.0/16"
-            "autoDirectNodeRoutes=true"
-            "ipam.mode=kubernetes"
-            "ipam.operator.clusterPoolIPv4PodCIDRList=10.42.0.0/16"
-          ];
+          cilium = {
+            version = "v1.15.2";
+            settings = if  kubeProxyReplacemen then [
+              # NOTE: Required settings for pod-gateway
+              # see: https://github.com/cilium/cilium/issues/27560
+              # alternatively use https://github.com/angelnu/pod-gateway/pull/52
+              "routingMode=native"
+              "ipv4NativeRoutingCIDR=10.42.0.0/16"
+              "autoDirectNodeRoutes=true"
+              "ipam.mode=kubernetes"
+              "ipam.operator.clusterPoolIPv4PodCIDRList=10.42.0.0/16"
+
+              # kube-proxy replacement
+              # NOTE: do not forget to enable this settings in your flux traced helm chart
+              "kubeProxyReplacement=true"
+              "k8sServicePort=6443"
+              "k8sServiceHost=127.0.0.1"
+              "endpointRoutes.enabled=true"
+              "localRedirectPolicy=true"
+              "devices=${bridge}"
+            ] else [
+              # NOTE: Required settings for pod-gateway
+              # see: https://github.com/cilium/cilium/issues/27560
+              # alternatively use https://github.com/angelnu/pod-gateway/pull/52
+              "routingMode=native"
+              "ipv4NativeRoutingCIDR=10.42.0.0/16"
+              "autoDirectNodeRoutes=true"
+              "ipam.mode=kubernetes"
+              "ipam.operator.clusterPoolIPv4PodCIDRList=10.42.0.0/16"
+            ];
+          };
         };
         addons = {
           minio = {
@@ -170,12 +213,6 @@ in
     ];
   };
 
-  # open ports for gitea, selfhosted unify-network-application, syncthing and Ser2Net Zigbee adapter
-  networking.firewall = {
-    allowedTCPPorts = [22 80 222 443 445 3000 8080 20108 22000];
-    allowedUDPPorts = [3478 10001 21027];
-  };
-
   users = {
     groups = {
       data = { 
@@ -200,7 +237,6 @@ in
           "storage"
           "wheel"
         ];
-        #TODO declarative way to add this to gitea webui ssh keys?
         openssh.authorizedKeys.keyFiles = [
           ./secrets/ssh.server02.lan.pub
         ];
@@ -352,14 +388,13 @@ in
         ${pkgs.rsync}/bin/rsync \
           -av \
           --delete \
+          --ignore-missing-args \
           --log-file="/mnt/backup/${domain}/rsync/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
+          --exclude "volsync/monerod" \
           /mnt/backup/minio/ /mnt/backup/${domain}/rsync/data/minio/
         export BACKUP_ARCHIVE_NAME="backup_$(date +%Y-%m-%d).tar.gz"
         tar -I 'gzip --fast' -cf "/mnt/backup/${domain}/archiv/$BACKUP_ARCHIVE_NAME" /mnt/backup/${domain}/rsync/data/minio
-        pushd /mnt/backup/${domain}/archiv
-        ${pkgs.par2cmdline}/bin/par2create -r5 -n1 "/mnt/backup/${domain}/archiv/$BACKUP_ARCHIVE_NAME"
-        popd
-        find /mnt/backup/${domain}/archiv/*.tar.gz* -mtime +30 -exec rm {} \;
+        find /mnt/backup/${domain}/archiv/*.tar.gz* -mtime +15 -exec rm {} \;
         echo "minio backup completed"
       '';
     };
@@ -367,7 +402,7 @@ in
     systemd.timers.minio-backup = {
       wantedBy = [ "timers.target" ];
       partOf = [ "minio-backup.service" ];
-      timerConfig.OnCalendar = [ "Mon 05:00:00" ];
+      timerConfig.OnCalendar = [ "Mon 06:00:00" ];
     };
   
 }

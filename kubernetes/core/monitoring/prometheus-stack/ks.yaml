@@ -4,16 +4,7 @@ metadata:
   name: prometheus-crds
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
   path: "./kubernetes/core/monitoring/prometheus-stack/crds"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -21,19 +12,9 @@ metadata:
   name: prometheus-stack
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
   dependsOn:
     - name: local-hostpath-persistent
     - name: traefik
     - name: thanos
     - name: prometheus-crds
   path: "./kubernetes/core/monitoring/prometheus-stack/app"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-

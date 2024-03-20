@@ -2,13 +2,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - authentication
   - backup
+  - database
+  - flux-system
+  - monitoring
   - networking
   - notification
   - policy
   - storage
-  - security
-  - database
-  - monitoring
   - system
-  - flux-system

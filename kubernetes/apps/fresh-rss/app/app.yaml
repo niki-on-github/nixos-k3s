@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -48,7 +46,7 @@ spec:
               FRESHRSS_INSTALL: |-
                 --api_enabled
                 --db-base ${POSTGRES_DATABASE}
-                --db-host ${APP_NAME}-postgresql-rw.${APP_NAMESPACE}.svc.cluster.local
+                --db-host ${APP_NAME}-postgresql-rw.${CONFIG_DATABASE_NAMESPACE}.svc.cluster.local
                 --db-password ${SECRET_DATABASE_PASSWORD}
                 --db-type pgsql
                 --db-user ${SECRET_DATABASE_USER}

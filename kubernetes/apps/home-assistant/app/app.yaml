@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -34,7 +32,7 @@ spec:
           main:
             image:
               repository: ghcr.io/home-assistant/home-assistant
-              tag: 2024.2.5
+              tag: 2024.3.1
           
             env:
               # NOTE: hass does not support env-variables for configuration directly, but you can use env variables in configuration.yaml with `!env_var VAR_NAME`

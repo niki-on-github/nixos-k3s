@@ -4,15 +4,7 @@ metadata:
   name: vaultwarden
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/vaultwarden/app"
-  prune: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: vaultwarden

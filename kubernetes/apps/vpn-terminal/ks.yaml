@@ -4,15 +4,6 @@ metadata:
   name: vpn-terminal
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
+  path: "./kubernetes/apps/vpn-terminal/app"
   dependsOn:
     - name: vpn-gateway
-  path: "./kubernetes/apps/vpn-terminal/app"
-  prune: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-

@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -56,6 +54,9 @@ spec:
     persistence:
       data:
         enabled: true
-        existingClaim: "${APP_NAME}-pvc"
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: ${PVC_CAPACITY}
+        storageClass: "local-persistent"
         globalMounts:
           - path: /data

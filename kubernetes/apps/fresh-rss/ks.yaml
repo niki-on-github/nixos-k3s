@@ -4,23 +4,13 @@ metadata:
   name: fresh-rss-db
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/templates/postgres"
-  prune: true
-  force: true
   wait: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: fresh-rss
       APP_NAMESPACE: apps
       POSTGRES_DATABASE: "freshrss"
-      POSTGRES_BACKUP_SCHEDULE: "0 0 * * * *"
-      POSTGRES_BACKUP_RETENTION: "30d"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -28,18 +18,10 @@ metadata:
   name: fresh-rss
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/fresh-rss/app"
-  prune: true
-  force: true
   dependsOn:
     - name: fresh-rss-db
     - name: tailscale
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: fresh-rss

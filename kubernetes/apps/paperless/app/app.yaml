@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -39,7 +37,7 @@ spec:
             image:
               # renovate: datasource=docker
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.5.4
+              tag: 2.6.2
 
             env:
               COMPOSE_PROJECT_NAME: paperless
@@ -62,6 +60,19 @@ spec:
               PAPERLESS_ADMIN_USER: "root"
               PAPERLESS_ADMIN_PASSWORD: "${SECRET_WEBSERVICES_PASSWORD}"
               PAPERLESS_ADMIN_MAIL: "root@${SECRET_DOMAIN}"
+
+
+            # migration is slow
+            probes:
+              liveness: &probe
+                spec:
+                  initialDelaySeconds: 60
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+
+              readiness: *probe
+              startup: *probe
 
           redis:
             image:

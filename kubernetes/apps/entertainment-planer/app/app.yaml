@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -29,7 +27,6 @@ spec:
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
-              POSTGRES_HOST: &postgresqlHost "${APP_NAME}-postgresql-rw.${APP_NAMESPACE}.svc.cluster.local"
               POSTGRES_USER:
                 valueFrom:
                   secretKeyRef:
@@ -45,6 +42,11 @@ spec:
                   secretKeyRef:
                     name: *postgresqlCredentials
                     key: database
+              POSTGRES_HOST:
+                valueFrom:
+                  secretKeyRef:
+                    name: *postgresqlCredentials
+                    key: uri
 
       crawler:
         containers:
@@ -55,7 +57,6 @@ spec:
 
             env:
               TZ: *tz
-              POSTGRES_HOST: *postgresqlHost
               THE_MOVIE_DB_API_KEY: "${SECRET_THE_MOVIE_DB_API_KEY}"      
               POSTGRES_USER:
                 valueFrom:
@@ -72,6 +73,11 @@ spec:
                   secretKeyRef:
                     name: *postgresqlCredentials
                     key: database            
+              POSTGRES_HOST:
+                valueFrom:
+                  secretKeyRef:
+                    name: *postgresqlCredentials
+                    key: uri
 
     service:
       main:
@@ -85,7 +91,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
         hosts:
           - host: &ingress "smp.${SECRET_DOMAIN}"
             paths:

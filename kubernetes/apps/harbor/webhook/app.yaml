@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: harbor-container-webhook
       version: 0.7.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: harbor-container-webhook-charts
@@ -22,7 +20,8 @@ spec:
           - '^docker.io'
         excludes:
           # prevent a deadlock
-          - '^docker.io/.*coredns:.*$'
-          - '^docker.io/.*harbor:.*$'
+          - '.*docker.io/.*coredns:.*$'
+          - '.*docker.io/.*harbor:.*$'
+          - '.*docker.io/harbor:.*$'
         replace: "harbor.${SECRET_DOMAIN}/docker_hub"
         checkUpstream: false

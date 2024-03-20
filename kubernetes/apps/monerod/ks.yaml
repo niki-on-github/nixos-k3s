@@ -4,18 +4,13 @@ metadata:
   name: monerod
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/monerod/app"
-  prune: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: monerod
       APP_NAMESPACE: apps
       PVC_CAPACITY: "200Gi"
-
+      BACKUP_RETAIN_DAILY: "1"
+      BACKUP_RETAIN_WEEKLY: "0"
+      BACKUP_RETAIN_MONTHLY: "0"
+      BACKUP_SCHEDULE: "0 4 */3 * *"

@@ -5,16 +5,6 @@ metadata:
   name: snapshot-controller
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
   path: "./kubernetes/core/backup/snapshot-controller/app"
-  prune: true
-  wait: true
-  force: true
   dependsOn:
     - name: cert-manager
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-

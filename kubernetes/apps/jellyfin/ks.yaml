@@ -4,15 +4,7 @@ metadata:
   name: jellyfin
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/jellyfin/app"
-  prune: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   dependsOn:
     - name: network-share
   postBuild:

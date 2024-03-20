@@ -4,16 +4,7 @@ metadata:
   name: local-hostpath-temp
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/core/storage/local-path/operator"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   dependsOn:
     - name: snapshot-controller
   postBuild:
@@ -28,16 +19,7 @@ metadata:
   name: local-hostpath-persistent
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/core/storage/local-path/operator"
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   dependsOn:
     - name: snapshot-controller
   postBuild:

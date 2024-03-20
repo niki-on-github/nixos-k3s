@@ -8,12 +8,10 @@ metadata:
     meta.helm.sh/release-name: *app
     meta.helm.sh/release-namespace: *ns
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -28,7 +26,7 @@ spec:
       # Must macht name in pod-gateway publicPorts section
       hostname: qbittorrent
       labels:
-        vpn: "true"
+        vpn: "enabled"
         
     controllers:
       main:
@@ -44,7 +42,7 @@ spec:
           main:
             image:
               repository: ghcr.io/onedr0p/qbittorrent
-              tag: "4.6.3@sha256:a4ad890e8c4a287c17d12ca22eb1d84a046aba2efbd882bf7d6eb12459f6a70c"
+              tag: "4.6.3@sha256:f2895e632fe66299d8ccc68265cc11aea92a232b7d0844de9961864b3e504026"
 
             # NOTE: Open shell in pod change setting in WebUI and observe the config value via `cat /config/qBittorrent/qBittorrent.conf`           
             # For more details see https://github.com/onedr0p/containers/tree/main/apps/qbittorrent
@@ -78,7 +76,27 @@ spec:
               QBT_BitTorrent__Session__PeXEnabled: false
               QBT_Network__PortForwardingEnabled: false
 
-      
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v2/app/version
+                    port: *port
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+  
     service:
       main:
         ports:
@@ -91,7 +109,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          traefik.ingress.kubernetes.io/router.middlewares: "security-auth@kubernetescrd"
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
         hosts:
           - host: &ingress "qbittorrent.${SECRET_DOMAIN}"
             paths:

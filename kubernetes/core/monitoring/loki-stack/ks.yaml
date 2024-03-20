@@ -4,16 +4,6 @@ metadata:
   name: loki-stack
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 15m
   path: "./kubernetes/core/monitoring/loki-stack/app"
   dependsOn:
     - name: local-hostpath-persistent
-  prune: true
-  wait: true
-  force: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-

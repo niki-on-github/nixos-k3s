@@ -4,23 +4,13 @@ metadata:
   name: vikunja-db
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/templates/postgres"
-  prune: true
-  force: true
   wait: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: vikunja
       APP_NAMESPACE: apps
       POSTGRES_DATABASE: "entertainment_planer"
-      POSTGRES_BACKUP_SCHEDULE: "0 0 * * * *"
-      POSTGRES_BACKUP_RETENTION: "30d"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -28,19 +18,11 @@ metadata:
   name: vikunja
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/apps/vikunja/app"
-  prune: true
-  force: true
   wait: true
   dependsOn:
     - name: vikunja-db
     - name: tailscale
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: vikunja

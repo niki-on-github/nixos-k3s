@@ -7,7 +7,7 @@ metadata:
 stringData:
   AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD: "${SECRET_WEBSERVICES_PASSWORD}"
   AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET: "${SECRET_AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET}"
-  AUTHELIA_JWT_SECRET: "${SECRET_AUTHELIA_JWT_SECRET}"
+  AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET: "${SECRET_AUTHELIA_JWT_SECRET}"
   AUTHELIA_SESSION_SECRET: "${SECRET_AUTHELIA_SESSION_SECRET}"
   AUTHELIA_STORAGE_ENCRYPTION_KEY: "${SECRET_AUTHELIA_STORAGE_ENCRYPTION_KEY}"
 ---
@@ -23,7 +23,7 @@ data:
         disable: true
       refresh_interval: 1m
       ldap:
-        address: ldap://lldap.security.svc.cluster.local:389
+        address: ldap://lldap.authentication.svc.cluster.local:389
         implementation: custom
         timeout: 5s
         start_tls: false
@@ -96,12 +96,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 30m
   chart:
     spec:
       chart: app-template
       version: 2.6.0
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -118,7 +116,7 @@ spec:
               repository: ghcr.io/authelia/authelia
               tag: v4.38.0-beta3
             env:
-              AUTHELIA_SERVER_PORT: &port 9091
+              AUTHELIA_SERVER_PORT: 9091
               AUTHELIA_SERVER_DISABLE_HEALTHCHECK: "true"
               AUTHELIA_TELEMETRY_METRICS_ADDRESS: tcp://0.0.0.0:8080
               AUTHELIA_TELEMETRY_METRICS_ENABLED: "true"
@@ -158,7 +156,7 @@ spec:
       main:
         ports:
           http:
-            port: *port
+            port: 9091
           metrics:
             port: 8080
 

@@ -4,12 +4,10 @@ metadata:
   name: cilium
   namespace: kube-system
 spec:
-  interval: 5m
   chart:
     spec:
       chart: cilium
-      version: 1.15.1
-      interval: 5m
+      version: 1.15.2
       sourceRef:
         kind: HelmRepository
         name: cilium-charts
@@ -17,6 +15,7 @@ spec:
   values:
     # NOETE: Required settings for vpn-gateway
     # see: https://github.com/cilium/cilium/issues/27560
+    # alternatively use https://github.com/angelnu/pod-gateway/pull/52
     routingMode: native
     ipv4NativeRoutingCIDR: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"
     autoDirectNodeRoutes: true
@@ -25,6 +24,25 @@ spec:
       operator:
         clusterPoolIPv4PodCIDRList: ["${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"]
 
+    # kube-proxy replacement
+    #devices:
+    #  - br1
+    #localRedirectPolicy: true
+    #enableRuntimeDeviceDetection: true
+    #rollOutCiliumPods: true
+    #kubeProxyReplacement: true
+    #k8sServicePort: 6443
+    #k8sServiceHost: "127.0.0.1"
+    #kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    #endpointRoutes:
+    #  enabled: true
+    #l2announcements:
+    #  enabled: true
+    #cgroup:
+    #  automount:
+    #    enabled: false
+    # hostRoot: /sys/fs/cgroup
+      
     updateStrategy:
       type: RollingUpdate
 
@@ -48,7 +66,6 @@ spec:
       prometheus:
         <<: *prometheus
 
-
       dashboards:
         <<: *dashboards
 
@@ -57,6 +74,12 @@ spec:
       dashboards:
         <<: *dashboards
 
+      tls:
+        auto:
+          enabled: true
+          method: helm
+          certValidityDuration: 1095
+      
       ui:
         enabled: true
         prometheus:

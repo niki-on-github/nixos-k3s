@@ -4,12 +4,10 @@ metadata:
   name: &app vault-autounseal
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: vault-autounseal
       version: 0.5.2
-      interval: 1h
       sourceRef:
         kind: HelmRepository
         name: vault-autounseal-charts

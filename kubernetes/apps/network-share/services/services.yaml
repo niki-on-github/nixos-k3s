@@ -4,12 +4,10 @@ metadata:
   name: &app ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
-  interval: 15m
   chart:
     spec:
       chart: app-template
-      version: 2.5.0
-      interval: 1h
+      version: 2.6.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts

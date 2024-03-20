@@ -6,7 +6,6 @@ metadata:
   name: ${STORAGE_CLASS_NAME}-provisioner
   namespace: storage
 spec:
-  interval: 30m
   chart:
     spec:
       chart: democratic-csi

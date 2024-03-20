@@ -4,16 +4,8 @@ metadata:
   name: cilium
   namespace: flux-system
 spec:
-  interval: 15m
-  timeout: 15m
-  retryInterval: 30s
   path: "./kubernetes/core/networking/cilium/operator"
-  prune: true
-  wait: true
-  force: true
   dependsOn:
     - name: traefik-crds
     - name: prometheus-crds
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
+    - name: cert-manager

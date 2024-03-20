@@ -4,18 +4,9 @@ metadata:
   name: reloader
   namespace: flux-system
 spec:
-  interval: 15m
-  retryInterval: 2m0s
-  timeout: 5m
   path: "./kubernetes/core/system/reloader/app"
-  prune: true
-  wait: true
-  force: true
   dependsOn:
     - name: prometheus-stack  
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   postBuild:
     substitute:
       APP_NAME: reloader

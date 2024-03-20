@@ -6,8 +6,8 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m
-  timeout: 15m
-  retryInterval: 30s
+  timeout: 10m
+  retryInterval: 1m
   dependsOn:
   - name: flux-system
   - name: config
@@ -36,8 +36,15 @@ spec:
         metadata:
           name: not-used
         spec:
+          interval: 15m
+          retryInterval: 5m
+          timeout: 15m
           force: true
           prune: true
+          wait: true
+          sourceRef:
+            kind: GitRepository
+            name: flux-system
           decryption:
             provider: sops
             secretRef:
@@ -48,17 +55,48 @@ spec:
                 name: cluster-settings
               - kind: Secret
                 name: cluster-secrets
+          patches:
+            - patch: |-
+                apiVersion: helm.toolkit.fluxcd.io/v2beta2
+                kind: HelmRelease
+                metadata:
+                  name: not-used
+                spec:
+                  interval: 15m
+                  timeout: 15m
+                  chart:
+                    spec:
+                      interval: 15m
+                  install:
+                    createNamespace: true
+                    remediation:
+                      retries: 3
+                  upgrade:
+                    force: true
+                    remediation:
+                      retries: 3
+              target:
+                group: helm.toolkit.fluxcd.io
+                version: v2beta2
+                kind: HelmRelease
+                labelSelector: substitution.flux.home.arpa/disabled notin (true)
+      
       target:
         group: kustomize.toolkit.fluxcd.io
         version: v1
         kind: Kustomization
         labelSelector: substitution.flux.home.arpa/disabled notin (true)
     - patch: |-
-        apiVersion: helm.toolkit.fluxcd.io/v2beta1
+        apiVersion: helm.toolkit.fluxcd.io/v2beta2
         kind: HelmRelease
         metadata:
           name: not-used
         spec:
+          interval: 15m
+          timeout: 15m
+          chart:
+            spec:
+              interval: 15m
           install:
             createNamespace: true
             remediation:
@@ -69,6 +107,6 @@ spec:
               retries: 3
       target:
         group: helm.toolkit.fluxcd.io
-        version: v2beta1
+        version: v2beta2
         kind: HelmRelease
         labelSelector: substitution.flux.home.arpa/disabled notin (true)
