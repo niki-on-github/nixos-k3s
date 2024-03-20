@@ -1,6 +1,6 @@
 # My NixOS K3S Cluster
 
-My NixOS based K3S Cluster configuration hosted on my personal Git Server. Feel free to look around. Be aware that not all configuration files are available in my public repository.
+My NixOS based K3S Cluster fully declarative and reproducable from empty disk to operating services, hosted on my personal Git Server. Feel free to look around. Be aware that not all configuration files are available in my public repository.
 
 <p align="center"><img src="docs/images/logo.png" width=300px></p>
 
@@ -8,13 +8,16 @@ My NixOS based K3S Cluster configuration hosted on my personal Git Server. Feel 
 
 ## Overview
 
-This repository provides the **Infrastructure as Code** (IaC) and **GitOps** State for the following tools:
+This repository provides the **Infrastructure as Code** (IaC) and **GitOps** State with the following core components:
 
-- [**NixOS**](https://nixos.org/): Linux distribution based on Nix to provide a declarative and reproducible (flakes) system.
+- [**NixOS**](https://nixos.org/): Linux distribution based on Nix to provide a **declarative** and **reproducible** (flakes) system.
 - [**K3S**](https://k3s.io/): Lightweight certified Kubernetes distribution.
 - [**Flux**](https://github.com/fluxcd/flux2): GitOps Kubernetes Operator that ensures that my cluster state matches the desired state described in this repository.
-- [**Renovate**](https://github.com/renovatebot/renovate): Automatically updates third-party dependencies declared in my Git repository via pull requests.
+- [**Renovate**](https://github.com/renovatebot/renovate): Automatically updates dependencies declared in my Git repository via pull requests.
 - [**SOPS**](https://github.com/mozilla/sops): Tool for managing secrets.
+- [**Cilium**](https://cilium.io/): eBPF-based Networking, Observability and Security (CNI, LB, Network Policy, etc.).
+- [**Cert-Manager**](https://cert-manager.io/): Cloud native certificate management.
+- [**Gitea**](https://about.gitea.com/): Self-hosted Git Server.
 
 ## Description
 
@@ -24,11 +27,13 @@ A single node k3s cluster which can be **fully reproducibly deployed with a sing
 
 ### Install
 
-Boot the nixos minimal iso and set the root user password to access the live iso via ssh. Then run the following command on remote computer:
+Boot any linux iso (recomended is nixos minimal) and run the following command on remote computer:
 
 ```bash
 nix run '.#install-system' -- supermicro-k3s root@${IP}
 ```
+
+Dependeing on the chosen linux iso you may have to set the root user password and enable the ssh server to make the server accessable via ssh.
 
 > [!NOTE] 
 > On my supermicro board i can not boot the official nixos minimal iso. Selecting an enty in the live iso grub menu result in loading the default boot device. Workaround is to boot an arch linux iso and use the command from above, which automatically uses kexec to load nixos setup.

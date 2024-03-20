@@ -28,8 +28,10 @@ in
   
   networking.firewall = {
     enable = true;
-    # NOTE: required for cilium when using without kube-proxy replacement to get working livenes probe for pods
-    checkReversePath = if kubeProxyReplacemen then true else "loose";     
+    # NOTE: `loose` required for cilium when using without kube-proxy replacement to get working livenes probe for pods. With this settings the cluster is mostly usable with exception of
+    # Cilium DNS Filtering: msg="Timeout waiting for response to forwarded proxied DNS lookup" dnsName=vpn-gateway-pod-gateway.vpn-gateway.svc.cluster.local. error="read udp 10.42.0.183:43844->10.42.0.176:53: i/o timeout" ipAddr="10.42.0.183:43844" subsys=fqdn/dnsproxy 
+    # => Therefore we have to use `checkReversePath=false` to get our vpn-gateway CiliumNetworkPolicy with DNS Filter working (when installing without cilium kube-proxy replacement).
+    checkReversePath = if kubeProxyReplacemen then true else false;     
     allowedTCPPorts = [
       3000 # nixos gitea
       8080 # unifi control
