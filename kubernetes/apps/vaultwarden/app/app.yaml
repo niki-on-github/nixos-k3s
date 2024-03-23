@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          app:
             image:
               repository: vaultwarden/server
               tag: 1.30.5
@@ -34,14 +34,14 @@ spec:
               TZ: "${CONFIG_TIMEZONE}"
 
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 80
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -51,7 +51,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -59,7 +59,6 @@ spec:
         
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /data

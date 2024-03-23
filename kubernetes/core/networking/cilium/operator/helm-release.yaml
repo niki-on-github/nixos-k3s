@@ -12,37 +12,10 @@ spec:
         kind: HelmRepository
         name: cilium-charts
         namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-helm-values
   values:
-    # NOETE: Required settings for vpn-gateway
-    # see: https://github.com/cilium/cilium/issues/27560
-    # alternatively use https://github.com/angelnu/pod-gateway/pull/52
-    routingMode: native
-    ipv4NativeRoutingCIDR: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"
-    autoDirectNodeRoutes: true
-    ipam:
-      mode: "kubernetes"
-      operator:
-        clusterPoolIPv4PodCIDRList: ["${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"]
-
-    # kube-proxy replacement
-    #devices:
-    #  - br1
-    #localRedirectPolicy: true
-    #enableRuntimeDeviceDetection: true
-    #rollOutCiliumPods: true
-    #kubeProxyReplacement: true
-    #k8sServicePort: 6443
-    #k8sServiceHost: "127.0.0.1"
-    #kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
-    #endpointRoutes:
-    #  enabled: true
-    #l2announcements:
-    #  enabled: true
-    #cgroup:
-    #  automount:
-    #    enabled: false
-    # hostRoot: /sys/fs/cgroup
-      
     updateStrategy:
       type: RollingUpdate
 

@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -26,7 +26,7 @@ spec:
         vpn: "enabled"
 
     controllers:
-      main:
+      ${APP_NAME}:
         initContainers:
           init:
             image:
@@ -38,7 +38,7 @@ spec:
             - "/init.sh"
 
         containers:
-          main:
+          app:
             image:
               repository: nzbgetcom/nzbget
               tag: "v23.0"
@@ -53,14 +53,14 @@ spec:
       
 
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 6789
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -71,7 +71,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -79,7 +79,6 @@ spec:
 
     configMaps:
       setup:
-        enabled: true
         data:
           init.sh: |
             #!/bin/sh
@@ -90,12 +89,10 @@ spec:
             
     persistence:
       config:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /config
       downloads:
-        enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 32Gi
@@ -103,21 +100,19 @@ spec:
         globalMounts:
           - path: /downloads
       scripts:
-        enabled: true
         type: configMap
         name: ${APP_NAME}-scripts
         defaultMode: 493
         advancedMounts:
-          main:
+          ${APP_NAME}:
             init:
               - path: /scripts
       setup:
-        enabled: true
         type: configMap
         name: ${APP_NAME}-setup
         defaultMode: 493
         advancedMounts:
-          main:
+          ${APP_NAME}:
             init:
               - path: /init.sh
                 subPath: init.sh

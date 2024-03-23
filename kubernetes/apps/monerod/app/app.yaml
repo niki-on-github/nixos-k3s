@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/sethforprivacy/simple-monerod              
               tag: v0.18.3.3
@@ -38,20 +38,17 @@ spec:
               TZ: "${CONFIG_TIMEZONE}"
       
     service:
-      main:
+      app:
+        controller: ${APP_NAME}
         type: LoadBalancer
         loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
         ports:
-          http:
-            enabled: false
           rpc:
-            enabled: true
             port: 18089
             protocol: TCP
 
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /home/monero/.bitmonero

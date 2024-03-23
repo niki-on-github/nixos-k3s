@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,7 +18,7 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         initContainers:
           init:
             image:
@@ -32,7 +32,7 @@ spec:
             - "/init/extensions"            
 
         containers:
-          main:
+          app:
             image:
               repository: freshrss/freshrss
               tag: 1.23.1
@@ -60,14 +60,14 @@ spec:
                 --user admin
       
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: *port
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -77,14 +77,13 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
               - *ingress
 
       tailscale:
-        enabled: true
         className: tailscale
         hosts:
           - host: "${APP_NAME}"
@@ -92,7 +91,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -100,13 +99,12 @@ spec:
         
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
-          main:
+          ${APP_NAME}:
             init:
               - path: /init
-            main:
+            app:
               - path: /var/www/FreshRSS/data
                 subPath: "data"
               - path: /var/www/FreshRSS/extensions

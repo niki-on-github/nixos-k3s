@@ -7,18 +7,18 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
         namespace: flux-system
   values:
     controllers:
-      main:
+      ${APP_NAME}-code:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/coder/code-server
               tag: 4.22.1
@@ -36,14 +36,14 @@ spec:
               - /config
               
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}-code
         ports:
           http:
             port: 80
             
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -53,7 +53,7 @@ spec:
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -61,6 +61,5 @@ spec:
 
     persistence:
       config:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
 

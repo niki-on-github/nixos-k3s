@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -28,7 +28,7 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         initContainers:
           init:
             image:
@@ -42,7 +42,7 @@ spec:
             - "/unifi/log"        
 
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/jacobalberty/unifi-docker
               tag: "v8.0.28"
@@ -51,7 +51,8 @@ spec:
               TZ: "${CONFIG_TIMEZONE}"
  
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         annotations:
           traefik.ingress.kubernetes.io/service.serversscheme: https
           traefik.ingress.kubernetes.io/service.serverstransport: "${APP_NAMESPACE}-${APP_NAME}-transport@kubernetescrd"
@@ -59,28 +60,23 @@ spec:
           http:
             port: 8443
             protocol: HTTPS
-      load-balancer:
-        controller: main
-        enabled: true
+      ingress:
+        controller: ${APP_NAME}
         type: LoadBalancer
         loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
         ports:
           stun:
-            enabled: true
             port: 3478
             protocol: UDP
           control:
-            enabled: true
             port: 8080
             protocol: TCP
           discovery:
-            enabled: true
             port: 10001
             protocol: UDP
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -90,7 +86,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -98,7 +94,6 @@ spec:
         
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /unifi

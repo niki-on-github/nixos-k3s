@@ -1,0 +1,13 @@
+# seperate helm values to make them deployable without flux at cluster bootstrap
+# therefore we can not use flux variable substitution in this file
+---
+# NOETE: Required settings for vpn-gateway
+# see: https://github.com/cilium/cilium/issues/27560
+# alternatively use https://github.com/angelnu/pod-gateway/pull/52
+routingMode: native
+ipv4NativeRoutingCIDR: "10.42.0.0/16"
+autoDirectNodeRoutes: true
+ipam:
+  mode: "kubernetes"
+  operator:
+    clusterPoolIPv4PodCIDRList: ["10.42.0.0/16"]

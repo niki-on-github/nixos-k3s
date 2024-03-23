@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -15,9 +15,9 @@ spec:
 
   values:
     controllers:
-      main:
+       ${APP_NAME}:
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/analogj/scrutiny
               tag: v0.8.0-web
@@ -47,14 +47,14 @@ spec:
                 add: ["SYS_RAWIO", "SYS_ADMIN"]
 
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 8080
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -65,7 +65,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -73,26 +73,23 @@ spec:
         
     persistence:
       config:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
-          main:
-            main:
+          ${APP_NAME}:
+            app:
               - path: /opt/scrutiny/config
       dev:
-        enabled: true
         type: hostPath
         hostPath: /dev
         advancedMounts:
-          main:
+          ${APP_NAME}:
             collector:
               - path: /dev
       udev:
-        enabled: true
         type: hostPath
         hostPath: /run/udev
         advancedMounts:
-          main:
+          ${APP_NAME}:
             collector:
               - path: /run/udev
           

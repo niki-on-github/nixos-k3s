@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,7 +18,7 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         initContainers:
           init:
             image:
@@ -29,7 +29,7 @@ spec:
             args:
             - "/init.sh"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/home-assistant/home-assistant
               tag: 2024.3.1
@@ -44,14 +44,14 @@ spec:
                     key: url
 
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 8123
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -61,14 +61,13 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
               - *ingress
 
       tailscale:
-        enabled: true
         className: tailscale
         hosts:
           - host: "${APP_NAME}"
@@ -76,7 +75,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -84,7 +83,6 @@ spec:
         
     configMaps:
       scripts:
-        enabled: true
         data:
           init.sh: |
             #!/bin/sh
@@ -94,28 +92,25 @@ spec:
                         
     persistence:
       config:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
-          main:
-            main:
+          ${APP_NAME}:
+            app:
               - path: /config
             init:
               - path: /config
       init:
-        enabled: true
         type: configMap
         name: home-assistant-init
         advancedMounts:
-          main:
+          ${APP_NAME}:
             init:
               - path: /init
       scripts:
-        enabled: true
         type: configMap
         name: ${APP_NAME}-scripts
         advancedMounts:
-          main:
+          ${APP_NAME}:
             init:
               - path: /init.sh
                 subPath: init.sh

@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -28,7 +28,7 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         initContainers:
           init-config:
             image:
@@ -43,41 +43,40 @@ spec:
                 chmod 0600 /mosquitto/external_config/mosquitto_pwd;
 
         containers:
-          main:
+          app:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
               tag: 2.0.18      
 
     service:
-      main:
+      mqtt:
+        controller: ${APP_NAME}
         ports:
-          http:
-            enabled: false
           mqtt:
-            enabled: true
             port: 1883
         
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /data
+          
       configfile:
         type: configMap
         name: mosquitto-configmap
         advancedMounts:
-          main:
-            main:
+          ${APP_NAME}:
+            app:
               - path: /mosquitto/config/mosquitto.conf
                 subPath: mosquitto.conf
       secret:
         type: secret
         name: ${APP_NAME}-secret
         advancedMounts:
-          main:
+          ${APP_NAME}:
             init-config:
               - path: /tmp/secret
+              
       externalconfig:
         type: emptyDir
         globalMounts:

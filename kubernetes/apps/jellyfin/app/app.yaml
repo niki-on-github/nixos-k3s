@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:      
+      ${APP_NAME}:      
         containers:
-          main:
+          app:
             image:
               repository: jellyfin/jellyfin
               tag: "10.8.13"
@@ -30,14 +30,14 @@ spec:
               JELLYFIN_PublishedServerUrl: "https://jellyfin.${SECRET_DOMAIN}"
          
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 8096
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
@@ -49,7 +49,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -57,13 +57,11 @@ spec:
         
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /config
         
       cache:
-        enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 16Gi
@@ -72,7 +70,6 @@ spec:
           - path: /cache
           
       media:
-        enabled: true
         existingClaim: "network-share-data"
         globalMounts:
           - path: /media

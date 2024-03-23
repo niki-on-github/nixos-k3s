@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/niki-on-github/serien-and-movie-planer
               tag: v1.2.1
@@ -50,7 +50,7 @@ spec:
 
       crawler:
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/niki-on-github/serien-and-movie-crawler
               tag: v1.2.1
@@ -80,14 +80,14 @@ spec:
                     key: uri
 
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 8888
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -98,7 +98,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:

@@ -9,6 +9,5 @@ resources:
   - monitoring
   - networking
   - notification
-  - policy
   - storage
   - system

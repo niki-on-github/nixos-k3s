@@ -11,8 +11,6 @@ let
   cpufreqmax = 2100000; 
   bridge = "br1";
   disk = "/dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNF0MA23122T";
-  # NOTE: I was not able to get pod-gateway working with cilium kube-proxy replacement, everything else worked. For now we use the default k3s kube-proxy
-  kubeProxyReplacemen = false;
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -31,7 +29,7 @@ in
     # NOTE: `loose` required for cilium when using without kube-proxy replacement to get working livenes probe for pods. With this settings the cluster is mostly usable with exception of
     # Cilium DNS Filtering: msg="Timeout waiting for response to forwarded proxied DNS lookup" dnsName=vpn-gateway-pod-gateway.vpn-gateway.svc.cluster.local. error="read udp 10.42.0.183:43844->10.42.0.176:53: i/o timeout" ipAddr="10.42.0.183:43844" subsys=fqdn/dnsproxy 
     # => Therefore we have to use `checkReversePath=false` to get our vpn-gateway CiliumNetworkPolicy with DNS Filter working (when installing without cilium kube-proxy replacement).
-    checkReversePath = if kubeProxyReplacemen then true else false;     
+    checkReversePath = false;     
     allowedTCPPorts = [
       3000 # nixos gitea
       8080 # unifi control
@@ -100,41 +98,24 @@ in
     services = {
       k3s = {
         enable = true;
-        gitops = {
-          toolkit = "flux"; 
+        prepare = {
+          cilium = true;
         };
-        network = {
-          cni = "cilium";
-          cilium = {
-            version = "v1.15.2";
-            settings = if  kubeProxyReplacemen then [
-              # NOTE: Required settings for pod-gateway
-              # see: https://github.com/cilium/cilium/issues/27560
-              # alternatively use https://github.com/angelnu/pod-gateway/pull/52
-              "routingMode=native"
-              "ipv4NativeRoutingCIDR=10.42.0.0/16"
-              "autoDirectNodeRoutes=true"
-              "ipam.mode=kubernetes"
-              "ipam.operator.clusterPoolIPv4PodCIDRList=10.42.0.0/16"
-
-              # kube-proxy replacement
-              # NOTE: do not forget to enable this settings in your flux traced helm chart
-              "kubeProxyReplacement=true"
-              "k8sServicePort=6443"
-              "k8sServiceHost=127.0.0.1"
-              "endpointRoutes.enabled=true"
-              "localRedirectPolicy=true"
-              "devices=${bridge}"
-            ] else [
-              # NOTE: Required settings for pod-gateway
-              # see: https://github.com/cilium/cilium/issues/27560
-              # alternatively use https://github.com/angelnu/pod-gateway/pull/52
-              "routingMode=native"
-              "ipv4NativeRoutingCIDR=10.42.0.0/16"
-              "autoDirectNodeRoutes=true"
-              "ipam.mode=kubernetes"
-              "ipam.operator.clusterPoolIPv4PodCIDRList=10.42.0.0/16"
-            ];
+        services = {
+          kube-proxy = true;
+          flux = true;
+          servicelb = false;
+          traefik = false;
+          local-storage = false;
+          metrics-server = false;
+          coredns = false;
+          flannel = false;
+        };
+        bootstrap = {
+          helm = {
+            enable = true;
+            completedIf = "get CustomResourceDefinition -A | grep -q 'cilium.io'";
+            helmfile = "/etc/k3s/helmfile.yaml";
           };
         };
         addons = {
@@ -321,6 +302,30 @@ in
     '';
   };
 
+  environment.etc."k3s/helmfile.yaml" = {
+    mode = "0750";
+    text = ''
+      repositories:
+        - name: coredns
+          url: https://coredns.github.io/helm
+        - name: cilium
+          url: https://helm.cilium.io
+      releases:
+        - name: cilium
+          namespace: kube-system
+          chart: cilium/cilium
+          version: 1.15.2
+          values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
+          wait: true
+        - name: coredns
+          namespace: kube-system
+          chart: coredns/coredns
+          version: 1.29.0
+          values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
+          wait: true
+    '';
+  };
+  
   # NOTE this config map is optional used by k3s coredns see https://github.com/k3s-io/k3s/blob/master/manifests/coredns.yaml
   environment.etc."k3s/coredns-custom.yaml" = {
     mode = "0750";

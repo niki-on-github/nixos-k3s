@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -29,7 +29,7 @@ spec:
         vpn: "enabled"
         
     controllers:
-      main:
+      ${APP_NAME}:
         pod:
           securityContext:
             runAsUser: 568
@@ -39,7 +39,7 @@ spec:
             supplementalGroups: [10000]
 
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/onedr0p/qbittorrent
               tag: "4.6.3@sha256:f2895e632fe66299d8ccc68265cc11aea92a232b7d0844de9961864b3e504026"
@@ -98,14 +98,14 @@ spec:
               capabilities: { drop: ["ALL"] }
   
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: *port
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -116,7 +116,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -124,12 +124,10 @@ spec:
         
     persistence:
       config:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /config
       downloads:
-        enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 64Gi

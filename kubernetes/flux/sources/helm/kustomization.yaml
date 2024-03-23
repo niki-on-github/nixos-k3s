@@ -31,4 +31,5 @@ resources:
 - charts/tailscale-charts.yaml
 - charts/traefik-charts.yaml
 - charts/vault-autounseal-charts.yaml
+- charts/xenitab-charts.yaml
 

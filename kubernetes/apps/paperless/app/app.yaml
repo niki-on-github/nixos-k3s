@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,7 +18,7 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         initContainers:
           init:
             image:
@@ -33,11 +33,11 @@ spec:
             - "/init/export"        
               
         containers:
-          main:
+          app:
             image:
               # renovate: datasource=docker
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.6.2
+              tag: 2.6.3
 
             env:
               COMPOSE_PROJECT_NAME: paperless
@@ -81,14 +81,14 @@ spec:
               tag: 7.2.4
 
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: *port
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -98,7 +98,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -106,15 +106,12 @@ spec:
         
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
-          main:
-            bootstrap:
-              - path: /init
+          ${APP_NAME}:
             init:
               - path: /init
-            main:
+            app:
               - path: /usr/src/paperless/data
                 subPath: data
               - path: /usr/src/paperless/consume

@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -30,7 +30,7 @@ spec:
     controllers:
       api:
         containers:
-          main:
+          app:
             image:
               repository: vikunja/api
               tag: "0.22.1"
@@ -67,9 +67,9 @@ spec:
                     key: jwtSecret
                 
 
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          app:
             image:
               repository: vikunja/frontend
               tag: "0.22.1"
@@ -83,7 +83,8 @@ spec:
                     key: jwtSecret           
 
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 80
@@ -94,8 +95,7 @@ spec:
             port: 3456
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -105,29 +105,28 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
               - path: /api/v1/
                 pathType: Prefix
                 service:
-                  name: api
+                  identifier: api
                   port: http
               - path: /dav/
                 pathType: Prefix
                 service:
-                  name: api
+                  identifier: api
                   port: http
               - path: /.well-known/
                 pathType: Prefix
                 service:
-                  name: api
+                  identifier: api
                   port: http
         tls:
           - hosts:
               - *ingress
 
       tailscale:
-        enabled: true
         className: tailscale
         hosts:
           - host: "${APP_NAME}"
@@ -135,22 +134,22 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
               - path: /api/v1/
                 pathType: Prefix
                 service:
-                  name: api
+                  identifier: api
                   port: http
               - path: /dav/
                 pathType: Prefix
                 service:
-                  name: api
+                  identifier: api
                   port: http
               - path: /.well-known/
                 pathType: Prefix
                 service:
-                  name: api
+                  identifier: api
                   port: http
 
         tls:
@@ -159,9 +158,8 @@ spec:
 
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
           api:
-            main:
+            app:
               - path: /app/vikunja/files

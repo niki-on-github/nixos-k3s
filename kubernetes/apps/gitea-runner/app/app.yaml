@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          app:
             securityContext:
               privileged: true
               fsGroup: 1000
@@ -32,7 +32,7 @@ spec:
               tag: "dind-rootless-0.2.6"
 
             env:
-              GITEA_INSTANCE_URL: "http://gitea.${APP_NAMESPACE}.svc.cluster.local:3000"
+              GITEA_INSTANCE_URL: "http://gitea-webui.${APP_NAMESPACE}.svc.cluster.local:3000"
               GITEA_RUNNER_REGISTRATION_TOKEN: "${SECRET_GITEA_RUNNER_TOKEN}"
               GITEA_RUNNER_LOG_LEVEL: "info"
               GITEA_RUNNER_JOB_CONTAINER_PRIVILEGED: false
@@ -42,18 +42,9 @@ spec:
               GITEA_RUNNER_GID: 1000
               #GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "--add-host=git.${SECRET_DOMAIN}:host-gateway -e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
               GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "-e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
-
-    service:
-      main:
-        enabled: false
-        
-    ingress:
-      main:
-        enabled: false
          
     persistence:
       data:
-        enabled: true
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: ${PVC_CAPACITY}

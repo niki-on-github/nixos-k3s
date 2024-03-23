@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          app:
             image:
               repository: vault
               tag: "1.13.3"
@@ -33,14 +33,14 @@ spec:
                 add: ["IPC_LOCK"]
 
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 8200
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -50,7 +50,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -58,7 +58,6 @@ spec:
         
     configMaps:
       configmap:
-        enabled: true
         data:
           config.hcl: |
             ui = true
@@ -78,12 +77,10 @@ spec:
       
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /vault/file
       config:
-        enabled: true
         type: configMap
         name: ${APP_NAME}-configmap
         globalMounts:

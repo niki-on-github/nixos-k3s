@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          app:
             image:
               repository: telegraf
               tag: "1.30.0"
@@ -34,15 +34,14 @@ spec:
               HOST_MOUNT_PREFIX: "/rootfs"
       
     service:
-      main:
+      liveness:
+        controller: ${APP_NAME}
         ports:
           http:
-            # for liveness probe
             port: 8080
        
     configMaps:
       config:
-        enabled: true
         data:
           telegraf.conf: |
             [global_tags]
@@ -106,13 +105,11 @@ spec:
       
     persistence:
       data:
-        enabled: true
         type: hostPath
         hostPath: /
         globalMounts:
           - path: /rootfs
       config:
-        enabled: true
         type: configMap
         name: ${APP_NAME}-config
         globalMounts:

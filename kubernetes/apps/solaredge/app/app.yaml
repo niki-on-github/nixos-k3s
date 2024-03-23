@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          rest:
             image:
               repository: ghcr.io/niki-on-github/solaredge-modbus-rest-api
               tag: "v0.0.4"
@@ -54,12 +54,9 @@ spec:
               - "30"
    
     service:
-      main:
+      rest:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 5000
 
-    ingress:
-      main:
-        enabled: false
-        

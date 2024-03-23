@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.4
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,9 +18,9 @@ spec:
       nameOverride: *app
 
     controllers:
-      main:
+      ${APP_NAME}:
         containers:
-          main:
+          app:
             image:
               repository: gitea/gitea
               tag: "1.21.8"
@@ -45,24 +45,22 @@ spec:
               GITEA__migrations__SKIP_TLS_VERIFY: "true"
               GITEA__migrations__ALLOW_LOCALNETWORKS: "true"
     service:
-      main:
+      webui:
+        controller: ${APP_NAME}
         ports:
           http:
             port: 3000
       ssh:
-        enabled: true
-        controller: main
+        controller: ${APP_NAME}
         type: LoadBalancer
         loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
         ports: 
           ssh:
-            enabled: true
             port: *sshPort
             protocol: TCP
 
     ingress:
-      main:
-        enabled: true
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -72,7 +70,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
@@ -80,7 +78,6 @@ spec:
         
     persistence:
       data:
-        enabled: true
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /data
