@@ -48,6 +48,13 @@
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
       "extractVersionTemplate": "{{#if versionTemplate}}{{{versionTemplate}}}{{else}}{{/if}}"
+    },
+    {
+      "fileMatch": ["\\.nix$"],
+      "matchStrings": [
+        "chart: (?<depName>.*?)\n *version: (?<currentValue>.*)\n"
+      ],
+      "datasourceTemplate": "helm"
     }
   ],
   "packageRules": [

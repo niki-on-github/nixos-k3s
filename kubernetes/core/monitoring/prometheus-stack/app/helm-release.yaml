@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 57.1.0
+      version: 57.1.1
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -67,9 +67,9 @@ spec:
           - name: "ignore"
           - name: "email"
             email_configs:
-              - to: self@signal.localdomain'
+              - to: ${CONFIG_SIGNAL_MAIL}
                 from: 'alertmanager@${SECRET_DOMAIN}'
-                smarthost: "email2signal-mail.notification.svc:8025"
+                smarthost: "${CONFIG_MAIL_REPLAY_HOST}:${CONFIG_MAIL_REPLAY_PORT}"
                 send_resolved: true
                 require_tls: false
         route:

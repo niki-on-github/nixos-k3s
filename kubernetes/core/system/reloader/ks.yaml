@@ -6,7 +6,7 @@ metadata:
 spec:
   path: "./kubernetes/core/system/reloader/app"
   dependsOn:
-    - name: prometheus-stack  
+    - name: prometheus-crds
   postBuild:
     substitute:
       APP_NAME: reloader

@@ -5,3 +5,4 @@ resources:
   - metrics-server/ks.yaml
   - prometheus-stack/ks.yaml
   - thanos/ks.yaml
+  - flux-addons/ks.yaml

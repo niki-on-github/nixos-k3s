@@ -27,6 +27,7 @@ resources:
 - charts/minio-charts.yaml
 - charts/piraeus-charts.yaml
 - charts/prometheus-community-charts.yaml
+- charts/runix-charts.yaml
 - charts/stakater-charts.yaml
 - charts/tailscale-charts.yaml
 - charts/traefik-charts.yaml

@@ -1,0 +1,142 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: 3.0.4
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: *app
+
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: bbernhard/signal-cli-rest-api
+              tag: "0.81"
+
+            env:
+              TZ: &tz "${CONFIG_TIMEZONE}"
+              MODE: "native"
+              # It's not a good idea to use the AUTO_RECEIVE_SCHEDULE parameter, as you might lose some messages that way.
+              # AUTO_RECEIVE_SCHEDULE: "0 2 * * *"
+
+      relay:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/niki-on-github/email2signal
+              tag: "v1.2.2"
+
+            env:
+              TZ: *tz
+              SIGNAL_REST_URL: "http://${APP_NAME}-rest.${APP_NAMESPACE}.svc:8080"
+              SENDER_NUMBER: "\\${SECRET_SIGNAL_PHONE_NUMBER}"
+              SMTP_HOST: ""
+              SMTP_USER: ""
+              SMTP_PASSWORD: ""
+      mail:
+        containers:
+          app:
+            image:
+              repository: axllent/mailpit
+              tag: "v1.15.0"
+
+            env:
+              TZ: *tz
+              MP_MAX_MESSAGES: 100
+              MP_SMTP_AUTH_ALLOW_INSECURE: 1
+              MP_SMTP_AUTH_ACCEPT_ANY: 1
+              MP_SMTP_RELAY_HOST: "email2signal-relay.notification.svc"
+              MP_SMTP_RELAY_PORT: 8025
+              MP_SMTP_RELAY_STARTTLS: false
+              MP_SMTP_RELAY_ALLOW_INSECURE: true
+              MP_SMTP_RELAY_AUTH: none
+              # does not work
+              # MP_SMTP_RELAY_ALLOWED_RECIPIENTS: "@signal\\.localdomain$"
+              MP_SMTP_RELAY_ALL: true
+              MP_DATA_FILE: /data/mailpit.db
+        
+    service:
+      rest:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 8080
+      relay:
+        controller: relay
+        ports:
+          smtp:
+            port: 8025
+            protocol: TCP
+      mail:
+        controller: mail
+        ports:
+          http:
+            # webui
+            port: 8025
+          smtp:
+            port: 1025
+            protocol: TCP
+
+    # https://signal-api.{domain}/v1/qrcodelink?device_name=signal-api
+    ingress:
+      rest:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &host "signal-api.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: rest
+                  port: http
+        tls:
+          - hosts:
+              - *host
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &host "mail.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: mail
+                  port: http
+        tls:
+          - hosts:
+              - *host
+
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+              - path: /home/.local/share/signal-cli
+      archive:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: "local-persistent"
+        advancedMounts:
+          mail:
+            app:
+              - path: /data

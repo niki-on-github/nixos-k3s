@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *appname
-  path: ./kubernetes/core/flux-system/add-ons/app
+  path: ./kubernetes/core/monitoring/flux-addons/app
   dependsOn:
     - name: prometheus-crds
     - name: prometheus-stack

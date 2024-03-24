@@ -4,11 +4,12 @@ metadata:
   name: email2signal
   namespace: flux-system
 spec:
-  path: "./kubernetes/core/notification/email2signal/app"
-  dependsOn:
-    - name: traefik
-    - name: volsync
-    - name: local-hostpath-persistent
+  path: "./kubernetes/apps/email2signal/app"
+  #dependsOn:
+  #  - name: traefik
+  #  - name: volsync
+  #  - name: local-hostpath-persistent
+  #  - name: authelia
   postBuild:
     substitute:
       APP_NAME: email2signal

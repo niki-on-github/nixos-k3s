@@ -20,3 +20,6 @@ data:
   CONFIG_NFS_STORAGE_CLASS_NAME: "nfs-storage"
   CONFIG_POSTGRES_BACKUP_RETENTION: "7d"
   CONFIG_DATABASE_NAMESPACE: "database"
+  CONFIG_SIGNAL_MAIL: "self@signal.localdomain"
+  CONFIG_MAIL_REPLAY_HOST: "email2signal-mail.notification.svc"
+  CONFIG_MAIL_REPLAY_PORT: "1025"
