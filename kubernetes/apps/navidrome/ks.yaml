@@ -5,8 +5,10 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/navidrome/app"
+  dependsOn:
+    - name: network-share
   postBuild:
     substitute:
       APP_NAME: navidrome
-      APP_NAMESPACE: apps
+      APP_NAMESPACE: media
       PVC_CAPACITY: "8Gi"

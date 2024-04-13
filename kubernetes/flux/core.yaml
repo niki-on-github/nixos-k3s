@@ -29,21 +29,21 @@ spec:
       name: cluster-settings
     - kind: Secret
       name: cluster-secrets
-  healthChecks:
-  - apiVersion: kustomize.toolkit.fluxcd.io/v1
-    kind: Kustomization
-    name: traefik
-    namespace: flux-system
   patches:
-    - patch: |-
+    - target:
+        group: kustomize.toolkit.fluxcd.io
+        version: v1
+        kind: Kustomization
+        labelSelector: substitution.flux.home.arpa/disabled notin (true)
+      patch: |-
         apiVersion: kustomize.toolkit.fluxcd.io/v1
         kind: Kustomization
         metadata:
           name: not-used
         spec:
           interval: 10m
-          retryInterval: 5m
           timeout: 10m
+          retryInterval: 5m
           force: true
           prune: true
           wait: true
@@ -60,15 +60,38 @@ spec:
                 name: cluster-settings
               - kind: Secret
                 name: cluster-secrets
+
+    # NOTE: `$patch: merge` does not work and will always override/replace existing patches!
+    # ref:
+    # - [#306](https://github.com/kubernetes-sigs/kustomize/issues/306)
+    # - [strategic-merge-patch](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md)
+    # Workaround: Use `kustomize.patches/append: true` label on kustomize with patches
+    - target:
+        group: kustomize.toolkit.fluxcd.io
+        version: v1
+        kind: Kustomization
+        labelSelector: kustomize.patches/append notin (true)
+      patch: |-
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: not-used
+        spec:
+          $patch: merge
           patches:
-            - patch: |-
+            - target:
+                group: helm.toolkit.fluxcd.io
+                version: v2beta2
+                kind: HelmRelease
+                labelSelector: substitution.flux.home.arpa/disabled notin (true)
+              patch: |-
                 apiVersion: helm.toolkit.fluxcd.io/v2beta2
                 kind: HelmRelease
                 metadata:
                   name: not-used
                 spec:
-                  interval: 15m
-                  timeout: 15m
+                  interval: 10m
+                  timeout: 10m
                   chart:
                     spec:
                       interval: 15m
@@ -80,24 +103,54 @@ spec:
                     cleanupOnFail: true
                     remediation:
                       retries: 3
-              target:
-                group: helm.toolkit.fluxcd.io
-                version: v2beta2
-                kind: HelmRelease
-                labelSelector: substitution.flux.home.arpa/disabled notin (true)
-      target:
+
+    - target:
         group: kustomize.toolkit.fluxcd.io
         version: v1
         kind: Kustomization
+        labelSelector: kustomize.patches/append in (true)
+      patch: |
+        - op: add
+          path: /spec/patches/-
+          value:
+            target:
+              group: helm.toolkit.fluxcd.io
+              version: v2beta2
+              kind: HelmRelease
+              labelSelector: substitution.flux.home.arpa/disabled notin (true)
+            patch: |-
+              apiVersion: helm.toolkit.fluxcd.io/v2beta2
+              kind: HelmRelease
+              metadata:
+                name: not-used
+              spec:
+                interval: 10m
+                timeout: 10m
+                chart:
+                  spec:
+                    interval: 15m
+                install:
+                  createNamespace: true
+                  remediation:
+                    retries: 3
+                upgrade:
+                  cleanupOnFail: true
+                  remediation:
+                    retries: 3
+                       
+    - target:
+        group: helm.toolkit.fluxcd.io
+        version: v2beta2
+        kind: HelmRelease
         labelSelector: substitution.flux.home.arpa/disabled notin (true)
-    - patch: |-
+      patch: |-
         apiVersion: helm.toolkit.fluxcd.io/v2beta2
         kind: HelmRelease
         metadata:
           name: not-used
         spec:
-          interval: 15m
-          timeout: 15m
+          interval: 10m
+          timeout: 10m
           chart:
             spec:
               interval: 15m
@@ -109,9 +162,3 @@ spec:
             cleanupOnFail: true
             remediation:
               retries: 3
-      target:
-        group: helm.toolkit.fluxcd.io
-        version: v2beta2
-        kind: HelmRelease
-        labelSelector: substitution.flux.home.arpa/disabled notin (true)
-

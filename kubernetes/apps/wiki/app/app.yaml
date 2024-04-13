@@ -1,0 +1,108 @@
+apiVersion: v1
+type: Opaque
+kind: Secret
+metadata:
+  name: ${APP_NAME}-secret
+  namespace: ${APP_NAMESPACE}
+stringData:
+  GITSYNC_USERNAME: "${SECRET_HUGO_WIKI_GITSYNC_USER}"
+  GITSYNC_PASSWORD: "${SECRET_HUGO_WIKI_GITSYNC_PASSWORD}"
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: 3.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        pod:
+          securityContext:
+            runAsUser: 65533
+            runAsGroup: 65533
+            fsGroup: 65533
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
+
+        containers:
+          git-sync:
+            image:
+              repository: registry.k8s.io/git-sync/git-sync
+              tag: "v4.2.1"
+            env:
+              - name: GIT_SSL_NO_VERIFY
+                value: true
+              - name: GITSYNC_LINK
+                value: "wiki"
+              - name: GITSYNC_ROOT
+                value: &dir "/tmp/sync"
+              - name: GITSYNC_REPO
+                value: "${CONFIG_HUGO_WIKI_GITSYNC_REPO}"
+              - name: GITSYNC_PERIOD
+                value: "${CONFIG_HUGO_WIKI_GITSYNC_PERIOD}"
+            envFrom:
+              - secretRef:
+                  name: ${APP_NAME}-secret
+          hugo:
+            image:
+              repository: docker.io/hugomods/hugo
+              tag: "exts-0.124.0"
+            command:
+              - "hugo"
+            args:
+              - "server"
+              - "--bind"
+              - "0.0.0.0"
+              - "-p"
+              - "1313"
+              - "--source"
+              - "/tmp/sync/wiki"
+              - "--buildDrafts"
+              - "--baseURL=https://wiki.${SECRET_DOMAIN}"
+              - "--appendPort=false"
+            dependsOn:
+              - "git-sync"
+ 
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 1313
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &ingress "wiki.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress 
+
+    persistence:
+      cache:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 8Gi
+        storageClass: "local-temp"
+        globalMounts:
+          - path: *dir

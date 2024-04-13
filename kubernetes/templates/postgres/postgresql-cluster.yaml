@@ -8,7 +8,11 @@ metadata:
     # cnpg.io/skipWalArchiving: enabled
 spec:
   instances: 1
-
+  imageName: ${POSTGRES_IMAGE:-""}
+  enableSuperuserAccess: ${POSTGRES_ENABLE_SUPERUSER:-false}
+  superuserSecret:
+    name: ${APP_NAME}-postgresql-superuser
+  
   monitoring:
     enablePodMonitor: true
     # Ref: https://github.com/cloudnative-pg/cloudnative-pg/issues/2501

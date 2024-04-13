@@ -1,0 +1,9 @@
+apiVersion: v1
+type: kubernetes.io/basic-auth
+kind: Secret
+metadata:
+  name: ${APP_NAME}-postgresql-superuser
+  namespace: ${CONFIG_DATABASE_NAMESPACE}
+stringData:
+  password: ${SECRET_DATABASE_PASSWORD}
+  username: postgres

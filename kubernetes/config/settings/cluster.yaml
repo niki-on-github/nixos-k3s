@@ -23,3 +23,5 @@ data:
   CONFIG_SIGNAL_MAIL: "self@signal.localdomain"
   CONFIG_MAIL_REPLAY_HOST: "email2signal-mail.notification.svc"
   CONFIG_MAIL_REPLAY_PORT: "1025"
+  CONFIG_HUGO_WIKI_GITSYNC_REPO: "https://git.k8s.lan/r/wiki-hugo.git"
+  CONFIG_HUGO_WIKI_GITSYNC_PERIOD: "2m"

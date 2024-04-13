@@ -1,0 +1,12 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: readeck
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/readeck/app"
+  postBuild:
+    substitute:
+      APP_NAME: readeck
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "8Gi"

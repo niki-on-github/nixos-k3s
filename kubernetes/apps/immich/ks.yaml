@@ -1,0 +1,43 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: immich-db
+  namespace: flux-system
+  labels:
+    kustomize.patches/append: true
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: immich
+      APP_NAMESPACE: media
+      POSTGRES_DATABASE: "immich"
+      POSTGRES_IMAGE: "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16-v0.2.1"
+      POSTGRES_ENABLE_SUPERUSER: "true"
+  patches:
+    - target:
+        kind: Cluster
+        # TODO labelSelector and name does not work!?
+        # labelSelector: kustomize.toolkit.fluxcd.io/name in (immich-db)
+      patch: |
+        - op: add
+          path: /spec/postgresql
+          value:
+            shared_preload_libraries:
+              - "vectors.so"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: immich
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/immich/app"
+  dependsOn:
+    - name: immich-db
+    - name: network-share
+  postBuild:
+    substitute:
+      APP_NAME: immich
+      APP_NAMESPACE: media

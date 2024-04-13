@@ -7,3 +7,4 @@ spec:
   path: "./kubernetes/core/database/pgadmin/app"
   dependsOn:
     - name: prometheus-crds
+    - name: local-hostpath-persistent

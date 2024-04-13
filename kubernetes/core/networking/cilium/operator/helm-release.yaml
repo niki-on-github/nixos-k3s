@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: cilium
-      version: 1.15.2
+      version: 1.15.3
       sourceRef:
         kind: HelmRepository
         name: cilium-charts
@@ -30,7 +30,7 @@ spec:
       namespace: monitoring
       labelValue: "1"
       annotations:
-        grafana_folder: "/tmp/dashboards/cilium"
+        grafana_folder: "Cilium"
 
     operator:
       enabled: true
@@ -77,9 +77,8 @@ spec:
           - flow
           - icmp
           - http
-        enableOpenMetrics: true
         serviceMonitor:
-          enabled: true
+          enabled: false
         dashboards:
           <<: *dashboards
 

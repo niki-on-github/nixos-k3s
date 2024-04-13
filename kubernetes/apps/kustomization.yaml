@@ -10,6 +10,7 @@ resources:
  - grafana/ks.yaml
 # - harbor/ks.yaml
  - home-assistant/ks.yaml
+ - immich/ks.yaml
  - influxdb/ks.yaml
  - it-tools/ks.yaml 
  - jdownloader/ks.yaml
@@ -25,6 +26,7 @@ resources:
 # - openvas/ks.yaml
  - paperless/ks.yaml
  - qbittorrent/ks.yaml
+ - readeck/ks.yaml
  - scrutiny/ks.yaml
  - solaredge/ks.yaml
  - syncthing/ks.yaml
@@ -37,6 +39,6 @@ resources:
  - vikunja/ks.yaml
  - vpn-gateway/ks.yaml
  - vpn-terminal/ks.yaml
+ - wiki/ks.yaml
  - webdav/ks.yaml
-# - wikijs/ks.yaml
  - zigbee2mqtt/ks.yaml

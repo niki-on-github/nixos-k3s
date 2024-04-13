@@ -313,12 +313,14 @@ in
       releases:
         - name: cilium
           namespace: kube-system
+          # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.15.2
+          version: 1.15.3
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
           namespace: kube-system
+          # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
           version: 1.29.0
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
