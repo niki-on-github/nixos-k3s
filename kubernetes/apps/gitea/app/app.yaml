@@ -20,7 +20,7 @@ spec:
           app:
             image:
               repository: gitea/gitea
-              tag: "1.21.10"
+              tag: "1.21.11"
 
             env:
               USER_UID: "1000"

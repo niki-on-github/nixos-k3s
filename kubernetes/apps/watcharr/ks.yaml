@@ -1,27 +1,27 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: entertainment-planer-db
+  name: watcharr-db
   namespace: flux-system
 spec:
   path: "./kubernetes/templates/postgres"
   wait: true
   postBuild:
     substitute:
-      APP_NAME: entertainment-planer
+      APP_NAME: watcharr
       APP_NAMESPACE: apps
-      POSTGRES_DATABASE: "entertainment_planer"
+      POSTGRES_DATABASE: "watcharr"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: entertainment-planer
+  name: watcharr
   namespace: flux-system
 spec:
-  path: "./kubernetes/apps/entertainment-planer/app"
+  path: "./kubernetes/apps/watcharr/app"
   dependsOn:
-    - name: entertainment-planer-db
+    - name: watcharr-db
   postBuild:
     substitute:
-      APP_NAME: entertainment-planer
+      APP_NAME: watcharr
       APP_NAMESPACE: apps

@@ -15,7 +15,7 @@ spec:
     # manual: "manual-backup-0004"
   restic:
     # NOTE: when your repository has a stale lock that prevents backups increment the number in string below to perform an unlock before the next backup
-    unlock: "unlock-00004"
+    unlock: "unlock-00006"
     repository: "${APP_NAME}-restic-dest-credentials"
     copyMethod: Direct
     cacheStorageClassName: local-temp
@@ -25,7 +25,6 @@ spec:
       weekly: ${BACKUP_RETAIN_WEEKLY:-2}
       monthly: ${BACKUP_RETAIN_MONTHLY:-1}
 
-    # TODO add with v0.9.0
-    #moverResources:
-    #  limits:
-    #    cpu: "500m"
+    moverResources:
+      limits:
+        cpu: "500m"

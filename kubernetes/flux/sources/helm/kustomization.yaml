@@ -33,4 +33,5 @@ resources:
 - charts/traefik-charts.yaml
 - charts/vault-autounseal-charts.yaml
 - charts/xenitab-charts.yaml
+- charts/open-webui-charts.yaml
 

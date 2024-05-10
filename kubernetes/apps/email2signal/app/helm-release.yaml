@@ -33,7 +33,7 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/email2signal
-              tag: "v1.2.2"
+              tag: "v2.0.2"
 
             env:
               TZ: *tz
@@ -47,7 +47,7 @@ spec:
           app:
             image:
               repository: axllent/mailpit
-              tag: "v1.15.1"
+              tag: "v1.18.1"
 
             env:
               TZ: *tz

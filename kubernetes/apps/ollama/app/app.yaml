@@ -1,0 +1,37 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  chart:
+    spec:
+      chart: open-webui
+      version: 2.0.2
+      sourceRef:
+        kind: HelmRepository
+        name: open-webui-charts
+        namespace: flux-system
+
+  values:
+    ollama:
+      enabled: true
+      image:
+        repository: ollama/ollama
+        tag: "0.1.34"
+      persistence:
+        storageClass: "local-persistent"
+    image:
+      repository: ghcr.io/open-webui/open-webui
+      tag: "v0.1.124"
+    persistence:
+      enabled: true
+      storageClass: "local-persistent"
+    ingress:
+      enabled: true
+      class: "traefik"
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      host: "ollama.${SECRET_DOMAIN}"
+      tls: true
+  

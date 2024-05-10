@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: influxdb
-      version: 5.18.1
+      version: 6.0.11
       sourceRef:
         kind: HelmRepository
         name: bitnami-charts
@@ -27,6 +27,11 @@ spec:
     influxdb:
       updateStrategy:
         type: Recreate
+      resources:
+        requests:
+          memory: 512Mi
+        limits:
+          memory: 2048Mi
       initdbScripts: 
         init_script.sh: |
           #!/bin/sh
@@ -34,6 +39,9 @@ spec:
           influx bucket create -n telegraf-opnsense -o ${CONFIG_INFLUXDB_ORG} -r 90d
           influx bucket create -n telegraf-server -o ${CONFIG_INFLUXDB_ORG} -r 90d
           influx bucket create -n scrutiny -o ${CONFIG_INFLUXDB_ORG} -r 90d
+          influx bucket create -n scrutiny_weekly -o ${CONFIG_INFLUXDB_ORG} -r 0
+          influx bucket create -n scrutiny_monthly -o ${CONFIG_INFLUXDB_ORG} -r 0
+          influx bucket create -n scrutiny_yearly -o ${CONFIG_INFLUXDB_ORG} -r 0
 
     ingress:
       enabled: true

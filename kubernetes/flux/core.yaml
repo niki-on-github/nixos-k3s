@@ -96,10 +96,12 @@ spec:
                     spec:
                       interval: 15m
                   install:
+                    crds: CreateReplace
                     createNamespace: true
                     remediation:
                       retries: 3
                   upgrade:
+                    crds: CreateReplace
                     cleanupOnFail: true
                     remediation:
                       retries: 3
@@ -130,10 +132,12 @@ spec:
                   spec:
                     interval: 15m
                 install:
+                  crds: CreateReplace
                   createNamespace: true
                   remediation:
                     retries: 3
                 upgrade:
+                  crds: CreateReplace
                   cleanupOnFail: true
                   remediation:
                     retries: 3
@@ -155,10 +159,12 @@ spec:
             spec:
               interval: 15m
           install:
+            crds: CreateReplace
             createNamespace: true
             remediation:
               retries: 3
           upgrade:
+            crds: CreateReplace
             cleanupOnFail: true
             remediation:
               retries: 3

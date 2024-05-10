@@ -53,7 +53,7 @@
       "fileMatch": ["\\.nix$"],
       "matchStrings": [
         "# renovate: repository=(?<registryUrl>.*?)\n *chart: .*/(?<depName>.*?)\n *version: (?<currentValue>.*)\n"
-          ],
+      ],
       "datasourceTemplate": "helm"
     }
   ],

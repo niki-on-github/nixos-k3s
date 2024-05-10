@@ -20,7 +20,7 @@ spec:
           app:
             image:
               repository: syncthing/syncthing
-              tag: 1.27.6
+              tag: 1.27.7
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

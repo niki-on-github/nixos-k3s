@@ -37,6 +37,7 @@
     personalModules = {
       # url = "git+https://git.k8s.lan/r/nixos-modules.git";
       url = "git+http://10.0.1.11:3000/r/nixos-modules.git";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 

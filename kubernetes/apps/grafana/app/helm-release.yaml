@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: grafana
-      version: 7.3.7
+      version: 7.3.10
       sourceRef:
         kind: HelmRepository
         name: grafana-charts
@@ -90,14 +90,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/thanos
-          - name: cilium
-            orgId: 1
-            folder: Cilium
-            type: file
-            disableDeletion: false
-            editable: true
-            options:
-              path: /tmp/dashboards/cilium
+          # - name: cilium
+          #   orgId: 1
+          #   folder: Cilium
+          #   type: file
+          #   disableDeletion: false
+          #   editable: true
+          #   options:
+          #     path: /tmp/dashboards/cilium
 
 
     dashboards:

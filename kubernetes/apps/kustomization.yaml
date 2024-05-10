@@ -2,13 +2,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+ - actual/ks.yaml
+ - attic/ks.yaml
  - email2signal/ks.yaml
- - entertainment-planer/ks.yaml
+ - watcharr/ks.yaml
+ - excalidraw/ks.yaml
  - fresh-rss/ks.yaml
  - gitea/ks.yaml
  - gitea-runner/ks.yaml
  - grafana/ks.yaml
-# - harbor/ks.yaml
  - home-assistant/ks.yaml
  - immich/ks.yaml
  - influxdb/ks.yaml
@@ -16,18 +18,18 @@ resources:
  - jdownloader/ks.yaml
  - jellyfin/ks.yaml
  - jellyseerr/ks.yaml
-# - kasm/ks.yaml
 # - monerod/ks.yaml
  - mosquitto/ks.yaml
  - navidrome/ks.yaml
  - network-share/ks.yaml
  - nodered/ks.yaml
  - nzbget/ks.yaml
-# - openvas/ks.yaml
+ - ollama/ks.yaml
  - paperless/ks.yaml
  - qbittorrent/ks.yaml
  - readeck/ks.yaml
  - scrutiny/ks.yaml
+ - stirling-pdf/ks.yaml 
  - solaredge/ks.yaml
  - syncthing/ks.yaml
  - tailscale/ks.yaml

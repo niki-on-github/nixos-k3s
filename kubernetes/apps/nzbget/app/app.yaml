@@ -38,7 +38,7 @@ spec:
           app:
             image:
               repository: nzbgetcom/nzbget
-              tag: "v23.0"
+              tag: "v24.0"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

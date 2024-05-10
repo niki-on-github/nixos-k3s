@@ -315,7 +315,7 @@ in
           namespace: kube-system
           # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.15.3
+          version: 1.15.4
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
