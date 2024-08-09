@@ -1,11 +1,18 @@
 {
   inputs = {
     nixpkgs = {
-      url = "github:NixOS/nixpkgs/nixos-23.11";
+      url = "github:NixOS/nixpkgs/nixos-24.05";
     };
 
     nixpkgs-unstable = {
       url = "github:nixos/nixpkgs/nixos-unstable";
+    };
+    home-manager = {
+      url = "github:nix-community/home-manager/release-24.05";
+    };
+
+    nur = {
+      url = "github:nix-community/NUR";
     };
 
     sops-nix = {
@@ -15,18 +22,12 @@
 
     agenix = {
       url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     deploy-rs = {
       url = "github:serokell/deploy-rs";
-    };
-
-    home-manager = {
-      url = "github:nix-community/home-manager/release-23.11";
-    };
-
-    nur = {
-      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     disko = {
@@ -35,9 +36,15 @@
     };
 
     personalModules = {
-      # url = "git+https://git.k8s.lan/r/nixos-modules.git";
-      url = "git+http://10.0.1.11:3000/r/nixos-modules.git";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # Most of my personalModule code is available at https://github.com/niki-on-github/nixos-modules.git
+      # url = "git+https://git.k8s.lan/r/nixos-modules.git?submodules=1";
+      url = "git+http://10.0.1.11:3000/r/nixos-modules.git?submodules=1";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        nixpkgs-unstable.follows = "nixpkgs-unstable";
+        home-manager.follows = "home-manager";
+        nur.follows = "nur";
+      };
     };
   };
 

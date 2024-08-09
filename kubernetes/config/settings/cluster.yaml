@@ -25,3 +25,4 @@ data:
   CONFIG_MAIL_REPLAY_PORT: "1025"
   CONFIG_HUGO_WIKI_GITSYNC_REPO: "http://gitea-webui.apps.svc.cluster.local:3000/r/wiki-hugo.git"
   CONFIG_HUGO_WIKI_GITSYNC_PERIOD: "2m"
+  CONFIG_WG_DNS: "10.0.1.1"

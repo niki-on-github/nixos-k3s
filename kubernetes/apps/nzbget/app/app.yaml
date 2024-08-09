@@ -1,4 +1,5 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app "${APP_NAME}"
@@ -8,10 +9,11 @@ metadata:
     meta.helm.sh/release-name: *app
     meta.helm.sh/release-namespace: *ns
 spec:
+  interval: 10m
   chart:
     spec:
       chart: app-template
-      version: 3.1.0
+      version: 3.3.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -38,7 +40,7 @@ spec:
           app:
             image:
               repository: nzbgetcom/nzbget
-              tag: "v24.0"
+              tag: "v24.2"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

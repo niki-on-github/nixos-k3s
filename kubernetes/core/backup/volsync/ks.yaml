@@ -10,3 +10,5 @@ spec:
     - name: snapshot-controller
     - name: minio
     - name: prometheus-crds
+    - name: local-hostpath-temp 
+    - name: local-hostpath-persistent 

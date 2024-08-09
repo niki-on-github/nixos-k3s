@@ -1,13 +1,25 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
-kind: HelmRelease
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
 metadata:
-  name: &app ${APP_NAME}
+  name: ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
+  buffering:
+    maxRequestBodyBytes: 4294967296
+    memRequestBodyBytes: 4294967296
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
   chart:
     spec:
       chart: app-template
-      version: 3.1.0
+      version: 3.3.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -63,6 +75,7 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "${APP_NAMESPACE}-${APP_NAME}@kubernetescrd"
         hosts:
           - host: &ingress "attic.${SECRET_DOMAIN}"
             paths:

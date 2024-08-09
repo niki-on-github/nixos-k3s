@@ -81,11 +81,11 @@ spec:
           patches:
             - target:
                 group: helm.toolkit.fluxcd.io
-                version: v2beta2
+                version: v2
                 kind: HelmRelease
                 labelSelector: substitution.flux.home.arpa/disabled notin (true)
               patch: |-
-                apiVersion: helm.toolkit.fluxcd.io/v2beta2
+                apiVersion: helm.toolkit.fluxcd.io/v2
                 kind: HelmRelease
                 metadata:
                   name: not-used
@@ -117,11 +117,11 @@ spec:
           value:
             target:
               group: helm.toolkit.fluxcd.io
-              version: v2beta2
+              version: v2
               kind: HelmRelease
               labelSelector: substitution.flux.home.arpa/disabled notin (true)
             patch: |-
-              apiVersion: helm.toolkit.fluxcd.io/v2beta2
+              apiVersion: helm.toolkit.fluxcd.io/v2
               kind: HelmRelease
               metadata:
                 name: not-used
@@ -144,11 +144,11 @@ spec:
                        
     - target:
         group: helm.toolkit.fluxcd.io
-        version: v2beta2
+        version: v2
         kind: HelmRelease
         labelSelector: substitution.flux.home.arpa/disabled notin (true)
       patch: |-
-        apiVersion: helm.toolkit.fluxcd.io/v2beta2
+        apiVersion: helm.toolkit.fluxcd.io/v2
         kind: HelmRelease
         metadata:
           name: not-used

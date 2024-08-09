@@ -43,3 +43,9 @@ or from a flake:
 nix build
 attic push pkgs ./result
 ```
+
+to push the current-system use:
+
+```sh
+attic push pkgs /run/current-system
+```

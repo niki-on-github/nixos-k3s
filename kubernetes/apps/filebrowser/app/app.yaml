@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.3.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: busybox
+              tag: "1.36.1"
+            command:
+            - "/bin/mkdir"
+            args:
+            - "-p"
+            - "/data/content"
+        containers:
+          app:
+            image:
+              repository: docker.io/filebrowser/filebrowser
+              tag: "v2.30.0"
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+              FB_DATABASE: /data/filebrowser.db
+              FB_ROOT: /data/content
+              FB_LOG: stdout
+              FB_NOAUTH: true
+              
+    service:
+      main:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 80
+
+    ingress:
+      main:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &ingress "filebrowser.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: main
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: ${PVC_CAPACITY}
+        storageClass: "local-persistent"
+        globalMounts:
+          - path: /data
+

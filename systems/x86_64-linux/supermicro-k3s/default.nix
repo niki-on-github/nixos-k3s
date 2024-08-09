@@ -10,7 +10,7 @@ let
   interface = "eno3";
   cpufreqmax = 2100000; 
   bridge = "br1";
-  disk = "/dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNF0MA23122T";
+  disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_NJF381R007355PXXXX";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -20,10 +20,6 @@ in
 
   hardware.cpu."${cpu}".updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
-  security.pki.certificateFiles = [
-    ./secrets/ca-cert.crt
-  ];  
-  
   networking.firewall = {
     enable = true;
     # NOTE: `loose` required for cilium when using without kube-proxy replacement to get working livenes probe for pods. With this settings the cluster is mostly usable with exception of
@@ -41,10 +37,12 @@ in
       3478 # unifi stun
       10001 # unifi discovery
       21027 # syncthing discovery broadcast
+      51820 # wg-easy
     ];
   };
 
-  services.k3s.package = nixpkgs-unstable.k3s; 
+  services.k3s.package = pkgs.k3s; 
+  systemd.services.k3s.serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/sleep 60";
   
   age.secrets = {
     flux-git-auth.file = ./secrets/flux-git-auth.yaml.age;
@@ -129,7 +127,6 @@ in
       };
       kvm = {
         enable = true;
-        cockpit.enable = false; # broken
         platform = "${cpu}";
         user = "${user}";
       };
@@ -137,7 +134,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_01" = {
-    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S626NZFR300623P-part1";
+    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S626NZFR300XXXX-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
@@ -145,7 +142,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_02" = {
-    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_212507A00254-part1";
+    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_212507A0XXXX-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
@@ -315,14 +312,14 @@ in
           namespace: kube-system
           # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.15.4
+          version: 1.16.0
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
           namespace: kube-system
           # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
-          version: 1.29.0
+          version: 1.32.0
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
           wait: true
     '';
@@ -383,35 +380,68 @@ in
   };
 
   systemd.services.minio-backup = {
-      serviceConfig.Type = "oneshot";
-      path = [
-        pkgs.findutils
-        pkgs.gnutar
-        pkgs.gzip
-      ];
-      script = ''
-        echo "Start minio backup now"
-        mkdir -p /mnt/backup/${domain}/rsync/data/minio
-        mkdir -p /mnt/backup/${domain}/rsync/log
-        mkdir -p /mnt/backup/${domain}/archiv
-        ${pkgs.rsync}/bin/rsync \
-          -av \
-          --delete \
-          --ignore-missing-args \
-          --log-file="/mnt/backup/${domain}/rsync/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
-          --exclude "volsync/monerod" \
-          /mnt/backup/minio/ /mnt/backup/${domain}/rsync/data/minio/
-        export BACKUP_ARCHIVE_NAME="backup_$(date +%Y-%m-%d).tar.gz"
-        tar -I 'gzip --fast' -cf "/mnt/backup/${domain}/archiv/$BACKUP_ARCHIVE_NAME" /mnt/backup/${domain}/rsync/data/minio
-        find /mnt/backup/${domain}/archiv/*.tar.gz* -mtime +15 -exec rm {} \;
-        echo "minio backup completed"
-      '';
-    };
+    serviceConfig.Type = "oneshot";
+    path = [
+      pkgs.findutils
+      pkgs.gnutar
+      pkgs.gzip
+    ];
+    script = ''
+      echo "Start minio backup now"
+      mkdir -p /mnt/backup/${domain}/rsync/data/minio
+      mkdir -p /mnt/backup/${domain}/rsync/log
+      mkdir -p /mnt/backup/${domain}/archiv
+      ${pkgs.rsync}/bin/rsync \
+        -av \
+        --delete \
+        --ignore-missing-args \
+        --log-file="/mnt/backup/${domain}/rsync/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
+        --exclude "volsync/monerod" \
+        /mnt/backup/minio/ /mnt/backup/${domain}/rsync/data/minio/
+      export BACKUP_ARCHIVE_NAME="backup_$(date +%Y-%m-%d).tar.gz"
+      tar -I 'gzip --fast' -cf "/mnt/backup/${domain}/archiv/$BACKUP_ARCHIVE_NAME" /mnt/backup/${domain}/rsync/data/minio
+      find /mnt/backup/${domain}/archiv/*.tar.gz* -mtime +15 -exec rm {} \;
+      echo "minio backup completed"
+    '';
+  };
 
-    systemd.timers.minio-backup = {
-      wantedBy = [ "timers.target" ];
-      partOf = [ "minio-backup.service" ];
-      timerConfig.OnCalendar = [ "Mon 06:00:00" ];
-    };
+  systemd.timers.minio-backup = {
+    wantedBy = [ "timers.target" ];
+    partOf = [ "minio-backup.service" ];
+    timerConfig.OnCalendar = [ "Mon 06:00:00" ];
+  };
   
+  systemd.services.opnsense-kvm-backup = {
+    serviceConfig.Type = "oneshot";
+    path = [
+      pkgs.libvirt
+      pkgs.qemu_full
+    ];
+    script = ''
+      echo "Start opnsense-kvm backup now"
+      export HOME="/tmp/virtnbdbackup"
+      mkdir -p "$HOME"
+      mkdir -p /mnt/backup/${domain}/kvm/opnsense
+     
+      # NOTE: The following require qemu format v3
+      # export BACKUP_DEST="/mnt/backup/${domain}/kvm/opnsense/$(date +%Y-%m)"
+      # ${pkgs.virtnbdbackup}/bin/virtnbdbackup --uri qemu:///system -d terraform-opnsense -l auto -o $BACKUP_DEST -n
+      # find /mnt/backup/${domain}/kvm/opnsense/* -type d -maxdepth 1 -mtime +90 -exec rm -r {} \;
+      
+      export BACKUP_DEST="/mnt/backup/${domain}/kvm/opnsense/$(date +%Y-%m-%d)"
+      ${pkgs.virtnbdbackup}/bin/virtnbdbackup --uri qemu:///system -d terraform-opnsense -l copy -o $BACKUP_DEST -n
+      find /mnt/backup/${domain}/kvm/opnsense/* -maxdepth 0 -type d -mtime +30 -exec rm -r {} \;
+
+      rm -rf /mnt/backup/${domain}/kvm/opnsense/latest 
+      ${pkgs.virtnbdbackup}/bin/virtnbdrestore -i $BACKUP_DEST -o /mnt/backup/${domain}/kvm/opnsense/latest -n
+      
+      echo "opnsense-kvm backup completed"
+    '';
+  };
+
+  systemd.timers.opnsense-kvm-backup = {
+    wantedBy = [ "timers.target" ];
+    partOf = [ "opnsense-kvm-backup.service" ];
+    timerConfig.OnCalendar = [ "Tue 06:00:00" ];
+  };
 }

@@ -21,22 +21,24 @@ This repository provides the **Infrastructure as Code** (IaC) and **GitOps** Sta
 
 ## Description
 
-A single node k3s cluster which can be **fully reproducibly deployed with a single command**. At the same time the node contains the git server which represents the GitOps state of the cluster. To solve the chicken edge problem an additional git server is configured on operating system level which serves the infra repositories to have the cluster configurable even in case of configuration errors. For backup purpose i recommend to setup a mirror of the infra repositories inside the k3s git server to use the config driven k3s backup methods.
+A single node k3s cluster which can be **fully reproducibly deployed with a single command**. At the same time the node contains the git server which represents the GitOps state of the cluster. To solve the chicken edge problem an additional git server is configured on operating system level which serves the infra repositories to have the cluster configurable even in case of configuration errors. For backup purpose i recommend to setup a mirror of the infra repositories inside the k3s git server to use the config driven k3s backup methods. While a local Git server is not required, I prefer to keep the entire stack under my own control.
+
+In contrast to most public nixos system repositories, i use a separate nixos module repository and not a monorepository with all my systems. Since my systems have highly different release and update cycles, this makes it much easier to manage different system version states. A partial mirror of my nixos modules is available at [niki-on-github/nixos-modules](https://github.com/niki-on-github/nixos-modules).
 
 ## Setup
 
 ### Install
 
-Boot any linux iso (recomended is nixos minimal) and run the following command on remote computer:
+Boot any linux iso (recomended is nixos minimal) on your server and run the following command on your local computer:
 
 ```bash
 nix run '.#install-system' -- supermicro-k3s root@${IP}
 ```
 
-Dependeing on the chosen linux iso you may have to set the root user password and enable the ssh server to make the server accessable via ssh.
+Depending on the chosen linux iso you may have to set the root user password and enable the ssh server to make the server accessable via ssh. The command above is a wrapped script which fetches the encryption keys from my local hosted vault and use nixos-anywhere to deploy the system.
 
 > [!NOTE] 
-> On my supermicro board i can not boot the official nixos minimal iso. Selecting an enty in the live iso grub menu result in loading the default boot device. Workaround is to boot an arch linux iso and use the command from above, which automatically uses kexec to load nixos setup.
+> On my supermicro board i can not boot the official nixos minimal iso. Selecting an enty in the live iso grub menu result in loading the default boot device. Workaround is to boot an arch linux iso and use the command from above, which automatically uses kexec to load nixos setup. Due to the storage limit we first have to execute `mount -o remount,size=2G /run/archiso/cowspace` on the arch linux live iso.
 
 ### Update (System)
 

@@ -16,33 +16,36 @@
     }
   ],
   "helm-values": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+    "ignorePaths": ["kubernetes/suspended"]
   },
   "flux": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+    "ignorePaths": ["kubernetes/suspended"]
   },
   "kubernetes": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"]
+    "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+    "ignorePaths": ["kubernetes/suspended"]
   },
   "regexManagers": [
     {
-      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "fileMatch": ["kubernetes/apps/.+\\.ya?ml$", "kubernetes/config/.+\\.ya?ml$", "kubernetes/core/.+\\.ya?ml$", "kubernetes/flux/.+\\.ya?ml$", "kubernetes/templates/.+\\.ya?ml$" ],
       "matchStrings": ["# renovate: datasource=docker\\n.*: ?(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"],
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["kubernetes/.+/kustomization\\.ya?ml$"],
+      "fileMatch": ["kubernetes/apps/.+\\.ya?ml$", "kubernetes/config/.+\\.ya?ml$", "kubernetes/core/.+\\.ya?ml$", "kubernetes/flux/.+\\.ya?ml$", "kubernetes/templates/.+\\.ya?ml$" ],
       "matchStrings": [
         "- (\\w+://)?(raw\\.)?github(usercontent)?\\.com\\/(?<depName>[\\w\\-_]+\\/[\\w\\-_]+)\\/(.+\\/)?(?<currentValue>v?[\\d+\\.]+)\\/"
       ],
       "datasourceTemplate": "github-releases"
     },
     {
-      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "fileMatch": ["kubernetes/apps/.+\\.ya?ml$", "kubernetes/config/.+\\.ya?ml$", "kubernetes/core/.+\\.ya?ml$", "kubernetes/flux/.+\\.ya?ml$", "kubernetes/templates/.+\\.ya?ml$" ],
       "matchStrings": ["# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"]
     },
     {
-      "fileMatch": ["kubernetes/.+\\.ya?ml$"],
+      "fileMatch": ["kubernetes/apps/.+\\.ya?ml$", "kubernetes/config/.+\\.ya?ml$", "kubernetes/core/.+\\.ya?ml$", "kubernetes/flux/.+\\.ya?ml$", "kubernetes/templates/.+\\.ya?ml$" ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*=?))?( versionTemplate=(?<versionTemplate>.*=?))?\\n.*: ?(\"?(?<currentValue>[^\"\\n]+=?)\"?)"
       ],
@@ -79,6 +82,22 @@
       "matchDatasources": ["docker"],
       "addLabels": ["renovate/container"],
       "semanticCommitScope": "docker-image"
+    },
+    {
+      "matchPackagePatterns": ["traefik"],
+      "groupName": "traefik"
+    },
+    {
+      "matchPackagePatterns": ["coredns"],
+      "groupName": "coredns"
+    },
+    {
+      "matchPackagePatterns": ["cilium"],
+      "groupName": "cilium"
+    },
+    {
+      "matchPackagePatterns": ["prometheus", "thanos"],
+      "groupName": "prometheus"
     }
   ]
 }

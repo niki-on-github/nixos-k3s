@@ -1,14 +1,15 @@
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app csi-driver-nfs
   namespace: storage
 spec:
+  interval: 10m
   chart:
     spec:
       chart: *app
-      version: v4.7.0
+      version: v4.8.0
       sourceRef:
         kind: HelmRepository
         name: csi-driver-nfs-charts
@@ -27,4 +28,12 @@ spec:
             patch: |
               - op: remove
                 path: /spec/template/spec/hostNetwork
+          - target: 
+              kind: Deployment
+              name: csi-nfs-controller
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/3/livenessProbe/failureThreshold
+                value: 500
+
   

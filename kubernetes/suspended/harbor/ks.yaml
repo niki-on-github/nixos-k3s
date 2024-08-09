@@ -1,0 +1,27 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: harbor
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/harbor/app"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: harbor
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "32Gi"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: harbor-webhook
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/harbor/webhook"
+  dependsOn:
+    - name: harbor
+  postBuild:
+    substitute:
+      APP_NAME: harbor-webhook
+      APP_NAMESPACE: apps

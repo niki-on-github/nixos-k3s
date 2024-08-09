@@ -1,0 +1,13 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: changedetection
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/changedetection/app"
+  postBuild:
+    substitute:
+      APP_NAME: changedetection
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "8Gi"
+

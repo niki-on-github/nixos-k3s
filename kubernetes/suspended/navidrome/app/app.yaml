@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: deluan/navidrome
+              tag: "0.52.5"
+
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+              ND_SCANSCHEDULE: 2h
+              ND_LOGLEVEL: info  
+              ND_SESSIONTIMEOUT: 24h
+              ND_BASEURL: ""
+              ND_DEFAULTTHEME: "Spotify-ish"
+      
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 4533
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "navidrome.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /data
+      music:
+        existingClaim: "network-share-data"
+        globalMounts:
+          - path: /music
+            subPath: "Musik"

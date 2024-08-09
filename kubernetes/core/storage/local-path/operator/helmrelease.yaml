@@ -1,11 +1,12 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: ${STORAGE_CLASS_NAME}-provisioner
   namespace: storage
 spec:
+  interval: 10m
   chart:
     spec:
       chart: democratic-csi
@@ -41,29 +42,22 @@ spec:
         enabled: false
       externalProvisioner:
         enabled: true
-        extraArgs:
-          - --leader-election=false
-          - --node-deployment=true
-          - --node-deployment-immediate-binding=false
-          - --feature-gates=Topology=true
-          - --strict-topology=true
-          - --enable-capacity=false
-          - --capacity-ownerref-level=1
       externalResizer:
         enabled: false
       externalSnapshotter:
         enabled: true
-        extraArgs:
-          - --leader-election=false
-          - --node-deployment=true
+      driver:
+        enabled: true
+        image: docker.io/democraticcsi/democratic-csi:v1.9.3
 
     node:
       driver:
+        enabled: true
+        image: docker.io/democraticcsi/democratic-csi:v1.9.3
         extraVolumeMounts:
           - name: *className
             mountPath: &path "${CONFIG_HOST_PATH_PREFIX}/${PATH_POSTFIX}"            
             mountPropagation: Bidirectional
-   
       driverRegistrar:
         enabled: true
       extraVolumes:

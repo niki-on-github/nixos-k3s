@@ -1,11 +1,12 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: volsync
   namespace: backup
 spec:
+  interval: 10m
   chart:
     spec:
       chart: volsync
@@ -18,7 +19,8 @@ spec:
   values:
     image:
       repository: ghcr.io/niki-on-github/volsync
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
+      # pullPolicy: IfNotPresent
       tag: "personal-0.9.1"
     manageCRDs: true
     metrics:

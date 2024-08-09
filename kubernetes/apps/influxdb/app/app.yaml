@@ -1,13 +1,14 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app ${APP_NAME}
+  name: ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
+  interval: 10m
   chart:
     spec:
       chart: influxdb
-      version: 6.0.11
+      version: 6.3.16
       sourceRef:
         kind: HelmRepository
         name: bitnami-charts

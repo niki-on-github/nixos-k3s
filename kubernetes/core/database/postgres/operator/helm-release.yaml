@@ -1,5 +1,5 @@
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: postgres-operator
@@ -7,10 +7,11 @@ metadata:
   annotations:
     meta.helm.sh/release-namespace: "database"
 spec:
+  interval: 10m
   chart:
     spec:
       chart: cloudnative-pg
-      version: 0.21.2
+      version: 0.21.6
       sourceRef:
         kind: HelmRepository
         name: cnpg-charts
