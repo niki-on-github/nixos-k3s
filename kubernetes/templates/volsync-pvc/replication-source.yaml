@@ -12,7 +12,7 @@ spec:
     # NOTE: change/inc below to perform a manual backup schedule once
     # TODO: Currently we can only use one trigger, why?
     # see https://github.com/backube/volsync/discussions/576
-    # manual: "manual-backup-0007"
+    # manual: "manual-backup-0008"
   restic:
     # NOTE: when your repository has a stale lock that prevents backups increment the number in string below to perform an unlock before the next backup
     unlock: "unlock-00006"

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.3.2
+      version: 3.5.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,11 +22,12 @@ spec:
           app:
             image:
               repository: jellyfin/jellyfin
-              tag: "10.9.9"
+              tag: "10.9.11"
           
             env:
               TZ: "${CONFIG_TIMEZONE}"
               JELLYFIN_PublishedServerUrl: "https://jellyfin.${SECRET_DOMAIN}"
+              JELLYFIN_FFMPEG__HARDWARE_ACCELERATION_TYPE: "vaapi"
          
     service:
       webui:
@@ -72,3 +73,11 @@ spec:
         existingClaim: "network-share-data"
         globalMounts:
           - path: /media
+
+      dev:
+        type: hostPath
+        hostPath: /dev
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+              - path: /dev

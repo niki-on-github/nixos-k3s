@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: volsync
-      version: 0.9.1
+      version: 0.10.0
       sourceRef:
         kind: HelmRepository
         name: backube-charts
@@ -19,8 +19,8 @@ spec:
   values:
     image:
       repository: ghcr.io/niki-on-github/volsync
-      pullPolicy: Always
-      # pullPolicy: IfNotPresent
+      # pullPolicy: Always
+      pullPolicy: IfNotPresent
       tag: "personal-0.9.1"
     manageCRDs: true
     metrics:

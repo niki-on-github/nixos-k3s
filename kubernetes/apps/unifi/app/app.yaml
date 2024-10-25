@@ -19,7 +19,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.3.2
+      version: 3.5.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -32,7 +32,7 @@ spec:
           init:
             image:
               repository: busybox
-              tag: "1.36.1"
+              tag: "1.37.0"
             command:
             - "/bin/mkdir"
             args:
@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: nexusforge/unifi-docker
-              tag: "v8.3.32"
+              tag: "v8.5.6"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

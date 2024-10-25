@@ -44,13 +44,13 @@ spec:
       
     image:
       repository: ghcr.io/angelnu/pod-gateway
-      tag: "v1.10.0"
+      tag: "v1.11.1"
 
     webhook:
       image:
         repository: ghcr.io/angelnu/gateway-admision-controller
         tag: "v3.10.0"
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
 
       gatewayDefault: true
       gatewayLabel: setGateway
@@ -63,7 +63,7 @@ spec:
         gluetun:
           image:
             repository: docker.io/qmcgaw/gluetun
-            tag: "v3.38.0"
+            tag: "v3.39.1"
 
         env:
         - name: VPN_SERVICE_PROVIDER
@@ -77,10 +77,16 @@ spec:
         - name: DOT
           value: "off"
         # firewall is confgured in vpn-gateway container
-        - name: FIREWALL
+        - name: FIREWALL_ENABLED_DISABLING_IT_SHOOTS_YOU_IN_YOUR_FOOT
           value: "off"
         - name: DNS_PLAINTEXT_ADDRESS
           value: ${SECRET_VPN_DNS}
+        - name: HEALTH_SUCCESS_WAIT_DURATION
+          value: "3m"
+        - name: HEALTH_VPN_DURATION_ADDITION
+          value: "30s"
+        - name: HEALTH_VPN_DURATION_INITIAL
+          value: "30s"
 
         configFileSecret: openvpn-config
 
@@ -92,8 +98,8 @@ spec:
               - "-c"
               - ${SECRET_VPN_LIVENESS_PROBE}
           initialDelaySeconds: 30
-          periodSeconds: 120
-          failureThreshold: 5
+          periodSeconds: 180
+          failureThreshold: 6
           timeoutSeconds: 20
 
         networkPolicy:

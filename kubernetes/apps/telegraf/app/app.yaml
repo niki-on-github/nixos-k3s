@@ -1,0 +1,116 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: telegraf
+              tag: "1.32.1"
+
+            env:
+              HOST_PROC: "/rootfs/proc"
+              HOST_SYS: "/rootfs/sys"
+              HOST_ETC: "/rootfs/etc"
+              HOST_RUN: "/rootfs/run"
+              HOST_VAR: "/rootfs/var"
+              HOST_MOUNT_PREFIX: "/rootfs"
+      
+    service:
+      liveness:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 8080
+       
+    configMaps:
+      config:
+        data:
+          telegraf.conf: |
+            [global_tags]
+              # use default
+
+            [agent]
+              interval = "30s"
+              round_interval = true
+              metric_batch_size = 1000
+              metric_buffer_limit = 10000
+              collection_jitter = "0s"
+              flush_interval = "10s"
+              flush_jitter = "0s"
+              precision = "0s"
+              hostname = ""
+              omit_hostname = false
+
+            [[outputs.influxdb_v2]]
+              urls = ["http://influxdb.monitoring.svc.cluster.local:8086"]
+              token = "${SECRET_INFLUXDB_ADMIN_TOKEN}"
+              organization = "${CONFIG_INFLUXDB_ORG}"
+              bucket = "telegraf-server"
+              timeout = "10s"
+              user_agent = "telegraf"
+
+            [[outputs.health]]
+              service_address = "http://0.0.0.0:8080"
+              read_timeout = "10s"
+              write_timeout = "10s"
+
+            [[inputs.cpu]]
+              percpu = true
+              totalcpu = true
+              collect_cpu_time = false
+              report_active = false
+
+            [[inputs.disk]]
+              ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+
+            [[inputs.diskio]]
+              # By default, telegraf will gather stats for all devices including disk partitions.
+
+            [[inputs.kernel]]
+              # no configuration
+
+            [[inputs.mem]]
+              # no configuration
+
+            [[inputs.processes]]
+              # no configuration
+
+            [[inputs.swap]]
+              # no configuration
+
+            [[inputs.system]]
+              # fielddrop = ["uptime_format"]
+
+            [[inputs.net]]
+              # By default, telegraf gathers stats from any up interface (excluding loopback)
+
+      
+    persistence:
+      data:
+        type: hostPath
+        hostPath: /
+        globalMounts:
+          - path: /rootfs
+      config:
+        type: configMap
+        name: ${APP_NAME}-config
+        globalMounts:
+          - path: /etc/telegraf/telegraf.conf
+            subPath: telegraf.conf

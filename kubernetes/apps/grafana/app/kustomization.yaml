@@ -7,6 +7,9 @@ configMapGenerator:
   - name: solaredge-dashboard
     files:
       - dashboards/solaredge.json
+  - name: esp-dashboard
+    files:
+      - dashboards/esp.json
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

@@ -17,7 +17,7 @@ spec:
       hostIPC: true
       containers:
       - name: unifi-udp-discovery
-        image: busybox:1.36.1
+        image: busybox:1.37.0
         securityContext:
           privileged: true
         volumeMounts:

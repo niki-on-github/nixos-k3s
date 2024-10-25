@@ -5,6 +5,6 @@ metadata:
   name: tailscale-charts
   namespace: flux-system
 spec:
-  interval: 1h
+  interval: 24h
   url: https://pkgs.tailscale.com/helmcharts
   timeout: 3m

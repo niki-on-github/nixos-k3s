@@ -5,6 +5,6 @@ metadata:
   name: harbor-container-webhook-charts
   namespace: flux-system
 spec:
-  interval: 1h
+  interval: 24h
   url: https://indeedeng.github.io/harbor-container-webhook/
   timeout: 3m

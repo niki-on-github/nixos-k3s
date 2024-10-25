@@ -1,16 +1,16 @@
 { config, lib, pkgs, nixpkgs-unstable, inputs, ... }:
 let
   user = "nix";
-  cpu = "intel";
+  cpu = "amd";
   domain = "server02.lan";
   ip = "10.0.1.11";
   dns = "10.0.1.1";
   subnet = 24;
   gateway = "10.0.1.1";
-  interface = "eno3";
-  cpufreqmax = 2100000; 
+  interface = "enp5s0f1";
+  cpufreqmax = 3000000; 
   bridge = "br1";
-  disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_NJF381R007355PXXXX";
+  disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_NJF381R00XXXX";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -25,24 +25,22 @@ in
     # NOTE: `loose` required for cilium when using without kube-proxy replacement to get working livenes probe for pods. With this settings the cluster is mostly usable with exception of
     # Cilium DNS Filtering: msg="Timeout waiting for response to forwarded proxied DNS lookup" dnsName=vpn-gateway-pod-gateway.vpn-gateway.svc.cluster.local. error="read udp 10.42.0.183:43844->10.42.0.176:53: i/o timeout" ipAddr="10.42.0.183:43844" subsys=fqdn/dnsproxy 
     # => Therefore we have to use `checkReversePath=false` to get our vpn-gateway CiliumNetworkPolicy with DNS Filter working (when installing without cilium kube-proxy replacement).
-    checkReversePath = false;     
+    checkReversePath = false;
     allowedTCPPorts = [
+      22 # ssh
+      80 # http
       3000 # nixos gitea
-      8080 # unifi control
-      18089 # monerod rpc
       20108 # zigbee adapter via serial2net
-      22000 # syncthing local discovery
     ];
     allowedUDPPorts = [
-      3478 # unifi stun
+      67 # netboot-xyz
+      69 # netboot-xyz
+      4011 # netboot-xyz
       10001 # unifi discovery
-      21027 # syncthing discovery broadcast
-      51820 # wg-easy
     ];
   };
 
   services.k3s.package = pkgs.k3s; 
-  systemd.services.k3s.serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/sleep 60";
   
   age.secrets = {
     flux-git-auth.file = ./secrets/flux-git-auth.yaml.age;
@@ -68,17 +66,46 @@ in
   };
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
+# configure the bridge
   networking = {
-    defaultGateway = "${gateway}";
-    nameservers = [ "${dns}" ];
     bridges = {
       "${bridge}" = {
         interfaces = [ "${interface}" ];
       };
     };
-    interfaces."${bridge}".ipv4.addresses = [ 
-      { address = "${ip}"; prefixLength = subnet; }
-    ];
+    interfaces.${bridge} = {
+      useDHCP = false;
+      ipv4.addresses = [{
+        address = "${ip}";
+        prefixLength = subnet;
+      }];
+    };
+  };
+
+  # required for better ip routing handling with bridge interface
+  networking.networkmanager.enable = true;
+
+  # disable wait-online, openvpn is runninng on this machine inside kvm so the networkt will be up later
+  systemd.services.NetworkManager-wait-online.enable = false;
+
+  # use dynamic routing entries
+  systemd.network = {
+    enable = true;
+    networks = {
+      "40-${bridge}" = {
+        matchConfig.Name = "${bridge}";
+        networkConfig = {
+          DHCP = "no";
+          Address = "${ip}/${toString subnet}";
+          Gateway = "${gateway}";
+          DNS = "${dns}";
+        };
+        linkConfig = {
+          RequiredForOnline = "carrier";
+        };
+      };
+    };
   };
 
   templates = {
@@ -92,10 +119,20 @@ in
         encrypt = true;
         disk = disk;
       };
+      crypttab = {
+        devices = [{
+          blkDev = "/dev/disk/by-id/ata-HGST_HDS724040ALXXX_PK233XXXXX-part1";
+          label = "hdd";
+          fsType = "btrfs";
+          mountpoint = "/mnt/hdd";
+          mountOptions = ["noatime" "compress=zstd" "nofail"];
+        }];
+      };
     };
     services = {
       k3s = {
         enable = true;
+        delay = 100;
         prepare = {
           cilium = true;
         };
@@ -134,7 +171,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_01" = {
-    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S626NZFR300XXXX-part1";
+    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S626NZXXXXX-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
@@ -142,12 +179,20 @@ in
   };
 
   boot.initrd.luks.devices."crypt_02" = {
-    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_212507A0XXXX-part1";
+    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_2125XXXXX-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
     fallbackToPassword = true;
   };
+
+  #boot.initrd.luks.devices."crypt_hdd" = {
+  #  device = "/dev/disk/by-id/HGST_HDS724040ALE640_PK2334PBHB727R-part1";
+  #  preLVM = true;
+  #  keyFile = "/disk.key";
+  #  allowDiscards = true;
+  #  fallbackToPassword = true;
+  #};
   
   fileSystems."/mnt/backup" = {
     device = "/dev/disk/by-label/data01";
@@ -155,6 +200,12 @@ in
     options = ["defaults" "noatime" "compress=zstd" "subvol=@data"];
     neededForBoot = true; # gitea and minio store data here so ensure to first mount the drive
   };
+
+  #fileSystems."/mnt/hdd" = {
+  #  device = "/dev/disk/by-label/hdd";
+  #  fsType = "btrfs";
+  #  options = ["defaults" "noatime" "compress=zstd"];
+  #};
   
   services.gitea = {
     enable = true;
@@ -176,6 +227,25 @@ in
         ENABLED = true;
       };
     };
+  };
+
+  # hdd spindown after 60*5 = 300 seconds
+  services.udev.extraRules = 
+    let
+      mkRule = as: lib.concatStringsSep ", " as;
+      mkRules = rs: lib.concatStringsSep "\n" rs;
+    in mkRules ([( mkRule [
+      ''ACTION=="add|change"''
+      ''SUBSYSTEM=="block"''
+      ''KERNEL=="sd[a-z]"''
+      ''ATTR{queue/rotational}=="1"''
+      ''RUN+="${pkgs.hdparm}/bin/hdparm -B 90 -S 60 /dev/%k"''
+    ])]);
+
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 25;
   };
 
   powerManagement = {
@@ -237,6 +307,7 @@ in
   # TODO why do we need to fix the folder permission of mapped age secrets?
   systemd.tmpfiles.rules = [
     "d /mnt/backup 0775 root data -" # must be owned by root to solve gitea folder transition issues!
+    "d /mnt/hdd/samba 0775 ${user} data -"
     "d /opt/k3s 0775 ${user} data -"
     "d /opt/k3s/data 0775 ${user} data -"
     "d /home/${user}/.config 0775 ${user} data -"
@@ -312,14 +383,14 @@ in
           namespace: kube-system
           # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.16.0
+          version: 1.16.3
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
           namespace: kube-system
           # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
-          version: 1.32.0
+          version: 1.36.0
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
           wait: true
     '';
@@ -385,6 +456,7 @@ in
       pkgs.findutils
       pkgs.gnutar
       pkgs.gzip
+      pkgs.rsync
     ];
     script = ''
       echo "Start minio backup now"
@@ -397,6 +469,7 @@ in
         --ignore-missing-args \
         --log-file="/mnt/backup/${domain}/rsync/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
         --exclude "volsync/monerod" \
+        --exclude "volsync/bitcoind" \
         /mnt/backup/minio/ /mnt/backup/${domain}/rsync/data/minio/
       export BACKUP_ARCHIVE_NAME="backup_$(date +%Y-%m-%d).tar.gz"
       tar -I 'gzip --fast' -cf "/mnt/backup/${domain}/archiv/$BACKUP_ARCHIVE_NAME" /mnt/backup/${domain}/rsync/data/minio
@@ -414,6 +487,7 @@ in
   systemd.services.opnsense-kvm-backup = {
     serviceConfig.Type = "oneshot";
     path = [
+      pkgs.findutils
       pkgs.libvirt
       pkgs.qemu_full
     ];
@@ -443,5 +517,51 @@ in
     wantedBy = [ "timers.target" ];
     partOf = [ "opnsense-kvm-backup.service" ];
     timerConfig.OnCalendar = [ "Tue 06:00:00" ];
+  };
+
+
+  systemd.services.blockchain-backup = {
+    serviceConfig.Type = "oneshot";
+    path = [
+      pkgs.findutils
+      pkgs.gnutar
+      pkgs.rsync
+      pkgs.gzip
+      pkgs.fluxcd
+      pkgs.kubectl
+      pkgs.coreutils
+    ];
+    script = ''
+      echo "Start blockchain backup now"
+      export HOME="/root"
+      mkdir -p /mnt/backup/${domain}/blockchain
+      mkdir -p /mnt/backup/${domain}/blockchain/log
+      
+      blockchains=("monerod" "bitcoind")
+      for blockchain in "''${blockchains[@]}"; do
+        echo "backup ''${blockchain}..."
+        ${pkgs.fluxcd}/bin/flux suspend ks ''${blockchain}
+        ${pkgs.kubectl}/bin/kubectl scale deploy -n apps ''${blockchain} --replicas=0
+        ${pkgs.coreutils}/bin/sleep 100
+
+        ${pkgs.rsync}/bin/rsync \
+          -av \
+          --delete \
+          --ignore-missing-args \
+          --log-file="/mnt/backup/${domain}/blockchain/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
+          "/opt/k3s/data/persistent/v/apps-''${blockchain}-data" /mnt/backup/${domain}/blockchain/
+
+        ${pkgs.kubectl}/bin/kubectl scale deploy -n apps ''${blockchain} --replicas=1
+        ${pkgs.fluxcd}/bin/flux resume ks ''${blockchain}
+      done
+      
+      echo "blockchain backup completed"
+    '';
+  };
+
+  systemd.timers.blockchain-backup = {
+    wantedBy = [ "timers.target" ];
+    partOf = [ "blockchain-backup.service" ];
+    timerConfig.OnCalendar = [ "Wed 06:00:00" ];
   };
 }

@@ -8,7 +8,11 @@ metadata:
     # cnpg.io/skipWalArchiving: enabled
 spec:
   instances: 1
-  imageName: ${POSTGRES_IMAGE:-""}
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ImageCatalog
+    name: postgresql
+    major: ${POSTGRES_MAJOR}
   enableSuperuserAccess: ${POSTGRES_ENABLE_SUPERUSER:-false}
   superuserSecret:
     name: ${APP_NAME}-postgresql-superuser
@@ -21,10 +25,10 @@ spec:
       - { regex: cluster, action: labeldrop }
  
   backup:
-    retentionPolicy: "${CONFIG_POSTGRES_BACKUP_RETENTION}"        
+    retentionPolicy: "${CONFIG_POSTGRES_BACKUP_RETENTION}"
     barmanObjectStore:
       destinationPath: "s3://${CONFIG_MINIO_BACKUP_POSTGRES_BUCKET}/${APP_NAME}"
-      endpointURL: "http://${CONFIG_MINIO_BACKUP_DEST_ENDPOINT}"    
+      endpointURL: "http://${CONFIG_MINIO_BACKUP_DEST_ENDPOINT}"
       wal:
         compression: gzip
       s3Credentials: &credentials
@@ -32,11 +36,11 @@ spec:
           name: ${APP_NAME}-postgresql-backup-credentials
           key: ACCESS_KEY_ID
         secretAccessKey:
-          name: ${APP_NAME}-postgresql-backup-credentials       
-          key: ACCESS_SECRET_KEY   
+          name: ${APP_NAME}-postgresql-backup-credentials
+          key: ACCESS_SECRET_KEY
         region:
-          name: ${APP_NAME}-postgresql-backup-credentials    
-          key: REGION   
+          name: ${APP_NAME}-postgresql-backup-credentials
+          key: REGION
       
   externalClusters:
     - name: *db

@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    defaultPodOptions:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/niki-on-github/netboot-xyz
+              tag: "v2.0.82"
+            env:
+              NETWORK_IP: "${CONFIG_NETBOOT_XYZ_HOST_NETWORK_IP}"
+              INTERFACE: "${CONFIG_NETBOOT_XYZ_HOST_INTERFACE}"
+
+            securityContext:
+              capabilities:
+                add: ["NET_ADMIN"]
+              privileged: true
+

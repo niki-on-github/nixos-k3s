@@ -13,8 +13,8 @@ spec:
       APP_NAME: immich
       APP_NAMESPACE: media
       POSTGRES_DATABASE: "immich"
-      POSTGRES_IMAGE: "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16-v0.2.1"
       POSTGRES_ENABLE_SUPERUSER: "true"
+      POSTGRES_MAJOR: "16"
   patches:
     - target:
         kind: Cluster

@@ -2,28 +2,34 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-# - actual/ks.yaml
+ - actual/ks.yaml
  - attic/ks.yaml
+ - bitcoind/ks.yaml
+ - bisq/ks.yaml
+ - bisq2/ks.yaml
  - changedetection/ks.yaml
  - email2signal/ks.yaml
  - watcharr/ks.yaml
-# - excalidraw/ks.yaml
+ - excalidraw/ks.yaml
+ - esp-dashboard/ks.yaml
  - fresh-rss/ks.yaml
  - filebrowser/ks.yaml 
  - gitea/ks.yaml
  - gitea-runner/ks.yaml
  - grafana/ks.yaml
-# - home-assistant/ks.yaml
+ - home-assistant/ks.yaml
 # - immich/ks.yaml
  - influxdb/ks.yaml
-# - it-tools/ks.yaml 
+ - it-tools/ks.yaml 
  - jdownloader/ks.yaml
  - jellyfin/ks.yaml
  - jellyseerr/ks.yaml
-# - monerod/ks.yaml
+ - monerod/ks.yaml
  - mosquitto/ks.yaml
+ - mqttx-web/ks.yaml
 # - navidrome/ks.yaml
  - network-share/ks.yaml
+ - netboot-xyz/ks.yaml
  - nodered/ks.yaml
  - nzbget/ks.yaml
 # - ollama/ks.yaml
@@ -31,11 +37,11 @@ resources:
  - qbittorrent/ks.yaml
  - readeck/ks.yaml
  - scrutiny/ks.yaml
-# - stirling-pdf/ks.yaml 
+ - stirling-pdf/ks.yaml 
  - solaredge/ks.yaml
  - syncthing/ks.yaml
  - tailscale/ks.yaml
-# - telegraf/ks.yaml
+ - telegraf/ks.yaml
  - unifi/ks.yaml
  - uptime-kuma/ks.yaml
  - vault/ks.yaml
@@ -44,5 +50,5 @@ resources:
  - vpn-gateway/ks.yaml
  - vpn-terminal/ks.yaml
  - wg-easy/ks.yaml
-# - wiki/ks.yaml
+ - wiki/ks.yaml
  - zigbee2mqtt/ks.yaml

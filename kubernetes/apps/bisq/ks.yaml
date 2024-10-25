@@ -1,0 +1,12 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: bisq
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/bisq/app"
+  postBuild:
+    substitute:
+      APP_NAME: bisq
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "16Gi"

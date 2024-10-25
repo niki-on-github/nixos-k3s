@@ -5,6 +5,6 @@ metadata:
   name: open-webui-charts
   namespace: flux-system
 spec:
-  interval: 1h
+  interval: 24h
   url: https://helm.openwebui.com/
   timeout: 3m

@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: influxdb
-      version: 6.3.16
+      version: 6.3.21
       sourceRef:
         kind: HelmRepository
         name: bitnami-charts
@@ -39,6 +39,8 @@ spec:
           influx bucket create -n solaredge -o ${CONFIG_INFLUXDB_ORG} -r 0
           influx bucket create -n telegraf-opnsense -o ${CONFIG_INFLUXDB_ORG} -r 90d
           influx bucket create -n telegraf-server -o ${CONFIG_INFLUXDB_ORG} -r 90d
+          influx bucket create -n home -o ${CONFIG_INFLUXDB_ORG} -r 30d
+          influx bucket create -n weather-forecast -o ${CONFIG_INFLUXDB_ORG} -r 30d
           influx bucket create -n scrutiny -o ${CONFIG_INFLUXDB_ORG} -r 90d
           influx bucket create -n scrutiny_weekly -o ${CONFIG_INFLUXDB_ORG} -r 0
           influx bucket create -n scrutiny_monthly -o ${CONFIG_INFLUXDB_ORG} -r 0

@@ -1,0 +1,11 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: netboot-xyz
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/netboot-xyz/app"
+  postBuild:
+    substitute:
+      APP_NAME: netboot-xyz
+      APP_NAMESPACE: apps

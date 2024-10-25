@@ -6,6 +6,6 @@ metadata:
   name: stakater-charts
   namespace: flux-system
 spec:
-  interval: 1h
+  interval: 24h
   url: https://stakater.github.io/stakater-charts
   timeout: 3m

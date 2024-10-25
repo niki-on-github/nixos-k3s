@@ -1,0 +1,109 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/sh"
+            args:
+            - "/init/init.sh"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/niki-on-github/bitcoind-container
+              tag: v27.1
+              # pullPolicy: Always
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+            resources:
+              limits:
+                cpu: 1000m
+      
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      app:
+        controller: ${APP_NAME}
+        type: LoadBalancer
+        loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
+        ports:
+          rpc:
+            port: 8332
+            protocol: TCP
+          clients:
+            port: 8333
+            protocol: TCP
+          testnet:
+            port: 18332
+            protocol: TCP
+          regtest:
+            port: 18443
+            protocol: TCP
+
+    configMaps:
+      init:
+        data:
+          init.sh: |
+            #!/bin/sh
+            echo "run $0"
+            cp -fv /init/bitcoin.conf /home/bitcoin/.bitcoin/bitcoin.conf
+            chown 101:101 /home/bitcoin/.bitcoin/bitcoin.conf
+          bitcoin.conf: |
+            # [core]
+            prune=20000
+
+            # [debug]
+            logips=1
+            printtoconsole=1
+
+            # [rpc]
+            # Format <USERNAME>:<SALT>$<HASH>. You can generate this value at https://jlopp.github.io/bitcoin-core-rpc-auth-generator/. 
+            rpcauth=${SECRET_BITCOIN_RPC_AUTH}
+            server=1
+            rpcbind=0.0.0.0
+            rpcallowip=10.0.0.0/8
+            rpcallowip=172.16.0.0/12
+            rpcallowip=192.168.0.0/16
+
+
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: ${PVC_CAPACITY}
+        storageClass: "local-persistent"
+        globalMounts:
+          - path: /home/bitcoin/.bitcoin/
+      init:
+        type: configMap
+        name: ${APP_NAME}-init
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+            - path: /init

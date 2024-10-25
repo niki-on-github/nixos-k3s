@@ -1,0 +1,13 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: mqttx-web
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/mqttx-web/app"
+  dependsOn:
+    - name: mosquitto
+  postBuild:
+    substitute:
+      APP_NAME: mqttx-web
+      APP_NAMESPACE: apps

@@ -26,3 +26,5 @@ data:
   CONFIG_HUGO_WIKI_GITSYNC_REPO: "http://gitea-webui.apps.svc.cluster.local:3000/r/wiki-hugo.git"
   CONFIG_HUGO_WIKI_GITSYNC_PERIOD: "2m"
   CONFIG_WG_DNS: "10.0.1.1"
+  CONFIG_NETBOOT_XYZ_HOST_NETWORK_IP: "10.0.1.0"
+  CONFIG_NETBOOT_XYZ_HOST_INTERFACE: "br1"

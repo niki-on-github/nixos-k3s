@@ -11,6 +11,7 @@ spec:
       APP_NAME: watcharr
       APP_NAMESPACE: apps
       POSTGRES_DATABASE: "watcharr"
+      POSTGRES_MAJOR: "16"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

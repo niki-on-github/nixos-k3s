@@ -7,11 +7,13 @@ spec:
   path: "./kubernetes/templates/postgres"
   dependsOn:
     - name: postgres-operator
+    - name: postgres-config
   postBuild:
     substitute:
       APP_NAME: lldap
       APP_NAMESPACE: authentication
       POSTGRES_DATABASE: "lldap"
+      POSTGRES_MAJOR: "16"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

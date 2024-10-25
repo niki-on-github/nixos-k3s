@@ -10,3 +10,4 @@ spec:
       APP_NAME: mosquitto
       APP_NAMESPACE: home-automation
       PVC_CAPACITY: "16Gi"
+

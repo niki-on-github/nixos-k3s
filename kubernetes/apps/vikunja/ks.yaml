@@ -11,6 +11,7 @@ spec:
       APP_NAME: vikunja
       APP_NAMESPACE: apps
       POSTGRES_DATABASE: "entertainment_planer"
+      POSTGRES_MAJOR: "16"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

@@ -1,0 +1,115 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/sh"
+            args:
+            - "/init.sh"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/home-assistant/home-assistant
+              tag: 2024.10.3
+          
+            env:
+              # NOTE: hass does not support env-variables for configuration directly, but you can use env variables in configuration.yaml with `!env_var VAR_NAME`
+              HASS_TRUSTED_PROXIES: ${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}
+              HASS_RECORDER_DB_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: "${APP_NAME}-postgresql-credentials"
+                    key: url
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 8123
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "hass.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
+        
+    configMaps:
+      scripts:
+        data:
+          init.sh: |
+            #!/bin/sh
+            echo "run $0"
+            cp -nv /init/* /config/ 
+            mkdir -p /config/python_scripts
+                        
+    persistence:
+      config:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+              - path: /config
+            init:
+              - path: /config
+      init:
+        type: configMap
+        name: home-assistant-init
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /init
+      scripts:
+        type: configMap
+        name: ${APP_NAME}-scripts
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /init.sh
+                subPath: init.sh
