@@ -185,14 +185,6 @@ in
     allowDiscards = true;
     fallbackToPassword = true;
   };
-
-  #boot.initrd.luks.devices."crypt_hdd" = {
-  #  device = "/dev/disk/by-id/HGST_HDS724040ALE640_PK2334PBHB727R-part1";
-  #  preLVM = true;
-  #  keyFile = "/disk.key";
-  #  allowDiscards = true;
-  #  fallbackToPassword = true;
-  #};
   
   fileSystems."/mnt/backup" = {
     device = "/dev/disk/by-label/data01";
@@ -201,12 +193,6 @@ in
     neededForBoot = true; # gitea and minio store data here so ensure to first mount the drive
   };
 
-  #fileSystems."/mnt/hdd" = {
-  #  device = "/dev/disk/by-label/hdd";
-  #  fsType = "btrfs";
-  #  options = ["defaults" "noatime" "compress=zstd"];
-  #};
-  
   services.gitea = {
     enable = true;
     lfs.enable = true;
