@@ -5,8 +5,8 @@ resources:
  - actual/ks.yaml
  - attic/ks.yaml
  - bitcoind/ks.yaml
- - bisq/ks.yaml
- - bisq2/ks.yaml
+  # - bisq/ks.yaml
+  # - bisq2/ks.yaml
  - changedetection/ks.yaml
  - email2signal/ks.yaml
  - watcharr/ks.yaml
