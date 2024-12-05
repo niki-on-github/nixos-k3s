@@ -10,7 +10,7 @@ let
   interface = "enp5s0f1";
   cpufreqmax = 3000000; 
   bridge = "br1";
-  disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_NJF381R00XXXX";
+  disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_YYY";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -86,7 +86,7 @@ in
   # required for better ip routing handling with bridge interface
   networking.networkmanager.enable = true;
 
-  # disable wait-online, openvpn is runninng on this machine inside kvm so the networkt will be up later
+  # disable wait-online, OPNsense is runninng on this machine inside kvm so the network will be up later
   systemd.services.NetworkManager-wait-online.enable = false;
 
   # use dynamic routing entries
@@ -116,12 +116,12 @@ in
     system = {
       setup = {
         enable = true;
-        encrypt = true;
+        encryption = "full";
         disk = disk;
       };
       crypttab = {
         devices = [{
-          blkDev = "/dev/disk/by-id/ata-HGST_HDS724040ALXXX_PK233XXXXX-part1";
+          blkDev = "/dev/disk/by-id/ata-HGST_YYY_YYY-part1";
           label = "hdd";
           fsType = "btrfs";
           mountpoint = "/mnt/hdd";
@@ -171,7 +171,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_01" = {
-    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S626NZXXXXX-part1";
+    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_YYY-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
@@ -179,13 +179,13 @@ in
   };
 
   boot.initrd.luks.devices."crypt_02" = {
-    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_2125XXXXX-part1";
+    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_YYY-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
     fallbackToPassword = true;
   };
-  
+
   fileSystems."/mnt/backup" = {
     device = "/dev/disk/by-label/data01";
     fsType = "btrfs";
@@ -234,6 +234,16 @@ in
     memoryPercent = 25;
   };
 
+
+  boot.loader.grub = {
+    extraEntries = ''
+      menuentry "Memtest86+" {
+        linux /@/boot/memtest.bin console=ttyS0,115200
+      }
+    '';
+    extraFiles."../memtest.bin" = "${pkgs.memtest86plus}/memtest.bin";
+  };
+
   powerManagement = {
     cpuFreqGovernor = "ondemand";
     cpufreq.max = cpufreqmax;
@@ -244,6 +254,7 @@ in
       gnutar
       ser2net
       par2cmdline
+      hdparm
       rsync
       gzip
     ];
@@ -369,14 +380,14 @@ in
           namespace: kube-system
           # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.16.3
+          version: 1.16.4
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
           namespace: kube-system
           # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
-          version: 1.36.0
+          version: 1.36.1
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
           wait: true
     '';
@@ -436,6 +447,8 @@ in
       };
   };
 
+  /*
+  obsolete:
   systemd.services.minio-backup = {
     serviceConfig.Type = "oneshot";
     path = [
@@ -468,6 +481,25 @@ in
     wantedBy = [ "timers.target" ];
     partOf = [ "minio-backup.service" ];
     timerConfig.OnCalendar = [ "Mon 06:00:00" ];
+  };
+  */
+
+  # Manually trigger with `systemctl start borgbackup-job-minio`
+  # browse backup with `sudo borg-job-minio mount /mnt/backup/borg $MOUNTPOINT`
+  # after browsing/restoring unmount with `sudo borg-job-minio mount $MOUNTPOINT` 
+  services.borgbackup.jobs."minio" = {
+    paths = [
+      "/mnt/backup/minio"
+    ];
+    encryption.mode = "none";
+    repo = "/mnt/backup/${domain}/borg";
+    compression = "auto,zstd";
+    startAt = "Mon 06:00:00";
+    prune.keep = {
+      daily = 7;
+      weekly = 2;
+      monthly = 1;
+    };
   };
   
   systemd.services.opnsense-kvm-backup = {
