@@ -28,7 +28,7 @@ spec:
             args:
             - "-p"
             - "/init/data"
-            - "/init/extensions"            
+            - "/init/extensions"
 
         containers:
           app:

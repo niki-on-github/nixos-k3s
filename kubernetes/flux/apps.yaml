@@ -9,7 +9,8 @@ spec:
   timeout: 10m
   retryInterval: 1m
   dependsOn:
-  - name: flux-system
+  - name: namespaces
+  - name: sources
   - name: config
   - name: core
   path: ./kubernetes/apps

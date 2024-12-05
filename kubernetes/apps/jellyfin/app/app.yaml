@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: jellyfin/jellyfin
-              tag: "10.9.11"
+              tag: "10.10.3"
           
             env:
               TZ: "${CONFIG_TIMEZONE}"

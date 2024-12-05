@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: frooodle/s-pdf
-              tag: "0.30.1"
+              tag: "0.35.1"
             env:
               LANGS: en_GB,de_DE
 

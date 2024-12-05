@@ -1,0 +1,135 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/immich-app/immich-server
+              tag: "v1.121.0"
+            env: &env
+              REDIS_HOSTNAME: "${APP_NAME}-redis.${APP_NAMESPACE}.svc.cluster.local"
+              IMMICH_MACHINE_LEARNING_URL: "http://${APP_NAME}-machine-learning.${APP_NAMESPACE}.svc.cluster.local:3003"
+              DB_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: &postgresqlCredentials "${APP_NAME}-postgresql-credentials"
+                    key: superuser
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: *postgresqlCredentials
+                    key: password
+              DB_HOSTNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: *postgresqlCredentials
+                    key: uri
+              DB_DATABASE_NAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: *postgresqlCredentials
+                    key: database
+                  
+      machine-learning:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/immich-app/immich-machine-learning
+              tag: "v1.121.0"
+            env: *env
+
+      redis:
+        containers:
+          app:
+            image:
+              repository: registry.hub.docker.com/library/redis
+              tag: "7.4-alpine"
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 2283
+      machine-learning:
+        controller: machine-learning
+        ports:
+          http:
+            port: 3003
+      redis:
+        controller: redis
+        ports:
+          http:
+            port: 6379
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "immich.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+      
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
+
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+              - path: /usr/src/app/upload
+      cache:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 16Gi
+        storageClass: "local-temp"
+        advancedMounts:
+          machine-learning:
+            app:
+              - path: /cache
+      dev:
+        type: hostPath
+        hostPath: /dev
+        advancedMounts:
+          machine-learning:
+            app:
+              - path: /dev

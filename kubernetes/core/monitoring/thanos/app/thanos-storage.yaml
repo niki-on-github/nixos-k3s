@@ -38,9 +38,9 @@ type: Opaque
 metadata:
   name: minio-thanos-storage-user
   namespace: monitoring
-data:
-  CONSOLE_ACCESS_KEY: ${SECRET_MINIO_CLUSTER_ACCESS_KEY_BASE64}
-  CONSOLE_SECRET_KEY: ${SECRET_MINIO_CLUSTER_SECRET_KEY_BASE64}
+stringData:
+  CONSOLE_ACCESS_KEY: ${SECRET_MINIO_CLUSTER_ACCESS_KEY}
+  CONSOLE_SECRET_KEY: ${SECRET_MINIO_CLUSTER_SECRET_KEY}
 ---
 apiVersion: minio.min.io/v2
 kind: Tenant

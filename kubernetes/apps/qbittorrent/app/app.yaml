@@ -40,18 +40,18 @@ spec:
             fsGroupChangePolicy: OnRootMismatch
             supplementalGroups: [10000]
 
-        containers:
-          app:
+        initContainers:
+          init:
             image:
-              repository: ghcr.io/onedr0p/qbittorrent
-              tag: "5.0.0@sha256:3fde39737ffa4b1f7ea05c14b57675ca5abdc1fce16e00aeea14d9b7b0f119e1"
-
-            # NOTE: Open shell in pod change setting in WebUI and observe the config value via `cat /config/qBittorrent/qBittorrent.conf`           
-            # For more details see https://github.com/onedr0p/containers/tree/main/apps/qbittorrent
+              repository: python
+              tag: "3.13"
+            command:
+            - "python3"
+            args:
+            - "/scripts/config.py"
+            - "--output"
+            - "/config/qBittorrent/qBittorrent.conf"
             env:
-              TZ: "${CONFIG_TIMEZONE}"
-              QBITTORRENT__PORT: &port 8080
-              QBITTORRENT__BT_PORT: &fwPort ${SECRET_VPN_FORWARDED_PORT}
               # NOTE disable webui password and use authelia for auth
               # TODO Bug only 0.0.0.0/0 works specify the POD Network or local network does not work!
               QBT_Preferences__WebUI__AuthSubnetWhitelist: "0.0.0.0/0"
@@ -71,12 +71,24 @@ spec:
               QBT_BitTorrent__Session__Interface: vxlan0
               QBT_BitTorrent__Session__InterfaceName: vxlan0
               QBT_BitTorrent__Session__DefaultSavePath: &downloadsPath "/downloads"
-              QBT_BitTorrent__Session__GlobalUPSpeedLimit: "1000"
               QBT_BitTorrent__Session__AnonymousModeEnabled: true
               QBT_BitTorrent__Session__DHTEnabled: false
               QBT_BitTorrent__Session__LSDEnabled: false
               QBT_BitTorrent__Session__PeXEnabled: false
               QBT_Network__PortForwardingEnabled: false
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/qbittorrent
+              tag: "5.0.2@sha256:b905a9e4eef9ffabd10ad8618ffdc2661d20c1a910441e5f921c851c10974444"
+
+            # NOTE: Open shell in pod change setting in WebUI and observe the config value via `cat /config/qBittorrent/qBittorrent.conf`           
+            # For more details see https://github.com/onedr0p/containers/tree/main/apps/qbittorrent
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+              QBITTORRENT__PORT: &port 8080
+              QBITTORRENT__BT_PORT: &fwPort ${SECRET_VPN_FORWARDED_PORT}
 
             probes:
               liveness: &probes
@@ -136,3 +148,11 @@ spec:
         storageClass: "${CONFIG_NFS_STORAGE_CLASS_NAME}"
         globalMounts:
           - path: *downloadsPath
+      scripts:
+        type: configMap
+        name: ${APP_NAME}-scripts
+        defaultMode: 493
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /scripts

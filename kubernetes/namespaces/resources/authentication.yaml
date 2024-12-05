@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: authentication
+  annotations:
+    volsync.backube/privileged-movers: "true"
+  labels:
+    goldilocks.fairwinds.com/enabled: "true"
+

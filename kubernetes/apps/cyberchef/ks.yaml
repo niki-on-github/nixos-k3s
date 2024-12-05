@@ -1,0 +1,11 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cyberchef
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/cyberchef/app"
+  postBuild:
+    substitute:
+      APP_NAME: cyberchef
+      APP_NAMESPACE: apps

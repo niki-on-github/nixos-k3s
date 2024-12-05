@@ -36,7 +36,7 @@ spec:
             image:
               # renovate: datasource=docker
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.12.1
+              tag: 2.13.5
 
             env:
               COMPOSE_PROJECT_NAME: paperless

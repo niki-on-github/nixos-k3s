@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: vaultwarden/server
-              tag: 1.32.2
+              tag: 1.32.5
 
             env:
               DATA_FOLDER: "data"

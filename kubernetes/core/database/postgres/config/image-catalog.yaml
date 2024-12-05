@@ -7,3 +7,13 @@ spec:
   images:
     - major: 16
       image: ghcr.io/cloudnative-pg/postgresql:16.4-38
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ImageCatalog
+metadata:
+  name: postgresql-pgvertors
+  namespace: database
+spec:
+  images:
+    - major: 16
+      image: "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16-v0.2.1"

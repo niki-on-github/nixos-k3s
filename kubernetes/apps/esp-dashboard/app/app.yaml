@@ -22,14 +22,14 @@ spec:
           app:
             image:
               repository: docker.io/nginx
-              tag: "1.27.2"
+              tag: "1.27.3"
           generator:
             image:
               repository: "ghcr.io/niki-on-github/grafana-esp-bridge"
               tag: "v0.0.1"
             env:
               IMAGE_URL: "http://admin:${SECRET_WEBSERVICES_PASSWORD}@grafana.monitoring.svc.cluster.local:3000/render/d/ad588e36-165d-464f-9f94-a8b553cfbcc3/esp-dashboard?orgId=1&from={start}&to={now}&panelId=10&width={width}&height={height}&scale=1&tz=Europe%2FBerlin"
-              CROP_TOP: 85
+              CROP_TOP: 140
               TIMELINE: 3600
               THRESHOLD: 60
               UPDATE_INTERVAL_IN_SECONDS: 300 

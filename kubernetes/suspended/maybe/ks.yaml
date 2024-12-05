@@ -1,0 +1,30 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: maybe-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: maybe
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "maybe"
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: maybe
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/maybe/app"
+  dependsOn:
+    - name: maybe-db
+  postBuild:
+    substitute:
+      APP_NAME: maybe
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "maybe"
+      PVC_CAPACITY: "8Gi"

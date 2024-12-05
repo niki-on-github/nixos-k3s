@@ -1,0 +1,103 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: busybox
+              tag: "1.37.0"
+            command:
+              - /bin/sh
+              - -c
+            args:
+              - |
+                mkdir -p /init/config /init/libraries/models
+                chown 1000:1000 /init/config /init/libraries/models /usr/src/app/tmp /usr/src/app/log
+                chmod +t /tmp
+            securityContext:
+              runAsUser: 0
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/manyfold3d/manyfold-solo
+              tag: 0.90.2
+          
+            env:
+              SECRET_KEY_BASE: "todo_a_nice_long_random_string"
+              PUID: 1000
+              PGID: 1000
+              MULTIUSER: false
+            
+            securityContext:
+              runAsUser: 0 # NOTE: container use tools like s6-applyuidgid that can only run by root
+              privileged: false
+              capabilities:
+                drop: ["ALL"]
+                add: ["CHOWN", "DAC_OVERRIDE", "SETUID", "SETGID"]
+ 
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 3214
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "manyfold.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /init
+            app:
+              - path: /config
+                subPath: "config"
+              - path: /libraries
+                subPath: "libraries"
+
+      tmpfs:
+        type: emptyDir
+        medium: Memory
+        globalMounts:
+          - path: /usr/src/app/tmp
+            subPath: app-tmp
+          - path: /usr/src/app/log
+            subPath: app-log
+          - path: /tmp
+            subPath: tmp
+

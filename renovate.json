@@ -1,14 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
+  "extends": [
+    "config:recommended"
+  ],
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dashboard",
-  "labels": ["renovatebot"],
+  "labels": [
+    "renovatebot"
+  ],
   "commitMessageTopic": "{{depName}}",
   "commitMessageExtra": "to {{newVersion}}",
   "commitMessageSuffix": "",
   "prHourlyLimit": 99,
   "prConcurrentLimit": 99,
+  "minimumReleaseAge": "1 day",
   "hostRules": [
     {
       "matchHost": "docker.io",
@@ -16,36 +21,80 @@
     }
   ],
   "helm-values": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"],
-    "ignorePaths": ["kubernetes/suspended"]
+    "fileMatch": [
+      "kubernetes/.+\\.ya?ml$"
+    ],
+    "ignorePaths": [
+      "kubernetes/suspended"
+    ]
   },
   "flux": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"],
-    "ignorePaths": ["kubernetes/suspended"]
+    "fileMatch": [
+      "kubernetes/.+\\.ya?ml$"
+    ],
+    "ignorePaths": [
+      "kubernetes/suspended"
+    ]
   },
   "kubernetes": {
-    "fileMatch": ["kubernetes/.+\\.ya?ml$"],
-    "ignorePaths": ["kubernetes/suspended"]
+    "fileMatch": [
+      "kubernetes/.+\\.ya?ml$"
+    ],
+    "ignorePaths": [
+      "kubernetes/suspended"
+    ]
   },
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": ["kubernetes/apps/.+\\.ya?ml$", "kubernetes/config/.+\\.ya?ml$", "kubernetes/core/.+\\.ya?ml$", "kubernetes/flux/.+\\.ya?ml$", "kubernetes/templates/.+\\.ya?ml$" ],
-      "matchStrings": ["# renovate: datasource=docker\\n.*: ?(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"],
+      "customType": "regex",
+      "fileMatch": [
+        "kubernetes/apps/.+\\.ya?ml$",
+        "kubernetes/config/.+\\.ya?ml$",
+        "kubernetes/core/.+\\.ya?ml$",
+        "kubernetes/flux/.+\\.ya?ml$",
+        "kubernetes/templates/.+\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=docker\\n.*: ?(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"
+      ],
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["kubernetes/apps/.+\\.ya?ml$", "kubernetes/config/.+\\.ya?ml$", "kubernetes/core/.+\\.ya?ml$", "kubernetes/flux/.+\\.ya?ml$", "kubernetes/templates/.+\\.ya?ml$" ],
+      "customType": "regex",
+      "fileMatch": [
+        "kubernetes/apps/.+\\.ya?ml$",
+        "kubernetes/config/.+\\.ya?ml$",
+        "kubernetes/core/.+\\.ya?ml$",
+        "kubernetes/flux/.+\\.ya?ml$",
+        "kubernetes/templates/.+\\.ya?ml$"
+      ],
       "matchStrings": [
         "- (\\w+://)?(raw\\.)?github(usercontent)?\\.com\\/(?<depName>[\\w\\-_]+\\/[\\w\\-_]+)\\/(.+\\/)?(?<currentValue>v?[\\d+\\.]+)\\/"
       ],
       "datasourceTemplate": "github-releases"
     },
     {
-      "fileMatch": ["kubernetes/apps/.+\\.ya?ml$", "kubernetes/config/.+\\.ya?ml$", "kubernetes/core/.+\\.ya?ml$", "kubernetes/flux/.+\\.ya?ml$", "kubernetes/templates/.+\\.ya?ml$" ],
-      "matchStrings": ["# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"]
+      "customType": "regex",
+      "fileMatch": [
+        "kubernetes/apps/.+\\.ya?ml$",
+        "kubernetes/config/.+\\.ya?ml$",
+        "kubernetes/core/.+\\.ya?ml$",
+        "kubernetes/flux/.+\\.ya?ml$",
+        "kubernetes/templates/.+\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"
+      ]
     },
     {
-      "fileMatch": ["kubernetes/apps/.+\\.ya?ml$", "kubernetes/config/.+\\.ya?ml$", "kubernetes/core/.+\\.ya?ml$", "kubernetes/flux/.+\\.ya?ml$", "kubernetes/templates/.+\\.ya?ml$" ],
+      "customType": "regex",
+      "fileMatch": [
+        "kubernetes/apps/.+\\.ya?ml$",
+        "kubernetes/config/.+\\.ya?ml$",
+        "kubernetes/core/.+\\.ya?ml$",
+        "kubernetes/flux/.+\\.ya?ml$",
+        "kubernetes/templates/.+\\.ya?ml$"
+      ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*=?))?( versionTemplate=(?<versionTemplate>.*=?))?\\n.*: ?(\"?(?<currentValue>[^\"\\n]+=?)\"?)"
       ],
@@ -53,7 +102,10 @@
       "extractVersionTemplate": "{{#if versionTemplate}}{{{versionTemplate}}}{{else}}{{/if}}"
     },
     {
-      "fileMatch": ["\\.nix$"],
+      "customType": "regex",
+      "fileMatch": [
+        "\\.nix$"
+      ],
       "matchStrings": [
         "# renovate: repository=(?<registryUrl>.*?)\n *chart: .*/(?<depName>.*?)\n *version: (?<currentValue>.*)\n"
       ],
@@ -62,42 +114,81 @@
   ],
   "packageRules": [
     {
-      "matchUpdateTypes": ["major"],
-      "labels": ["type/major"]
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "labels": [
+        "type/major"
+      ]
     },
     {
-      "matchUpdateTypes": ["minor"],
-      "labels": ["type/minor"]
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "labels": [
+        "type/minor"
+      ]
     },
     {
-      "matchUpdateTypes": ["patch", "digest"],
-      "labels": ["type/patch"]
+      "matchUpdateTypes": [
+        "patch",
+        "digest"
+      ],
+      "labels": [
+        "type/patch"
+      ]
     },
     {
-      "matchDatasources": ["helm"],
-      "addLabels": ["renovate/helm"],
+      "matchDatasources": [
+        "helm"
+      ],
+      "addLabels": [
+        "renovate/helm"
+      ],
       "semanticCommitScope": "helm-chart"
     },
     {
-      "matchDatasources": ["docker"],
-      "addLabels": ["renovate/container"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "addLabels": [
+        "renovate/container"
+      ],
       "semanticCommitScope": "docker-image"
     },
     {
-      "matchPackagePatterns": ["traefik"],
-      "groupName": "traefik"
+      "groupName": "traefik",
+      "matchPackageNames": [
+        "/traefik/"
+      ]
     },
     {
-      "matchPackagePatterns": ["coredns"],
-      "groupName": "coredns"
+      "groupName": "coredns",
+      "matchPackageNames": [
+        "/coredns/"
+      ]
     },
     {
-      "matchPackagePatterns": ["cilium"],
-      "groupName": "cilium"
+      "groupName": "cilium",
+      "matchPackageNames": [
+        "/cilium/"
+      ]
     },
     {
-      "matchPackagePatterns": ["prometheus", "thanos"],
-      "groupName": "prometheus"
+      "groupName": "prometheus",
+      "matchPackageNames": [
+        "/prometheus/",
+        "/thanos/"
+      ]
+    },
+    {
+      "groupName": "immich",
+      "matchPackageNames": [
+        "/immich-server/",
+        "/immich-machine-learning/",
+        "/immich/",
+        "/immich-app/"
+      ]
     }
   ]
 }

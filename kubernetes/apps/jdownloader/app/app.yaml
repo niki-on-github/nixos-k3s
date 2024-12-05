@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: jlesage/jdownloader-2
-              tag: v24.09.1
+              tag: v24.11.1
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

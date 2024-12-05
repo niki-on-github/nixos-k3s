@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrepository-source-v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: bitnami-charts
+  namespace: flux-system
+spec:
+  interval: 24h
+  timeout: 3m
+  url: oci://registry-1.docker.io/bitnamicharts
+  type: oci

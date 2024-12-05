@@ -8,7 +8,7 @@ spec:
   paused: false
   sourcePVC: "${APP_NAME}-pvc"
   trigger:
-    schedule: ${yaml_str_tag:=!!str} ${BACKUP_SCHEDULE:-"0 3 * * *"}
+    schedule: ${yaml_str_tag:=!!str} ${BACKUP_SCHEDULE:-"0 */4 * * *"}
     # NOTE: change/inc below to perform a manual backup schedule once
     # TODO: Currently we can only use one trigger, why?
     # see https://github.com/backube/volsync/discussions/576

@@ -11,7 +11,7 @@ spec:
   imageCatalogRef:
     apiGroup: postgresql.cnpg.io
     kind: ImageCatalog
-    name: postgresql
+    name: ${POSTGRES_CATALOG:-postgresql}
     major: ${POSTGRES_MAJOR}
   enableSuperuserAccess: ${POSTGRES_ENABLE_SUPERUSER:-false}
   superuserSecret:

@@ -49,7 +49,7 @@ spec:
           app:
             image:
               repository: axllent/mailpit
-              tag: "v1.20.7"
+              tag: "v1.21.5"
 
             env:
               TZ: *tz

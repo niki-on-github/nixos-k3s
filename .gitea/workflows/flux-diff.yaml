@@ -1,0 +1,67 @@
+name: "Comment PR with Diff"
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths: ["kubernetes/**"]
+
+jobs:
+  flux-diff:
+    name: Flux Diff
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    strategy:
+      matrix:
+        type: [helmrelease, kustomization]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: pull
+
+      - name: Checkout Default Branch
+        uses: actions/checkout@v4
+        with:
+          ref: "${{ gitea.event.repository.default_branch }}"
+          path: default
+
+      - name: Fixes
+        run: |
+          # https://github.com/kubernetes-sigs/kustomize/issues/3446
+          sed 's/"[0-5]":/x&:/g' -i /workspace/${{ gitea.repository }}/{pull,default}/kubernetes/config/secrets/vault-keys.sops.yaml || true
+          # https://github.com/allenporter/flux-local/pull/461
+          chown 1001:1001 -R .
+
+      - name: Diff Resources
+        uses: docker://ghcr.io/allenporter/flux-local:v6.0.2
+        with:
+          args: >-
+            diff ${{ matrix.type }}
+            --unified 6
+            --path /workspace/${{ gitea.repository }}/pull/kubernetes/flux
+            --path-orig /workspace/${{ gitea.repository }}/default/kubernetes/flux
+            --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
+            --limit-bytes 10000
+            --all-namespaces
+            --sources "flux-system"
+            --output-file diff.patch
+
+      - name: Generate Diff
+        run: |
+          {
+            echo "### ${{ matrix.type }} diff"
+            echo '```diff'
+            cat diff.patch
+            echo '```'
+          } > flux-diff.md
+
+      - name: Print Diff
+        run: |
+          cat diff.patch
+
+      - name: Comment PR with Diff
+        uses: https://code.thetadev.de/actions/comment-pull-request@v1
+        with:
+          filePath: flux-diff.md
+

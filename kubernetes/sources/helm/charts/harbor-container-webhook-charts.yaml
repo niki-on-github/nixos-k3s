@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrepository-source-v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: harbor-container-webhook-charts
+  namespace: flux-system
+spec:
+  interval: 24h
+  url: https://indeedeng.github.io/harbor-container-webhook/
+  timeout: 3m

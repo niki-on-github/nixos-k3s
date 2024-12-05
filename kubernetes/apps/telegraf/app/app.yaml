@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: telegraf
-              tag: "1.32.1"
+              tag: "1.32.3"
 
             env:
               HOST_PROC: "/rootfs/proc"

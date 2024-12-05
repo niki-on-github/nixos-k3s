@@ -5,3 +5,9 @@ namespace: vpn-apps
 resources:
   - ../../../templates/volsync-pvc
   - app.yaml
+configMapGenerator:
+  - name: qbittorrent-scripts
+    files:
+      - scripts/config.py
+generatorOptions:
+  disableNameSuffixHash: true

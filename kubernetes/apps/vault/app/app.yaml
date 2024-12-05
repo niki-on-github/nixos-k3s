@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: docker.io/hashicorp/vault
-              tag: "1.18.0"
+              tag: "1.18.2"
             args: 
               - "server"
               - "-config=/config.hcl"

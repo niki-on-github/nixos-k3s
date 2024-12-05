@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: codeberg.org/readeck/readeck
-              tag: "0.15.3"
+              tag: "0.16.0"
 
     service:
       webui:

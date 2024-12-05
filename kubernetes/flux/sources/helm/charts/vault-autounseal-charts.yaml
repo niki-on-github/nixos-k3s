@@ -1,9 +1,0 @@
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: vault-autounseal-charts
-  namespace: flux-system
-spec:
-  interval: 24h
-  timeout: 3m
-  url: https://pytoshka.github.io/vault-autounseal

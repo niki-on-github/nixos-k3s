@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-assistant/home-assistant
-              tag: 2024.10.3
+              tag: 2024.12.0
           
             env:
               # NOTE: hass does not support env-variables for configuration directly, but you can use env variables in configuration.yaml with `!env_var VAR_NAME`

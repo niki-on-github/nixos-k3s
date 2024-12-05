@@ -2,10 +2,9 @@ apiVersion: v1
 type: Opaque
 kind: Secret
 metadata:
-  name: ${APP_NAME}-secret
+  name: "${APP_NAME}-secret"
   namespace: ${APP_NAMESPACE}
 stringData:
-  #NOTE: default user is admin
   LLDAP_LDAP_USER_PASS: ${SECRET_WEBSERVICES_PASSWORD}
   LLDAP_USER_DN: "dc=home,dc=lan"
   LLDAP_LDAP_USER_EMAIL: "${SECRET_DATABASE_USER}@${SECRET_DOMAIN}"
@@ -35,7 +34,7 @@ spec:
           app:
             image:
               repository: ghcr.io/lldap/lldap
-              tag: v0.5.0
+              tag: v0.6.1
             env:
               TZ: "${TIMEZONE}"
               LLDAP_HTTP_PORT: &port 80

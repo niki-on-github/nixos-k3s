@@ -27,8 +27,9 @@ spec:
               runAsGroup: 1000
 
             image:
+              # TODO fix renovate
               repository: vegardit/gitea-act-runner
-              tag: "dind-rootless-0.2.6"
+              tag: "dind-rootless-0.2.11"
 
             env:
               GITEA_INSTANCE_URL: "http://gitea-webui.${APP_NAMESPACE}.svc.cluster.local:3000"
