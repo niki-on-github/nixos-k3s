@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.5.1
+      version: 3.6.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: jellyfin/jellyfin
-              tag: "10.10.3"
+              tag: "10.10.5"
           
             env:
               TZ: "${CONFIG_TIMEZONE}"

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: *app
-      version: v4.9.0
+      version: v4.10.0
       sourceRef:
         kind: HelmRepository
         name: csi-driver-nfs-charts
@@ -21,6 +21,7 @@ spec:
       
   postRenderers:
     - kustomize: 
+        # see https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/deploy/csi-nfs-controller.yaml
         patches:
           - target: 
               kind: Deployment
@@ -32,8 +33,7 @@ spec:
               kind: Deployment
               name: csi-nfs-controller
             patch: |
-              - op: add
-                path: /spec/template/spec/containers/3/livenessProbe/failureThreshold
-                value: 500
+              - op: remove
+                path: /spec/template/spec/containers/4/livenessProbe/httpGet/host
 
   

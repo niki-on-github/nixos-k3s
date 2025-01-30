@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.5.1
+      version: 3.6.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -34,7 +34,7 @@ spec:
           app:
             image:
               repository: freshrss/freshrss
-              tag: 1.24.3
+              tag: 1.25.0
           
             env:
               TZ: "${CONFIG_TIMEZONE}"

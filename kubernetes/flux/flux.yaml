@@ -67,7 +67,7 @@ spec:
         value: --kube-api-burst=1000
       - op: add
         path: /spec/template/spec/containers/0/args/-
-        value: --max-retry-delay=10m
+        value: --max-retry-delay=8m
     target:
       kind: Deployment
       name: (kustomize-controller|helm-controller|source-controller)

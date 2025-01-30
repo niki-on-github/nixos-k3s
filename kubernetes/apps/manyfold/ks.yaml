@@ -1,10 +1,27 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: manyfold-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: manyfold
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "manyfold"
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: manyfold
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/manyfold/app"
+  dependsOn:
+    - name: manyfold-db
   postBuild:
     substitute:
       APP_NAME: manyfold

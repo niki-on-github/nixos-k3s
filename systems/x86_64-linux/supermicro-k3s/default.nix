@@ -10,7 +10,7 @@ let
   interface = "enp5s0f1";
   cpufreqmax = 3000000; 
   bridge = "br1";
-  disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_YYY";
+  disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_AAA";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -121,7 +121,7 @@ in
       };
       crypttab = {
         devices = [{
-          blkDev = "/dev/disk/by-id/ata-HGST_YYY_YYY-part1";
+          blkDev = "/dev/disk/by-id/ata-HGST_HDSBBB_AAA-part1";
           label = "hdd";
           fsType = "btrfs";
           mountpoint = "/mnt/hdd";
@@ -171,7 +171,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_01" = {
-    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_YYY-part1";
+    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_AAA-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
@@ -179,7 +179,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_02" = {
-    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_YYY-part1";
+    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_AAA-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
@@ -380,14 +380,14 @@ in
           namespace: kube-system
           # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.16.4
+          version: 1.16.6
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
           namespace: kube-system
           # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
-          version: 1.36.1
+          version: 1.38.1
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
           wait: true
     '';

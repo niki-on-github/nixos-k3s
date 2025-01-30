@@ -19,7 +19,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.5.1
+      version: 3.6.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -40,7 +40,7 @@ spec:
           git-sync:
             image:
               repository: registry.k8s.io/git-sync/git-sync
-              tag: "v4.3.0"
+              tag: "v4.4.0"
             env:
               - name: GIT_SSL_NO_VERIFY
                 value: true

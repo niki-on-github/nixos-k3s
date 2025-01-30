@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "ollama-pvc"
+  namespace: ${APP_NAMESPACE}
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 32Gi
+  storageClassName: "local-persistent"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "open-webui-pvc"
+  namespace: ${APP_NAMESPACE}
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: "local-persistent"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "open-webui-pipelines-pvc"
+  namespace: ${APP_NAMESPACE}
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: "local-persistent"
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: open-webui
+      version: 5.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: open-webui-charts
+        namespace: flux-system
+
+  values:
+    ollama:
+      enabled: true
+      image:
+        repository: ollama/ollama
+        tag: "0.5.7"
+      persistence:
+        enabled: true
+        existingClaim: "ollama-pvc"
+
+    pipelines:
+      enabled: true
+      image:
+        repository: ghcr.io/open-webui/pipelines
+        tag: main
+      persistence:
+        enabled: true
+        existingClaim: "open-webui-pipelines-pvc"
+
+    image:
+      repository: ghcr.io/open-webui/open-webui
+      tag: "0.5.7"
+
+    persistence:
+      enabled: true
+      existingClaim: "open-webui-pvc"
+
+    ingress:
+      enabled: true
+      class: "traefik"
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      host: "open-webui.${SECRET_DOMAIN}"
+      tls: true
+  

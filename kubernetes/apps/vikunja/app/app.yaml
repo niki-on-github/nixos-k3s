@@ -19,7 +19,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.5.1
+      version: 3.6.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -36,25 +36,25 @@ spec:
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
-              VIKUNJA_SERVICE_FRONTENDURL: "https://vikunja.${SECRET_DOMAIN}/"              
+              VIKUNJA_SERVICE_FRONTENDURL: "https://vikunja.${SECRET_DOMAIN}/"
               VIKUNJA_SERVICE_ENABLEREGISTRATION: "true"
               VIKUNJA_DATABASE_TYPE: postgres
               VIKUNJA_DATABASE_USER:
                 valueFrom:
                   secretKeyRef:
                     name: &postgresqlCredentials "${APP_NAME}-postgresql-credentials"
-                    key: username                 
+                    key: username
               VIKUNJA_DATABASE_PASSWORD:
                 valueFrom:
                   secretKeyRef:
                     name: *postgresqlCredentials
                     key: password
-              VIKUNJA_DATABASE_DATABASE: 
+              VIKUNJA_DATABASE_DATABASE:
                 valueFrom:
                   secretKeyRef:
                     name: *postgresqlCredentials
                     key: database
-              VIKUNJA_DATABASE_HOST: 
+              VIKUNJA_DATABASE_HOST:
                 valueFrom:
                   secretKeyRef:
                     name: *postgresqlCredentials
@@ -64,7 +64,7 @@ spec:
                   secretKeyRef:
                     name: &appCredentials "${APP_NAME}-credentials"
                     key: jwtSecret
-                
+ 
 
       ${APP_NAME}:
         containers:

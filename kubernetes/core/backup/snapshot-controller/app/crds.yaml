@@ -8,7 +8,7 @@ spec:
   interval: 1h
   url: https://github.com/kubernetes-csi/external-snapshotter.git
   ref:
-    tag: v8.1.0
+    tag: v8.2.0
   ignore: |
     # exclude all
     /*
@@ -22,17 +22,8 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h
-  prune: false
+  prune: true
   sourceRef:
     kind: GitRepository
     name: external-snapshotter-source
-  healthChecks:
-  - apiVersion: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    name: volumesnapshotclasses.snapshot.storage.k8s.io
-  - apiVersion: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    name: volumesnapshotcontents.snapshot.storage.k8s.io
-  - apiVersion: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    name: volumesnapshots.snapshot.storage.k8s.io
+

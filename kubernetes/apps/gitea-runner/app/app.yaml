@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.5.1
+      version: 3.6.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -40,8 +40,9 @@ spec:
               GITEA_RUNNER_LOG_EFFECTIVE_CONFIG: true
               GITEA_RUNNER_UID: 1000
               GITEA_RUNNER_GID: 1000
-              #GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "--add-host=git.${SECRET_DOMAIN}:host-gateway -e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
+              GITEA_RUNNER_MAX_PARALLEL_JOBS: 4
               GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "-e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
+              GITEA_RUNNER_VALID_VOLUME_1: /etc/ssl/certs/internal-ca.pem
          
     persistence:
       data:
@@ -51,3 +52,11 @@ spec:
         storageClass: "local-persistent"
         globalMounts:
           - path: /data
+      certs:
+        type: secret
+        name: internal-ca
+        globalMounts:
+          - path: /etc/ssl/certs/internal-ca.pem
+            subPath: tls.crt
+
+

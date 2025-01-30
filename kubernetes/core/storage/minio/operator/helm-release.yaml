@@ -13,10 +13,10 @@ spec:
   chart:
     spec:
       chart: operator
-      version: 6.0.4
+      version: 7.0.0
       sourceRef:
         kind: HelmRepository
-        name: minio-charts
+        name: minio-operator-charts
         namespace: flux-system
 
   values:

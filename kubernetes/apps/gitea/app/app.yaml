@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.5.1
+      version: 3.6.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: gitea/gitea
-              tag: "1.22.4"
+              tag: "1.23.1"
 
             env:
               USER_UID: "1000"
@@ -35,7 +35,7 @@ spec:
               SSH_DOMAIN: "git.${SECRET_DOMAIN}"
               ROOT_URL: "https://git.${SECRET_DOMAIN}/"
               DISABLE_REGISTRATION: "true"
-              REQUIRE_SIGNIN_VIEW: "true"
+              REQUIRE_SIGNIN_VIEW: "false"
               GITEA__webhook__ALLOWED_HOST_LIST: "*"
               GITEA__webhook__SKIP_TLS_VERIFY: "true"
               GITEA__api_ENABLE_SWAGGER: "true"

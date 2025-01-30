@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app "${APP_NAME}"
+  namespace: &ns "${APP_NAMESPACE}"
+  annotations:
+    app.kubernetes.io/managed-by: "Helm"
+    meta.helm.sh/release-name: *app
+    meta.helm.sh/release-namespace: *ns
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.6.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    defaultPodOptions:
+      labels:
+        vpn: "enabled"
+        
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: jlesage/firefox
+              tag: v24.12.1
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 5800
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &ingress "browser.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      config:
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /config

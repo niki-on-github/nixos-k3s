@@ -7,13 +7,12 @@ resources:
  - changedetection/ks.yaml
  - cyberchef/ks.yaml
  - email2signal/ks.yaml
- - watcharr/ks.yaml
- - excalidraw/ks.yaml
  - esp-dashboard/ks.yaml
- - fresh-rss/ks.yaml
+ - excalidraw/ks.yaml
  - filebrowser/ks.yaml 
- - gitea/ks.yaml
+ - fresh-rss/ks.yaml
  - gitea-runner/ks.yaml
+ - gitea/ks.yaml
  - grafana/ks.yaml
  - home-assistant/ks.yaml
  - immich/ks.yaml
@@ -26,16 +25,19 @@ resources:
  - monerod/ks.yaml
  - mosquitto/ks.yaml
  - mqttx-web/ks.yaml
- - network-share/ks.yaml
  - netboot-xyz/ks.yaml
+ - network-share/ks.yaml
  - nodered/ks.yaml
  - nzbget/ks.yaml
+ - ollama/ks.yaml
  - paperless/ks.yaml
+ - perplexica/ks.yaml
+ - pgadmin/ks.yaml
  - qbittorrent/ks.yaml
  - readeck/ks.yaml
  - scrutiny/ks.yaml
- - stirling-pdf/ks.yaml 
  - solaredge/ks.yaml
+ - stirling-pdf/ks.yaml 
  - syncthing/ks.yaml
  - tailscale/ks.yaml
  - telegraf/ks.yaml
@@ -46,6 +48,7 @@ resources:
  - vikunja/ks.yaml
  - vpn-gateway/ks.yaml
  - vpn-terminal/ks.yaml
+ - watcharr/ks.yaml
  - wg-easy/ks.yaml
  - wiki/ks.yaml
  - zigbee2mqtt/ks.yaml

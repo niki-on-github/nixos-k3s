@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 66.3.0
+      version: 68.3.3
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -150,9 +150,9 @@ spec:
                   storage: 5Gi
         thanos:
           # NOTE: image must contain version tag!
-          image: quay.io/thanos/thanos:v0.37.1
+          image: quay.io/thanos/thanos:v0.37.2
           # renovate: datasource=docker depName=quay.io/thanos/thanos
-          version: "v0.37.1"
+          version: "v0.37.2"
           objectStorageConfig:
             name: thanos-objstore-config
             key: objstore.yml

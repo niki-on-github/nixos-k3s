@@ -7,3 +7,8 @@ Vaultwarden is a alternative server backend for the **password manager** Bitward
 The admin interface can be accessed with `vaultwarden.{{ domain }}/admin`.
 
 In `Settings : General` Settings you can enable and disable `Allow new signups`.
+
+## Users
+
+- root@server01.lan
+- family@k8s.lan
