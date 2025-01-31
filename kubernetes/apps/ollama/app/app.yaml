@@ -60,7 +60,7 @@ spec:
       image:
         repository: ollama/ollama
         tag: "0.5.7"
-      persistence:
+      persistentVolume:
         enabled: true
         existingClaim: "ollama-pvc"
 
