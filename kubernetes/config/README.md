@@ -2,6 +2,8 @@
 
 ## Cluster Secrets
 
+In K8S Secrets are immutable so you may have to delete them manually if you change them.
+
 ### Encrypt
 
 ```bash
@@ -58,4 +60,12 @@ openssl genrsa -out private.pem 4096
 kubectl -n security create secret generic authelia-keys --dry-run=client --from-file=oidcIssuerPrivateKey=./private.pem -o yaml > authelia-keys.sops.yam
 rm private.pem
 sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place authelia-keys.sops.yaml
+```
+
+
+## Jellyplist Spotify Cookie
+
+```sh
+kubectl -n media create secret generic jellyplist-spotify-cookie --dry-run=client --from-file=vpnConfigfile=./cookies.txt -o yaml > jellyplist-spotify-cookie.sops.yaml
+sops --encrypt --in-place jellyplist-spotify-cookie.sops.yaml
 ```

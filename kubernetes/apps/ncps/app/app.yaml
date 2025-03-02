@@ -1,0 +1,125 @@
+apiVersion: v1
+type: Opaque
+kind: Secret
+metadata:
+  name: ${APP_NAME}-secret
+  namespace: ${APP_NAMESPACE}
+stringData:
+  ncps.key: "${SECRET_NCPS_KEY}"
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  buffering:
+    maxRequestBodyBytes: 4294967296
+    memRequestBodyBytes: 4294967296
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          create-directories:
+            image:
+              repository: busybox
+              tag: "1.37.0"
+            command:
+              - "/bin/sh"
+            args:
+              - -c
+              - "mkdir -m 0755 -p /storage/var && mkdir -m 0700 -p /storage/var/ncps && mkdir -m 0700 -p /storage/var/ncps/db"
+
+          migrate-database:
+            image:
+              repository: kalbasit/ncps
+              tag: "latest" # TODO tag
+            args:
+            - /bin/dbmate
+            - --url=sqlite:/storage/var/ncps/db/db.sqlite
+            - migrate
+            - up
+
+        containers:
+          app:
+            image:
+              repository: kalbasit/ncps
+              tag: "latest" # TODO tag
+            args:
+              - "/bin/ncps"
+              - serve
+              - --cache-hostname=ncps.${SECRET_DOMAIN}
+              - --cache-data-path=/storage
+              - --cache-database-url=sqlite:/storage/var/ncps/db/db.sqlite
+              - --cache-max-size=128G
+              - --cache-lru-schedule=@daily
+              - --cache-secret-key-path=/secret/ncps.key
+              - --upstream-cache=https://cache.nixos.org
+              - --upstream-cache=https://nix-community.cachix.org
+              - --upstream-cache=https://cuda-maintainers.cachix.org
+              - --upstream-cache=https://hyprland.cachix.org
+              - --upstream-cache=https://cache.saumon.network/proxmox-nixos
+              - --upstream-public-key=cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+              - --upstream-public-key=nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+              - --upstream-public-key=cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=
+              - --upstream-public-key=hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=
+              - --upstream-public-key=proxmox-nixos:nveXDuVVhFDRFx8Dn19f1WDEaNRJjPrF2CPD2D+m1ys=
+        
+    service:
+      cache:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 8501
+
+    ingress:
+      cache:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "${APP_NAMESPACE}-${APP_NAME}@kubernetescrd"
+        hosts:
+          - host: &ingress "ncps.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: cache
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: ${PVC_CAPACITY}
+        storageClass: "local-persistent"
+        globalMounts:
+          - path: /storage
+      secret:
+        type: secret
+        name: ${APP_NAME}-secret
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+              - path: /secret

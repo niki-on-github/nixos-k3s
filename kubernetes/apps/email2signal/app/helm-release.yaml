@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.6.1
+      version: 3.7.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/email2signal
-              tag: "v2.0.2"
+              tag: "v2.0.3"
 
             env:
               TZ: *tz
@@ -49,7 +49,7 @@ spec:
           app:
             image:
               repository: axllent/mailpit
-              tag: "v1.22.0"
+              tag: "v1.22.3"
 
             env:
               TZ: *tz

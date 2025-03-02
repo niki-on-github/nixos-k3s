@@ -34,6 +34,6 @@ spec:
               name: csi-nfs-controller
             patch: |
               - op: remove
-                path: /spec/template/spec/containers/4/livenessProbe/httpGet/host
+                path: /spec/template/spec/containers/4/livenessProbe
 
   

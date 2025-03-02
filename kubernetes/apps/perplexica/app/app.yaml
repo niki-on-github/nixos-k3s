@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.6.1
+      version: 3.7.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/perplexica-frontend
-              tag: latest@sha256:469c7615247dc162caf1ead67439556cf1d3ceb203cecdcb308fd513eb57e2be
+              tag: latest@sha256:ecca1638d3fe7d72ae7cc47cf873471d9b987eeee8f13ff986f98525bbde4361
 
       backend:
         initContainers:
@@ -41,7 +41,7 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/perplexica-backend
-              tag: latest@sha256:e8098ff22b8b198e986eb8ee8827adc4512a28960effd65854db4f0ade75f060
+              tag: latest@sha256:75b8beb94bafc5bc80e6cf2f1bc25731c06198e49dbfb16cff75d84d269e9721
 
       searxng:
         containers:

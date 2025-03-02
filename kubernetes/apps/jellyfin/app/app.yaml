@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.6.1
+      version: 3.7.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: jellyfin/jellyfin
-              tag: "10.10.5"
+              tag: "10.10.6"
           
             env:
               TZ: "${CONFIG_TIMEZONE}"
@@ -54,7 +54,20 @@ spec:
         tls:
           - hosts:
               - *ingress
-        
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
+
     persistence:
       data:
         existingClaim: "${APP_NAME}-pvc"

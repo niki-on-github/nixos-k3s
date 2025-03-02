@@ -1,6 +1,6 @@
 # My NixOS K3S Cluster
 
-My NixOS based K3S Cluster fully declarative and reproducable from empty disk to operating services, hosted on my personal Git Server. Feel free to look around. Be aware that not all configuration files are available in my public repository.
+My NixOS based K3S Cluster fully declarative and reproducable from empty disk to operating services, hosted on my personal Git Server. Feel free to look around. **Be aware that not all configuration files are available in my public repository**.
 
 <p align="center"><img src="docs/images/logo.png" width=300px></p>
 
@@ -35,7 +35,7 @@ Boot any linux iso (recomended is nixos minimal) on your server and run the foll
 nix run '.#install-system' -- supermicro-k3s root@${IP}
 ```
 
-Depending on the chosen linux iso you may have to set the root user password and enable the ssh server to make the server accessable via ssh. The command above is a wrapped script which fetches the encryption keys from my local hosted vault and use nixos-anywhere to deploy the system.
+Depending on the chosen linux iso you may have to set the root user password and enable the ssh server to make the server accessable via ssh. The command above is a wrapped script which fetches the encryption keys from my local hosted vault and use nixos-anywhere + disko to deploy the system with a single command. The system disk id is defined in the system config. This disk will be partitioned with disko during installation. All data on the system disk will be lost! The data disks will not be changed. These data disk have to be partitioned manually on the first inital deploy and are already occupied with the previous backup data if the system existe before. The partition layout for the system is defined in my nixos modules.
 
 > [!NOTE] 
 > On my supermicro board i can not boot the official nixos minimal iso. Selecting an enty in the live iso grub menu result in loading the default boot device. Workaround is to boot an arch linux iso and use the command from above, which automatically uses kexec to load nixos setup. Due to the storage limit we first have to execute `mount -o remount,size=2G /run/archiso/cowspace` on the arch linux live iso.

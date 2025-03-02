@@ -10,5 +10,16 @@ In `Settings : General` Settings you can enable and disable `Allow new signups`.
 
 ## Users
 
-- root@server01.lan
+- root@k8s.lan
+- phone@k8s.lan
 - family@k8s.lan
+
+
+## Admin Token
+
+See `config.json` in data dir.
+
+
+## Create User
+
+USe the admin page at top select users.

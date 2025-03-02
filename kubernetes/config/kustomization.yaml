@@ -8,3 +8,4 @@ resources:
   - secrets/authelia-keys.sops.yaml
   - secrets/vault-root-token.sops.yaml
   - secrets/vault-keys.sops.yaml
+  - secrets/jellyplist-spotify-cookie.sops.yaml

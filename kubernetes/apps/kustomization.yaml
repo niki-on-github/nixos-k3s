@@ -2,7 +2,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
- - attic/ks.yaml
  - bitcoind/ks.yaml
  - changedetection/ks.yaml
  - cyberchef/ks.yaml
@@ -20,16 +19,20 @@ resources:
  - it-tools/ks.yaml 
  - jdownloader/ks.yaml
  - jellyfin/ks.yaml
+ - jellyplist/ks.yaml
  - jellyseerr/ks.yaml
  - manyfold/ks.yaml
+ - mealie/ks.yaml
  - monerod/ks.yaml
  - mosquitto/ks.yaml
  - mqttx-web/ks.yaml
+ - ncps/ks.yaml
  - netboot-xyz/ks.yaml
  - network-share/ks.yaml
  - nodered/ks.yaml
  - nzbget/ks.yaml
  - ollama/ks.yaml
+ - paperless-ai/ks.yaml
  - paperless/ks.yaml
  - perplexica/ks.yaml
  - pgadmin/ks.yaml

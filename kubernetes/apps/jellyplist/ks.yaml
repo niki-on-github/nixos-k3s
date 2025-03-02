@@ -1,0 +1,29 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: jellyplist-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: jellyplist
+      APP_NAMESPACE: media
+      POSTGRES_DATABASE: "jellyplist" # app is hardcoded to this db
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: jellyplist
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/jellyplist/app"
+  dependsOn:
+    - name: jellyplist-db
+    - name: network-share
+  postBuild:
+    substitute:
+      APP_NAME: jellyplist
+      APP_NAMESPACE: media

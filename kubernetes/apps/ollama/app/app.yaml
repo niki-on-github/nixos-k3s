@@ -48,7 +48,7 @@ spec:
   chart:
     spec:
       chart: open-webui
-      version: 5.4.0
+      version: 5.20.0
       sourceRef:
         kind: HelmRepository
         name: open-webui-charts
@@ -59,7 +59,7 @@ spec:
       enabled: true
       image:
         repository: ollama/ollama
-        tag: "0.5.7"
+        tag: "0.5.12"
       persistentVolume:
         enabled: true
         existingClaim: "ollama-pvc"
@@ -75,7 +75,7 @@ spec:
 
     image:
       repository: ghcr.io/open-webui/open-webui
-      tag: "0.5.7"
+      tag: "0.5.16"
 
     persistence:
       enabled: true

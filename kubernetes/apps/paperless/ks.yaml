@@ -5,6 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/paperless/app"
+  dependsOn:
+    - name: tailscale
   postBuild:
     substitute:
       APP_NAME: paperless

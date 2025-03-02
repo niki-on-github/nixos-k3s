@@ -5,6 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/vaultwarden/app"
+  dependsOn:
+    - name: tailscale
   postBuild:
     substitute:
       APP_NAME: vaultwarden

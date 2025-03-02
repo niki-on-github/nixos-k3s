@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.6.1
+      version: 3.7.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -28,9 +28,9 @@ spec:
             args:
             - "-p"
             - "/init/data"
-            - "/init/consume"        
-            - "/init/export"        
-              
+            - "/init/consume"
+            - "/init/export"
+ 
         containers:
           redis:
             image:
@@ -43,7 +43,7 @@ spec:
             image:
               # renovate: datasource=docker
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.14.6
+              tag: 2.14.7
 
             env:
               COMPOSE_PROJECT_NAME: paperless
@@ -61,6 +61,9 @@ spec:
               PAPERLESS_TASK_WORKERS: 2
               PAPERLESS_TIME_ZONE: "${CONFIG_TIMEZONE}"
               PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
+              PAPERLESS_ALLOWED_HOSTS: paperless.${SECRET_DOMAIN},paperless.${SECRET_TAILSCALE_TAILNET_NAME},paperless.${APP_NAMESPACE}.svc.cluster.local
+              PAPERLESS_CORS_ALLOWED_HOSTS: &allowedOrigins "https://paperless.${SECRET_DOMAIN},https://paperless.${SECRET_TAILSCALE_TAILNET_NAME},http://paperless.${APP_NAMESPACE}.svc.cluster.local:8000"
+              PAPERLESS_CSRF_TRUSTED_ORIGINS: *allowedOrigins
               USERMAP_GID: 0
               USERMAP_UID: 0
               PAPERLESS_ADMIN_USER: "root"
@@ -105,7 +108,20 @@ spec:
         tls:
           - hosts:
               - *ingress
-        
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
+
     persistence:
       data:
         existingClaim: "${APP_NAME}-pvc"
