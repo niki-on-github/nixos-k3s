@@ -12,9 +12,8 @@ metadata:
   name: prometheus-stack
   namespace: flux-system
 spec:
+  path: "./kubernetes/core/monitoring/prometheus-stack/app"
   dependsOn:
     - name: local-hostpath-persistent
     - name: traefik
-    - name: thanos
     - name: prometheus-crds
-  path: "./kubernetes/core/monitoring/prometheus-stack/app"

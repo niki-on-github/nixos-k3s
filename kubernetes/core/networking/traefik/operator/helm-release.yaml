@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: 34.4.0
+      version: 35.0.1
       sourceRef:
         kind: HelmRepository
         name: traefik-charts
@@ -51,8 +51,11 @@ spec:
 
     additionalArguments:
       - "--serverstransport.insecureskipverify=true"
-      - "--providers.kubernetescrd.allowCrossNamespace=true"      
+      - "--providers.kubernetescrd.allowCrossNamespace=true"
       - "--entryPoints.websecure.forwardedHeaders.trustedIPs=10.0.0.0/8,192.168.0.0/16,172.16.0.0/12,127.0.0.1/32"
+      - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=600s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.idleTimeout=600s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=600s"
 
     providers:
       kubernetesCRD:
@@ -77,3 +80,28 @@ spec:
           enabled: true
           options: default
 
+  # NOTE: Add out self signed root ca cert to traefik to get working setup with our self signed cert from oidc auth provider
+  postRenderers:
+    - kustomize:
+        patches:
+          - target: 
+              kind: Deployment
+              name: traefik
+            patch: |-
+              - op: add
+                path: /spec/template/spec/volumes/-
+                value:
+                  name: certs
+                  secret:
+                   defaultMode: 420
+                   secretName: internal-ca
+          - target: 
+              kind: Deployment
+              name: traefik
+            patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/volumeMounts/-
+                value:
+                  mountPath: /etc/ssl/certs/internal-ca.pem
+                  name: certs
+                  subPath: tls.crt

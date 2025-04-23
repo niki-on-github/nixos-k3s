@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 69.5.2
+      version: 70.7.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -126,6 +126,17 @@ spec:
       enabled: false
 
     prometheus:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - "prometheus.${SECRET_DOMAIN}"
+        tls:
+          - hosts:
+              - "prometheus.${SECRET_DOMAIN}"
+
       prometheusSpec:
         replicas: 1
         replicaExternalLabelName: "__replica__"
@@ -148,36 +159,9 @@ spec:
               resources:
                 requests:
                   storage: 5Gi
-        thanos:
-          # NOTE: image must contain version tag!
-          image: quay.io/thanos/thanos:v0.37.2
-          # renovate: datasource=docker depName=quay.io/thanos/thanos
-          version: "v0.37.2"
-          objectStorageConfig:
-            name: thanos-objstore-config
-            key: objstore.yml
 
         resources:
           requests:
             cpu: 50m
             memory: 128M
 
-      thanosService:
-        enabled: true
-
-      thanosServiceMonitor:
-        enabled: true
-
-  # TODO Why do i get duplicate timestamps, Workaround is to remove this servie monitor
-  postRenderers:
-    - kustomize: 
-        patches:
-          - target: 
-              kind: ServiceMonitor
-              name: kube-prometheus-stack-kube-state-metrics
-            patch: |-
-              $patch: delete
-              apiVersion: monitoring.coreos.com/v1
-              kind: ServiceMonitor
-              metadata:
-                name: kube-prometheus-stack-kube-state-metrics

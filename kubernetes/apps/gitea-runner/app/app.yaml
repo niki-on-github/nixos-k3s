@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.1
+      version: 3.7.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,6 +18,20 @@ spec:
   values:
     controllers:
       ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/mkdir"
+            args:
+            - "-m"
+            - "777"
+            - "-p"
+            - "/init/act"
+            - "/init/docker"
+
         containers:
           app:
             securityContext:
@@ -27,31 +41,41 @@ spec:
               runAsGroup: 1000
 
             image:
-              # TODO fix renovate
+              # TODO fix renovate, add sha256
               repository: vegardit/gitea-act-runner
-              tag: "dind-rootless-0.2.11"
+              tag: "dind-0.2.11"
 
             env:
-              GITEA_INSTANCE_URL: "http://gitea-webui.${APP_NAMESPACE}.svc.cluster.local:3000"
+              # GITEA_INSTANCE_URL: "http://gitea-webui.${APP_NAMESPACE}.svc.cluster.local:3000"
+              GITEA_INSTANCE_URL: "https://git.${SECRET_DOMAIN}"
+              GITEA_INSTANCE_INSECURE: false
               GITEA_RUNNER_REGISTRATION_TOKEN: "${SECRET_GITEA_RUNNER_TOKEN}"
               GITEA_RUNNER_LOG_LEVEL: "info"
-              GITEA_RUNNER_JOB_CONTAINER_PRIVILEGED: false
-              GITEA_INSTANCE_INSECURE: true
+              GITEA_RUNNER_JOB_CONTAINER_PRIVILEGED: true
               GITEA_RUNNER_LOG_EFFECTIVE_CONFIG: true
               GITEA_RUNNER_UID: 1000
               GITEA_RUNNER_GID: 1000
               GITEA_RUNNER_MAX_PARALLEL_JOBS: 4
-              GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "-e GIT_SSL_NO_VERIFY=true -e RUNNER_TEMP=/tmp"
+              GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "-e RUNNER_TEMP=/tmp --mount type=bind,source=/etc/ssl/certs/internal-ca.pem,target=/etc/ssl/certs/internal-ca.pem,readonly"
               GITEA_RUNNER_VALID_VOLUME_1: /etc/ssl/certs/internal-ca.pem
-         
+              GITEA_RUNNER_ENV_VAR_1_NAME: "REGISTRY"
+              GITEA_RUNNER_ENV_VAR_1_VALUE: "git.${SECRET_DOMAIN}"
+
     persistence:
       data:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: ${PVC_CAPACITY}
         storageClass: "local-persistent"
-        globalMounts:
-          - path: /data
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /init
+            app:
+              - path: /data
+                subPath: "act"
+              - path: /var/lib/docker
+                subPath: "docker"
       certs:
         type: secret
         name: internal-ca

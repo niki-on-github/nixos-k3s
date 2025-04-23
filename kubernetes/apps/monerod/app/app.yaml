@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.1
+      version: 3.7.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sethforprivacy/simple-monerod
-              tag: v0.18.3.4
+              tag: v0.18.4.0
             command:
             - "/entrypoint.sh"
             args:

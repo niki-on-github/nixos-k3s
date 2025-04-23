@@ -15,14 +15,14 @@ nix.settings.trusted-substituters  = [
 ];
 
 nix.settings.trusted-public-keys = [
-  "ncps.${SECRET_DOMAIN}:6NCHdD59X431o0AAApbMrAURkbJ16ZPMQFGspcDShjY=" // content of ncps.pub
+  "ncps.${SECRET_DOMAIN}:6NCHdD59X431o0AAApbMrAURkbJ16ZPMQFGspcDShjY="  # content of ncps.pub
 ];
 ```
 
 ## Usage
 
 ```sh
-nix --option substituters https://ncps.${SECRET_DOMAIN} $ARGS
+nix --option extra-substituters https://ncps.${SECRET_DOMAIN}?priority=1&trusted=1 $ARGS
 ```
 
 ## Upload Artifacts

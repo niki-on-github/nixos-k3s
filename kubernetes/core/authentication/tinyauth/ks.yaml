@@ -1,0 +1,13 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tinyauth
+  namespace: flux-system
+spec:
+  path: "./kubernetes/core/authentication/tinyauth/app"
+  dependsOn:
+    - name: traefik
+  postBuild:
+    substitute:
+      APP_NAME: tinyauth
+      APP_NAMESPACE: authentication

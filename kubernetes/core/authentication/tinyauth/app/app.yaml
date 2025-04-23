@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/steveiliop56/tinyauth
+              tag: "v3.2.1"
+
+            env:
+              # TODO use secret
+              # generate with `openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 32`
+              SECRET: "${SECRET_TINYAUTH_KEY}"
+              APP_URL: https://auth.${SECRET_DOMAIN}
+              SESSION_EXPIRY: "86400"
+              DISABLE_CONTINUE: "true"
+              # TODO use USER_FILE and k8s secret
+              # generate with `docker run -i -t --rm ghcr.io/steveiliop56/tinyauth:v3 user create --interactive`, create multiple users by seperate entries by comma
+              USERS: "${SECRET_TINYAUTH_USERS}"
+              # We use pocket-id with OAuth for passkey login
+              GENERIC_NAME: "pocket-id"
+              GENERIC_AUTH_URL: "https://id.${SECRET_DOMAIN}/authorize"
+              GENERIC_TOKEN_URL: "http://pocket-id.authentication.svc/api/oidc/token"
+              GENERIC_USER_URL: "http://pocket-id.authentication.svc/api/oidc/userinfo"
+              GENERIC_SCOPES: "openid,profile,email"
+              # generate entry on https://id.${SECRET_DOMAIN}/settings/admin/oidc-clients
+              # set callback to https://auth.${SECRET_DOMAIN}/api/oauth/callback/generic
+              GENERIC_CLIENT_ID: "${SECRET_TINYAUTH_CLIENT_ID}"
+              GENERIC_CLIENT_SECRET: "${SECRET_TINYAUTH_CLIENT_SECRET}"
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 3000
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "auth.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        

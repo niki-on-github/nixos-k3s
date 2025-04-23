@@ -1,0 +1,152 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        containers:
+          redis:
+            image:
+              repository: docker.io/library/redis
+              tag: 7.4.2
+
+          app:
+            dependsOn: redis
+            image:
+              repository: docker.io/searxng/searxng
+              tag: "latest@sha256:1bc1738b321f9c266f264268639aa524a2fd7dd4b53c9e935a1640bbae44b447"
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+              UWSGI_WORKERS: &cpu
+                valueFrom:
+                  resourceFieldRef:
+                    containerName: app
+                    resource: limits.cpu # not defined, so will use node allocatable
+              UWSGI_THREADS: *cpu
+            command: ["uwsgi", "--master", "--http-socket", "[::]:8080", "/usr/local/searxng/dockerfiles/uwsgi.ini"]
+              
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 8080
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "searxng.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+    configMaps:
+      config:
+        data: 
+          limiter.toml: |
+            [botdetection.ip_limit]
+            link_token = true
+          settings.yml: |
+            use_default_settings: true
+            general:
+              instance_name: 'searxng'
+              enable_metrics: false
+            search:
+              safe_search: 0
+              default_lang: "de"
+              max_page: 0
+              formats:
+                - html
+                - json
+            server:
+              bind_address: "0.0.0.0"
+              port: 8080
+              secret_key: ${SECRET_SEARXNG_KEY}
+              base_url: "https://searxng.${SECRET_DOMAIN}/"
+            redis:
+              url: redis://127.0.0.1:6379/0
+            ui:
+              static_use_hash: true
+              infinite_scroll: true
+              default_theme: "simple"
+              theme_args:
+                simple_style: "dark"
+            enabled_plugins:
+              - 'Basic Calculator'
+              - 'Unit converter plugin'
+              - 'Hash plugin'
+              - 'Search on category select'
+              - 'Self Information'
+              - 'Self Informations'
+              - 'Tracker URL remover'
+              - 'Open Access DOI rewrite'
+              - 'Vim-like hotkeys'
+            engines:
+              - name: brave
+                disabled: false
+              - name: startpage
+                disabled: false
+              - name: ddg definitions
+                disabled: false
+              - name: tineye
+                disabled: false
+              - name: apple maps
+                disabled: false
+              - name: duckduckgo images
+                disabled: false
+              - name: fdroid
+                disabled: false
+              - name: free software directory
+                disabled: false
+              - name: gitlab
+                disabled: false
+              - name: codeberg
+                disabled: false
+              - name: google play apps
+                disabled: false
+              - name: lobste.rs
+                disabled: false
+              - name: searchcode code
+                disabled: false
+              - name: mojeek
+                disabled: false
+              - name: lib.rs
+                disabled: false
+              - name: sourcehut
+                disabled: false
+
+    persistence:
+      config:
+        type: configMap
+        name: ${APP_NAME}-config
+        advancedMounts:
+          ${APP_NAME}:
+            app: 
+              - path: /etc/searxng/settings.yml
+                subPath: settings.yml
+              - path: /etc/searxng/limiter.toml
+                subPath: limiter.toml
+
+

@@ -5,6 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/ollama/app"
+  dependsOn:
+    - name: searxng
   postBuild:
     substitute:
       APP_NAME: ollama

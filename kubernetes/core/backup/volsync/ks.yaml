@@ -8,7 +8,7 @@ spec:
   path: "./kubernetes/core/backup/volsync/operator"
   dependsOn:
     - name: snapshot-controller
-    - name: minio
     - name: prometheus-crds
+    - name: minio-external
     - name: local-hostpath-temp 
     - name: local-hostpath-persistent 

@@ -25,6 +25,8 @@ resources:
 - charts/kyverno-charts.yaml
 - charts/metrics-server-charts.yaml
 - charts/minio-operator-charts.yaml
+- charts/nvidia-charts.yaml
+- charts/open-webui-charts.yaml
 - charts/piraeus-charts.yaml
 - charts/prometheus-community-charts.yaml
 - charts/runix-charts.yaml
@@ -33,5 +35,4 @@ resources:
 - charts/traefik-charts.yaml
 - charts/vault-autounseal-charts.yaml
 - charts/xenitab-charts.yaml
-- charts/open-webui-charts.yaml
 

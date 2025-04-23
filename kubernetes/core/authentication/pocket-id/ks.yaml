@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: pocket-id
+  namespace: flux-system
+spec:
+  path: "./kubernetes/core/authentication/pocket-id/app"
+  dependsOn:
+    - name: traefik
+    - name: local-hostpath-persistent
+    # - name: lldap-db
+  postBuild:
+    substitute:
+      APP_NAME: pocket-id
+      APP_NAMESPACE: authentication
+      PVC_CAPACITY: "2Gi"

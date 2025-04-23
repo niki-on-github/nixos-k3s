@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: democratic-csi
-      version: "0.14.7"
+      version: "0.15.0"
       sourceRef:
         name: democratic-csi-charts
         kind: HelmRepository
@@ -48,15 +48,13 @@ spec:
         enabled: true
       driver:
         enabled: true
-        image: docker.io/democraticcsi/democratic-csi:v1.9.3
 
     node:
       driver:
         enabled: true
-        image: docker.io/democraticcsi/democratic-csi:v1.9.3
         extraVolumeMounts:
           - name: *className
-            mountPath: &path "${CONFIG_HOST_PATH_PREFIX}/${PATH_POSTFIX}"            
+            mountPath: &path "${CONFIG_HOST_PATH_PREFIX}/${PATH_POSTFIX}"
             mountPropagation: Bidirectional
       driverRegistrar:
         enabled: true

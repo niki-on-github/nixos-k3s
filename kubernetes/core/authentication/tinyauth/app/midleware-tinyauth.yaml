@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth
+  namespace: authentication
+spec:
+  forwardAuth:
+    address: "http://tinyauth.authentication.svc:3000/api/auth/traefik"
+    trustForwardHeader: true
+    authResponseHeaders:
+      - X-Forwarded-User
+      - Remote-User
+      - Remote-Groups
+      - Remote-Name
+      - Remote-Email
+
