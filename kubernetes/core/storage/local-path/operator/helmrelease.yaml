@@ -27,11 +27,11 @@ spec:
         defaultClass: false
         reclaimPolicy: ${RECLAIM_POLICY:=Retain}
         volumeBindingMode: WaitForFirstConsumer
-        allowVolumeExpansion: false
+        allowVolumeExpansion: true
 
     volumeSnapshotClasses:
       - name: *className
-        deletionPolicy: ${RECLAIM_POLICY:=Retain}
+        deletionPolicy: Delete
         parameters:
           dummy: {}
  

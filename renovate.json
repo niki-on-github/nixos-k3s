@@ -110,6 +110,16 @@
         "# renovate: repository=(?<registryUrl>.*?)\n *chart: .*/(?<depName>.*?)\n *version: (?<currentValue>.*)\n"
       ],
       "datasourceTemplate": "helm"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "\\.nix$"
+      ],
+      "matchStrings": [
+         "chart:\\s*oci://(?<packageName>[^\\s]+)\\s*\\n\\s*version:\\s*(?<currentValue>[0-9a-zA-Z._-]+)"
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [

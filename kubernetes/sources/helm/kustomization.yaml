@@ -14,6 +14,7 @@ resources:
 - charts/democratic-csi-charts.yaml
 - charts/drone-charts.yaml
 - charts/fairwinds-charts.yaml
+- charts/controlplaneio-fluxcd-charts.yaml
 - charts/gitea-charts.yaml
 - charts/grafana-charts.yaml
 - charts/harbor-charts.yaml
@@ -29,10 +30,10 @@ resources:
 - charts/open-webui-charts.yaml
 - charts/piraeus-charts.yaml
 - charts/prometheus-community-charts.yaml
+- charts/rke2-charts.yaml
 - charts/runix-charts.yaml
 - charts/stakater-charts.yaml
 - charts/tailscale-charts.yaml
 - charts/traefik-charts.yaml
 - charts/vault-autounseal-charts.yaml
 - charts/xenitab-charts.yaml
-

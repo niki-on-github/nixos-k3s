@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,13 +22,13 @@ spec:
           redis:
             image:
               repository: docker.io/library/redis
-              tag: 7.4.2
+              tag: 8.0.2
 
           app:
             dependsOn: redis
             image:
               repository: docker.io/searxng/searxng
-              tag: "latest@sha256:1bc1738b321f9c266f264268639aa524a2fd7dd4b53c9e935a1640bbae44b447"
+              tag: "latest@sha256:6873f96c525a077fd23244826584462d3f7a28211f510887fd3b5ce200ee3c20"
             env:
               TZ: "${CONFIG_TIMEZONE}"
               UWSGI_WORKERS: &cpu
@@ -37,7 +37,7 @@ spec:
                     containerName: app
                     resource: limits.cpu # not defined, so will use node allocatable
               UWSGI_THREADS: *cpu
-            command: ["uwsgi", "--master", "--http-socket", "[::]:8080", "/usr/local/searxng/dockerfiles/uwsgi.ini"]
+            command: ["/usr/local/searxng/venv/bin/uwsgi", "--master", "/usr/local/searxng/.template/uwsgi.ini"]
               
     service:
       webui:
@@ -64,6 +64,7 @@ spec:
               - *ingress
     configMaps:
       config:
+        suffix: config
         data: 
           limiter.toml: |
             [botdetection.ip_limit]

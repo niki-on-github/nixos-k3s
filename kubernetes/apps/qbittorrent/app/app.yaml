@@ -13,7 +13,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -65,7 +65,7 @@ spec:
               QBT_Preferences__WebUI__Address:
                 valueFrom:
                   fieldRef:
-                    fieldPath: status.podIP      
+                    fieldPath: status.podIP
               # NOTE: must match static ip configuration in vpn-gateway publicPorts section
               QBT_BitTorrent__Session__InterfaceAddress: "172.16.0.10"
               QBT_BitTorrent__Session__Interface: vxlan0
@@ -80,11 +80,11 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/qbittorrent
-              tag: "5.0.4@sha256:17e3e5f1c7e7fe81434f9d1f5f2e00da9a67f6dbfda1c988c0619932cb856047"
+              repository: ghcr.io/home-operations/qbittorrent
+              tag: "5.1.0@sha256:37aefd713ba31d51255995261616f1144378887bc5f21665a0ebf851fb85f69a"
 
             # NOTE: Open shell in pod change setting in WebUI and observe the config value via `cat /config/qBittorrent/qBittorrent.conf`           
-            # For more details see https://github.com/onedr0p/containers/tree/main/apps/qbittorrent
+            # For more details see https://github.com/home-operations/containers/tree/main/apps/qbittorrent
             env:
               TZ: "${CONFIG_TIMEZONE}"
               QBITTORRENT__PORT: &port 8080

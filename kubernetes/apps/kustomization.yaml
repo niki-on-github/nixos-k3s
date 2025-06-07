@@ -7,8 +7,6 @@ resources:
  - email2signal/ks.yaml
  - esp-dashboard/ks.yaml
  - excalidraw/ks.yaml
- - filebrowser/ks.yaml 
- - fresh-rss/ks.yaml
  - gitea-runner/ks.yaml
  - gitea/ks.yaml
  - grafana/ks.yaml
@@ -18,9 +16,11 @@ resources:
  - it-tools/ks.yaml 
  - jdownloader/ks.yaml
  - jellyfin/ks.yaml
+ - jellyplist/ks.yaml
  - jellyseerr/ks.yaml
  - manyfold/ks.yaml
  - mealie/ks.yaml
+ - miniflux/ks.yaml
  - monerod/ks.yaml
  - mosquitto/ks.yaml
  - mqttx-web/ks.yaml
@@ -30,12 +30,14 @@ resources:
  - nodered/ks.yaml
  - nzbget/ks.yaml
  - ollama/ks.yaml
+ - omni-tools/ks.yaml
  - paperless-ai/ks.yaml
  - paperless/ks.yaml
  - pgadmin/ks.yaml
  - qbittorrent/ks.yaml
  - readeck/ks.yaml
  - scrutiny/ks.yaml
+ - searxng/ks.yaml
  - solaredge/ks.yaml
  - stirling-pdf/ks.yaml 
  - syncthing/ks.yaml
@@ -51,4 +53,3 @@ resources:
  - wg-easy/ks.yaml
  - wiki/ks.yaml
  - zigbee2mqtt/ks.yaml
- - searxng/ks.yaml

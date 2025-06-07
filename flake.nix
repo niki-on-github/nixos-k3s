@@ -1,14 +1,14 @@
 {
   inputs = {
     nixpkgs = {
-      url = "github:NixOS/nixpkgs/nixos-24.05";
+      url = "github:NixOS/nixpkgs/nixos-24.11";
     };
 
     nixpkgs-unstable = {
       url = "github:nixos/nixpkgs/nixos-unstable";
     };
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
+      url = "github:nix-community/home-manager/release-24.11";
     };
 
     nur = {
@@ -27,7 +27,6 @@
 
     deploy-rs = {
       url = "github:serokell/deploy-rs";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     disko = {
@@ -52,7 +51,7 @@
     let
       inherit (nixpkgs) lib;
       overlays = lib.flatten [
-        nur.overlay
+        nur.overlays.default
         personalModules.overrides
         personalModules.pkgs
       ];

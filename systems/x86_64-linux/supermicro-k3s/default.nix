@@ -8,6 +8,7 @@ let
   subnet = 24;
   gateway = "10.0.1.1";
   interface = "enp5s0f1";
+  backupInterface = "enp7s0"; # warning when adding nvme this name may changes
   cpufreqmax = 3000000; 
   bridge = "br1";
   disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_AAA";
@@ -17,6 +18,8 @@ in
     inputs.self.nixosRoles.k3s
     inputs.home-manager.nixosModules.home-manager
   ];
+
+  system.stateVersion = "24.11";
 
   hardware.cpu."${cpu}".updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
@@ -65,29 +68,24 @@ in
     secrets.user-password.neededForUsers = true;
   };
 
-  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
-# configure the bridge
+  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   networking = {
     bridges = {
       "${bridge}" = {
-        interfaces = [ "${interface}" ];
+        interfaces = [ "${interface}" "${backupInterface}" ];
       };
     };
-    interfaces.${bridge} = {
-      useDHCP = false;
-      ipv4.addresses = [{
-        address = "${ip}";
-        prefixLength = subnet;
-      }];
+    interfaces = {
+      ${bridge} = {
+        useDHCP = false;
+        ipv4.addresses = [{
+          address = "${ip}";
+          prefixLength = subnet;
+        }];
+      };
     };
   };
-
-  # required for better ip routing handling with bridge interface
-  networking.networkmanager.enable = true;
-
-  # disable wait-online, OPNsense is runninng on this machine inside kvm so the network will be up later
-  systemd.services.NetworkManager-wait-online.enable = false;
 
   # use dynamic routing entries
   systemd.network = {
@@ -102,11 +100,15 @@ in
           DNS = "${dns}";
         };
         linkConfig = {
-          RequiredForOnline = "carrier";
+          RequiredForOnline = "no";
         };
       };
     };
   };
+
+  networking.networkmanager.enable = true;
+  systemd.network.wait-online.enable = false;
+  systemd.services.NetworkManager-wait-online.enable = false;
 
   templates = {
     apps = {
@@ -121,7 +123,7 @@ in
       };
       crypttab = {
         devices = [{
-          blkDev = "/dev/disk/by-id/ata-HGST_HDSBBB_AAA-part1";
+          blkDev = "/dev/disk/by-id/ata-HGST_AAA-part1";
           label = "hdd";
           fsType = "btrfs";
           mountpoint = "/mnt/hdd";
@@ -138,7 +140,6 @@ in
         };
         services = {
           kube-proxy = true;
-          flux = true;
           servicelb = false;
           traefik = false;
           local-storage = false;
@@ -171,7 +172,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_01" = {
-    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_AAA-part1";
+    device = "/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_Plus_1TB_AAA-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
@@ -179,7 +180,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_02" = {
-    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_AAA-part1";
+    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-AAA-part1";
     preLVM = true;
     keyFile = "/disk.key";
     allowDiscards = true;
@@ -313,7 +314,6 @@ in
     "d /home/${user}/.kube 0775 ${user} data -"
     "d /var/lib/rancher/k3s/server/manifests 0775 root data -"
     "L /home/${user}/.kube/config  - - - - /etc/rancher/k3s/k3s.yaml"
-    "L /var/lib/rancher/k3s/server/manifests/flux.yaml - - - - /etc/k3s/flux.yaml"
     "L /var/lib/rancher/k3s/server/manifests/flux-git-auth.yaml - - - - ${config.age.secrets.flux-git-auth.path}"
     "L /var/lib/rancher/k3s/server/manifests/flux-sops-age.yaml - - - - ${config.age.secrets.flux-sops-age.path}"                                  
     "L /var/lib/rancher/k3s/server/manifests/00-coredns-custom.yaml - - - - /etc/k3s/coredns-custom.yaml" # use 00- prefix to deploy this first                                 
@@ -331,41 +331,6 @@ in
   # 1. flux create secret git flux-git-auth --url="ssh://git@${domain}/~/r/gitops-homelab.git" --private-key-file={{ .PRIVATE_SSH_KEYFILE }} --export > flux-git-secret.yaml
   # 2. manually change the knwon_hosts to `ssh-keyscan -p 22 ${domain}` ssh-ed25519 output
   # 3. encrypt yaml with age
-  environment.etc."k3s/flux.yaml" = {
-    mode = "0750";
-    text = ''
-      apiVersion: source.toolkit.fluxcd.io/v1
-      kind: GitRepository
-      metadata:
-        name: flux-system
-        namespace: flux-system
-      spec:
-        interval: 2m
-        ref:
-          branch: main
-        secretRef:
-          name: flux-git-auth
-        url: ssh://gitea@${domain}/r/nixos-k3s.git
-      ---
-      apiVersion: kustomize.toolkit.fluxcd.io/v1
-      kind: Kustomization
-      metadata:
-        name: flux-system
-        namespace: flux-system
-      spec:
-        interval: 2m
-        path: ./kubernetes/flux
-        prune: true
-        wait: false
-        sourceRef:
-          kind: GitRepository
-          name: flux-system
-        decryption:
-          provider: sops
-          secretRef:
-            name: sops-age
-    '';
-  };
 
   environment.etc."k3s/helmfile.yaml" = {
     mode = "0750";
@@ -380,16 +345,29 @@ in
           namespace: kube-system
           # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.16.6
+          version: 1.17.4
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
           namespace: kube-system
           # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
-          version: 1.38.1
+          version: 1.42.2
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
           wait: true
+        - name: flux-operator
+          namespace: flux-system
+          chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
+          version: 0.22.0
+          wait: true
+        - name: flux-instance
+          namespace: flux-system
+          chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
+          version: 0.22.0
+          values: ["${../../../kubernetes/core/gitops/flux-instance/app/helm-values.yaml}"]
+          wait: true
+          needs:
+          - flux-system/flux-operator
     '';
   };
   
@@ -417,7 +395,7 @@ in
             cache 30
             loop
             reload
-            loadbalance          
+            loadbalance
           }
     '';
   };
@@ -446,43 +424,6 @@ in
         Restart = "on-failure";
       };
   };
-
-  /*
-  obsolete:
-  systemd.services.minio-backup = {
-    serviceConfig.Type = "oneshot";
-    path = [
-      pkgs.findutils
-      pkgs.gnutar
-      pkgs.gzip
-      pkgs.rsync
-    ];
-    script = ''
-      echo "Start minio backup now"
-      mkdir -p /mnt/backup/${domain}/rsync/data/minio
-      mkdir -p /mnt/backup/${domain}/rsync/log
-      mkdir -p /mnt/backup/${domain}/archiv
-      ${pkgs.rsync}/bin/rsync \
-        -av \
-        --delete \
-        --ignore-missing-args \
-        --log-file="/mnt/backup/${domain}/rsync/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
-        --exclude "volsync/monerod" \
-        --exclude "volsync/bitcoind" \
-        /mnt/backup/minio/ /mnt/backup/${domain}/rsync/data/minio/
-      export BACKUP_ARCHIVE_NAME="backup_$(date +%Y-%m-%d).tar.gz"
-      tar -I 'gzip --fast' -cf "/mnt/backup/${domain}/archiv/$BACKUP_ARCHIVE_NAME" /mnt/backup/${domain}/rsync/data/minio
-      find /mnt/backup/${domain}/archiv/*.tar.gz* -mtime +15 -exec rm {} \;
-      echo "minio backup completed"
-    '';
-  };
-
-  systemd.timers.minio-backup = {
-    wantedBy = [ "timers.target" ];
-    partOf = [ "minio-backup.service" ];
-    timerConfig.OnCalendar = [ "Mon 06:00:00" ];
-  };
-  */
 
   # Manually trigger with `systemctl start borgbackup-job-minio`
   # browse backup with `sudo borg-job-minio mount /mnt/backup/borg $MOUNTPOINT`

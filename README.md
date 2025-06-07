@@ -8,16 +8,18 @@ My NixOS based K3S Cluster fully declarative and reproducable from empty disk to
 
 ## Overview
 
-This repository provides the **Infrastructure as Code** (IaC) and **GitOps** State with the following core components:
-
-- [**NixOS**](https://nixos.org/): Linux distribution based on Nix to provide a **declarative** and **reproducible** (flakes) system.
-- [**K3S**](https://k3s.io/): Lightweight certified Kubernetes distribution.
-- [**Flux**](https://github.com/fluxcd/flux2): GitOps Kubernetes Operator that ensures that my cluster state matches the desired state described in this repository.
-- [**Renovate**](https://github.com/renovatebot/renovate): Automatically updates dependencies declared in my Git repository via pull requests.
-- [**SOPS**](https://github.com/mozilla/sops): Tool for managing secrets.
-- [**Cilium**](https://cilium.io/): eBPF-based Networking, Observability and Security (CNI, LB, Network Policy, etc.).
-- [**Cert-Manager**](https://cert-manager.io/): Cloud native certificate management.
-- [**Gitea**](https://about.gitea.com/): Self-hosted Git Server.
+This repository provides the **Infrastructure as Code** (IaC) and **GitOps** State with the following core components using [**NixOS**](https://nixos.org/), a Linux distribution based on Nix to provide a **declarative** and **reproducible** (flakes) system:
+- [**nixos-anywhere**](https://github.com/nix-community/nixos-anywhere): NixOS installation with a single CLI command
+- [**disko**](https://github.com/nix-community/disko): Declarative disk partitioning and formatting
+- [**agenix**](https://github.com/ryantm/agenix): Secrets for NixOS
+- [**Gitea**](https://about.gitea.com/): Self-hosted Git Server to serve the infra repo.
+- [**K3S**](https://k3s.io/): Lightweight certified Kubernetes (K8s) distribution.
+  - [**SOPS**](https://github.com/mozilla/sops): Tool for managing secrets.
+  - [**Flux**](https://github.com/fluxcd/flux2): GitOps Kubernetes Operator that ensures that my cluster state matches the desired state described in this repository.
+  - [**Renovate**](https://github.com/renovatebot/renovate): Automatically updates dependencies declared in my Git repository via pull requests.
+  - [**Cilium**](https://cilium.io/): eBPF-based Networking, Observability and Security (CNI, LB, Network Policy, etc.).
+  - [**Cert-Manager**](https://cert-manager.io/): Cloud native certificate management.
+  - And more...
 
 ## Description
 

@@ -8,7 +8,7 @@ spec:
   dependsOn:
     - name: traefik
     - name: local-hostpath-persistent
-    # - name: lldap-db
+    - name: volsync
   postBuild:
     substitute:
       APP_NAME: pocket-id

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: ghcr.io/steveiliop56/tinyauth
-              tag: "v3.2.1"
+              tag: "v3.4.0"
 
             env:
               # TODO use secret
@@ -37,8 +37,8 @@ spec:
               # We use pocket-id with OAuth for passkey login
               GENERIC_NAME: "pocket-id"
               GENERIC_AUTH_URL: "https://id.${SECRET_DOMAIN}/authorize"
-              GENERIC_TOKEN_URL: "http://pocket-id.authentication.svc/api/oidc/token"
-              GENERIC_USER_URL: "http://pocket-id.authentication.svc/api/oidc/userinfo"
+              GENERIC_TOKEN_URL: "http://pocket-id.authentication.svc:1411/api/oidc/token"
+              GENERIC_USER_URL: "http://pocket-id.authentication.svc:1411/api/oidc/userinfo"
               GENERIC_SCOPES: "openid,profile,email"
               # generate entry on https://id.${SECRET_DOMAIN}/settings/admin/oidc-clients
               # set callback to https://auth.${SECRET_DOMAIN}/api/oauth/callback/generic

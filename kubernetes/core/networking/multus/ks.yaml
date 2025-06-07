@@ -1,0 +1,17 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: multus
+  namespace: flux-system
+spec:
+  path: "./kubernetes/core/networking/multus/operator"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: multus-networks
+  namespace: flux-system
+spec:
+  path: "./kubernetes/core/networking/multus/networks"
+  dependsOn:
+    - name: multus

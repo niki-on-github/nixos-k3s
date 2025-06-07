@@ -19,7 +19,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -38,13 +38,13 @@ spec:
             args:
             - "-p"
             - "/unifi/data"
-            - "/unifi/log"        
+            - "/unifi/log"
 
         containers:
           app:
             image:
               repository: nexusforge/unifi-docker
-              tag: "v9.0.114"
+              tag: "v9.1.120"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

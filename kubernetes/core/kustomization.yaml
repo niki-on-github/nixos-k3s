@@ -9,3 +9,4 @@ resources:
   - networking
   - storage
   - system
+  - gitops

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,20 +22,18 @@ spec:
           app:
             image:
               repository: ghcr.io/pocket-id/pocket-id
-              tag: "v0.49.0"
+              tag: "v1.2.0"
 
             env:
               TRUST_PROXY: true
-              GUID: 1000
-              UGID: 1000
-              PUBLIC_APP_URL: "https://id.${SECRET_DOMAIN}"
+              APP_URL: "https://id.${SECRET_DOMAIN}"
 
     service:
       webui:
         controller: ${APP_NAME}
         ports:
           http:
-            port: 80
+            port: 1411
 
     ingress:
       webui:
@@ -58,4 +56,4 @@ spec:
       data:
         existingClaim: "${APP_NAME}-pvc"
         globalMounts:
-          - path: /app/backend/data
+          - path: /app/data

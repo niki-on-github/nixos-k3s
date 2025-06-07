@@ -1,0 +1,30 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: miniflux-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: miniflux
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "miniflux"
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: miniflux
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/miniflux/app"
+  dependsOn:
+    - name: miniflux-db
+    - name: tailscale
+  postBuild:
+    substitute:
+      APP_NAME: miniflux
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "miniflux"

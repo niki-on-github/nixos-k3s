@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,19 +22,21 @@ spec:
           rest:
             image:
               repository: ghcr.io/niki-on-github/solaredge-modbus-rest-api
-              tag: "v0.0.4"
-
+              tag: "v0.0.6"
+            command:
+              - "/usr/local/bin/python3"
+            args:
+              - "example_influxdb_v2_rest.py"
             env:
-              MODBUS_HOST: "${SECRET_SOLAREDGE_INVERTER_IP}"
-              MODBUS_PORT: "1502"
-              MODBUS_TIMEOUT: "1"
-              MODBUS_UNIT: "1"   
+              INFLUXDB_URL: "http://influxdb.monitoring.svc.cluster.local:8086"
+              INFLUXDB_TOKEN: "${SECRET_INFLUXDB_ADMIN_TOKEN}"
+              INFLUXDB_ORG: "${CONFIG_INFLUXDB_ORG}"
+              INFLUXDB_BUCKET: "solaredge"
 
           influxdb:
             image:
               repository: ghcr.io/niki-on-github/solaredge-modbus-rest-api
-              tag: "v0.0.4"
-
+              tag: "v0.0.6"
             command:
               - "/usr/local/bin/python3"
             args:
@@ -59,3 +61,19 @@ spec:
           http:
             port: 5000
 
+    ingress:
+      rest:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "solaredge.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: rest
+                  port: http
+        tls:
+          - hosts:
+              - *ingress

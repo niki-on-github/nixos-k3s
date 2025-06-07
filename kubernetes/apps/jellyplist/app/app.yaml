@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -34,13 +34,16 @@ spec:
             image:
               # renovate: datasource=docker
               repository: docker.io/library/redis
-              tag: 7.4.2
+              tag: 8.0.2
 
           app:
             dependsOn: redis
             image:
-              repository: ghcr.io/kamilkosek/jellyplist
-              tag: v0.1.10
+              repository: ghcr.io/niki-on-github/jellyplist
+              tag: latest
+              # TODO wait until https://github.com/kamilkosek/jellyplist/issues/80 is fixed
+              # repository: ghcr.io/kamilkosek/jellyplist
+              # tag: v0.1.9
           
             env:
               SECRET_KEY: "${SECRET_JELLYPLIST_SECRET_KEY}"

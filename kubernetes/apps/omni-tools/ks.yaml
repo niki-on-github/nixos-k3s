@@ -1,13 +1,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: filebrowser
+  name: omni-tools
   namespace: flux-system
 spec:
-  path: "./kubernetes/apps/filebrowser/app"
+  path: "./kubernetes/apps/omni-tools/app"
   postBuild:
     substitute:
-      APP_NAME: filebrowser
+      APP_NAME: omni-tools
       APP_NAMESPACE: apps
-      PVC_CAPACITY: "32Gi"
-

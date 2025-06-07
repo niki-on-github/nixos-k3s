@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -55,8 +55,27 @@ spec:
               FTP_USER_NAME: ftp
               FTP_USER_PASS: ${SECRET_WEBSERVICES_PASSWORD}
               FTP_USER_HOME: /home/ftp
-      
+
+      filebrowser:
+        containers:
+          app:
+            image:
+              repository: docker.io/filebrowser/filebrowser
+              tag: "v2.32.0"
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+              FB_DATABASE: /data/filebrowser.db
+              FB_ROOT: /data
+              FB_LOG: stdout
+              FB_NOAUTH: true
+
     service:
+      filebrowser:
+        controller: filebrowser
+        ports:
+          http:
+            port: 80
+
       samba:
         controller: samba
         type: LoadBalancer
@@ -113,8 +132,27 @@ spec:
             port: 30009
             protocol: TCP
 
+    ingress:
+      filebrowser:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &ingress "filebrowser.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: filebrowser
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+
     configMaps:
       config:
+        suffix: config
         data:
           exports: |
             /srv/nfs ${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}(rw,async,no_subtree_check,no_auth_nlm,insecure,no_root_squash,fsid=0)
@@ -150,6 +188,7 @@ spec:
 
     persistence:
       data:
+        suffix: data
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 128Gi
@@ -164,6 +203,9 @@ spec:
           ftp:
             app:
             - path: /home/ftp
+          filebrowser:
+            app:
+            - path: /data
               
       empty:
         type: emptyDir
@@ -197,3 +239,6 @@ spec:
           samba:
             app:
               - path: /hdd
+          filebrowser:
+            app:
+            - path: /data/hdd

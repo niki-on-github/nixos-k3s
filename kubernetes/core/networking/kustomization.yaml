@@ -6,3 +6,4 @@ resources:
 - kube-vip/ks.yaml
 - traefik/ks.yaml
 - cert-manager/ks.yaml
+- multus/ks.yaml

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: docker.io/hashicorp/vault
-              tag: "1.19.2"
+              tag: "1.19.5"
             args: 
               - "server"
               - "-config=/config.hcl"
@@ -57,6 +57,7 @@ spec:
         
     configMaps:
       configmap:
+        suffix: config
         data:
           config.hcl: |
             ui = true
@@ -81,7 +82,7 @@ spec:
           - path: /vault/file
       config:
         type: configMap
-        name: ${APP_NAME}-configmap
+        name: ${APP_NAME}-config
         globalMounts:
           - path: /config.hcl
             subPath: config.hcl

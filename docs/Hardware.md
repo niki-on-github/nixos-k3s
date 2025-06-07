@@ -16,7 +16,7 @@ In order to meet the energy requirements I have made the following decisions:
 - Mainboard: ASRock B550M Pro4 AMD
 - CPU: AMD Ryzen 7 Pro 5750GE (35W TDP)
 - RAM: 2 x 32GB Kingston KSM32ED8/32HC DDR4-3200 DIMM CL22 Single (ECC)
-- PSU: Supermicro PWS-203-1H 200W
+- PSU: Supermicro PWS-203-1H 200W (Fan modded)
 - NVME: 4TB Lexar NM790 M.2 2280
 - NIC: Intel X710-DA2 10GbE
 - SSD1: 1TB WD Red SA500

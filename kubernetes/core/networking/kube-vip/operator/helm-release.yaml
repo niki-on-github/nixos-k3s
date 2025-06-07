@@ -37,7 +37,10 @@ spec:
       address: *address
     resources:
       limits:
-        cpu: 100m
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 200m
         memory: 128Mi
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json

@@ -30,7 +30,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -53,7 +53,7 @@ spec:
           migrate-database:
             image:
               repository: kalbasit/ncps
-              tag: "latest" # TODO tag
+              tag: "0.2"
             args:
             - /bin/dbmate
             - --url=sqlite:/storage/var/ncps/db/db.sqlite
@@ -64,7 +64,7 @@ spec:
           app:
             image:
               repository: kalbasit/ncps
-              tag: "latest" # TODO tag
+              tag: "0.2"
             args:
               - "/bin/ncps"
               - serve
@@ -114,6 +114,7 @@ spec:
         
     persistence:
       data:
+        suffix: data
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: ${PVC_CAPACITY}

@@ -3,6 +3,8 @@
     inputs.self.homeManagerRoles.k3s
   ];
 
+  home.stateVersion = "24.11";
+
   programs.ssh = {
     enable = true;
     matchBlocks = {

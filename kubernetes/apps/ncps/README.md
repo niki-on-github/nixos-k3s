@@ -9,6 +9,8 @@ nix key generate-secret --key-name ncps.${SECRET_DOMAIN} > ncps.key # Add this t
 cat ncps.key | nix key convert-secret-to-public > ncps.pub # Add this to your config
 ```
 
+Later you can alos access `ncps.${SECRET_DOMAIN}/pubkey` to observe the public key
+
 ```nix
 nix.settings.trusted-substituters  = [
   "https://ncps.${SECRET_DOMAIN}"

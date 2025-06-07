@@ -16,3 +16,5 @@ spec:
     - "ReadWriteOnce"
     capacity: "${PVC_CAPACITY:-1Gi}"
     enableFileDeletion: true
+    cleanupTempPVC: true
+    cleanupCachePVC: true

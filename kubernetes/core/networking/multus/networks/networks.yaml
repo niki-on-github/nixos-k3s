@@ -1,0 +1,20 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: multus-br1
+  namespace: networking
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "type": "bridge",
+      "bridge": "br1",
+      "ipam": {
+        "type": "host-local",
+        "subnet": "${SECRET_MULTUS_BRIDGE_SUBNET}",
+        "rangeStart": "${SECRET_MULTUS_BRIDGE_RANGE_START}",
+        "rangeEnd": "${SECRET_MULTUS_BRIDGE_RANGE_END}",
+        "routes": [{"dst": "${SECRET_MULTUS_BRIDGE_SUBNET}"}, {"dst": "255.255.255.255/32"}],
+        "gateway": "${SECRET_MULTUS_BRIDGE_GATEWAY}"
+      }
+    }

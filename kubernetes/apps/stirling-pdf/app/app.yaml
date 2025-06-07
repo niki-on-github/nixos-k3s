@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: frooodle/s-pdf
-              tag: "0.45.6"
+              tag: "0.46.2"
             env:
               LANGS: en_GB,de_DE
 
@@ -69,6 +69,7 @@ spec:
         globalMounts:
           - path: /configs
       tessdata:
+        suffix: data
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 16Gi
