@@ -5,6 +5,7 @@ resources:
   - resources/authentication.yaml
   - resources/backup.yaml
   - resources/dashboard.yaml
+  - resources/flux-system.yaml
   - resources/database.yaml
   - resources/home-automation.yaml
   - resources/kubevirt.yaml

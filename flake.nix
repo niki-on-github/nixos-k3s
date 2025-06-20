@@ -36,8 +36,9 @@
 
     personalModules = {
       # Most of my personalModule code is available at https://github.com/niki-on-github/nixos-modules.git
-      # url = "git+https://git.k8s.lan/r/nixos-modules.git?submodules=1";
-      url = "git+http://10.0.1.11:3000/r/nixos-modules.git?submodules=1";
+      url = "git+https://git.k8s.lan/r/nixos-modules.git?submodules=1";
+      # url = "git+http://10.0.1.11:3000/r/nixos-modules.git?submodules=1";
+      # url = "path:/mnt/data-02/Work/Repos/private/nixos-modules";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         nixpkgs-unstable.follows = "nixpkgs-unstable";

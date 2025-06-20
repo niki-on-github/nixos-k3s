@@ -7,3 +7,4 @@ resources:
 - traefik/ks.yaml
 - cert-manager/ks.yaml
 - multus/ks.yaml
+- external-dns/ks.yaml

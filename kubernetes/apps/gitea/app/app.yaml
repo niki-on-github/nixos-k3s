@@ -21,7 +21,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.0.1
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -34,7 +34,7 @@ spec:
           app:
             image:
               repository: gitea/gitea
-              tag: "1.23.8"
+              tag: "1.24.0"
 
             env:
               USER_UID: "1000"
@@ -65,6 +65,8 @@ spec:
         controller: ${APP_NAME}
         type: LoadBalancer
         loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: git.${SECRET_DOMAIN}
         ports: 
           ssh:
             port: *sshPort

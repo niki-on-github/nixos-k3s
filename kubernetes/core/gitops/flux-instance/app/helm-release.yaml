@@ -16,4 +16,6 @@ spec:
         namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
-      name: flux-instance-helm-values
+      name: flux-instance-core
+    - kind: ConfigMap
+      name: flux-instance-config

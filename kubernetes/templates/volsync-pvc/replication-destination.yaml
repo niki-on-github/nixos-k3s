@@ -9,9 +9,9 @@ spec:
   restic:
     copyMethod: Snapshot
     repository: "${APP_NAME}-restic-src-credentials"
-    cacheStorageClassName: local-temp
-    storageClassName: "local-persistent"
-    volumeSnapshotClassName: "local-persistent"
+    cacheStorageClassName: "openebs-zfspv"
+    storageClassName: "openebs-zfspv"
+    volumeSnapshotClassName: "zfspv-snapclass"
     accessModes:
     - "ReadWriteOnce"
     capacity: "${PVC_CAPACITY:-1Gi}"

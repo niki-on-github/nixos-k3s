@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: ${STORAGE_CLASS_NAME}-provisioner
+  name: local-hostpath
   namespace: storage
 spec:
   interval: 10m
@@ -17,24 +17,18 @@ spec:
         namespace: flux-system
   values:
     csiDriver:
-      name: "org.democratic-csi.${STORAGE_CLASS_NAME}"
+      name: "org.democratic-csi.local-hostpath"
       attachRequired: false
       storageCapacity: false
       fsGroupPolicy: File
 
     storageClasses:
-      - name: &className "${STORAGE_CLASS_NAME}"
+      - name: &className "local-hostpath"
         defaultClass: false
-        reclaimPolicy: ${RECLAIM_POLICY:=Retain}
+        reclaimPolicy: Retain
         volumeBindingMode: WaitForFirstConsumer
         allowVolumeExpansion: true
 
-    volumeSnapshotClasses:
-      - name: *className
-        deletionPolicy: Delete
-        parameters:
-          dummy: {}
- 
     controller:
       enabled: true
       strategy: node
@@ -54,7 +48,7 @@ spec:
         enabled: true
         extraVolumeMounts:
           - name: *className
-            mountPath: &path "${CONFIG_HOST_PATH_PREFIX}/${PATH_POSTFIX}"
+            mountPath: &path "${CONFIG_HOST_PATH_PREFIX}/local-hostpath"
             mountPropagation: Bidirectional
       driverRegistrar:
         enabled: true

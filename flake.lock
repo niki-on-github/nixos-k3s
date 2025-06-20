@@ -278,19 +278,19 @@
         ]
       },
       "locked": {
-        "lastModified": 1749292082,
-        "narHash": "sha256-D1CmvzwOyAYkhxUnS7nfZ4cCHXc9/M4+FBZRY/102ao=",
+        "lastModified": 1750341396,
+        "narHash": "sha256-icLZbE/jlsDDyL8AQC6auDBgRI2Sl3FUfrQOFke3NP8=",
         "ref": "refs/heads/main",
-        "rev": "1380ce9334ea25f5ccac96ef191d7d78793f0e32",
-        "revCount": 939,
+        "rev": "9bf8b8d9ad0bff97e021190b5a2e1959deeb3997",
+        "revCount": 1001,
         "submodules": true,
         "type": "git",
-        "url": "http://10.0.1.11:3000/r/nixos-modules.git"
+        "url": "https://git.k8s.lan/r/nixos-modules.git"
       },
       "original": {
         "submodules": true,
         "type": "git",
-        "url": "http://10.0.1.11:3000/r/nixos-modules.git"
+        "url": "https://git.k8s.lan/r/nixos-modules.git"
       }
     },
     "root": {

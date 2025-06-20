@@ -5,3 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/pgadmin/app"
+  postBuild:
+    substitute:
+      APP_NAME: pgadmin
+      APP_NAMESPACE: database
+      PVC_CAPACITY: "1Gi"

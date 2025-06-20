@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.0.1
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -43,6 +43,8 @@ spec:
         controller: ${APP_NAME}
         type: LoadBalancer
         loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: monero.${SECRET_DOMAIN}
         ports:
           rpc:
             port: 18089
@@ -54,6 +56,6 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: ${PVC_CAPACITY}
-        storageClass: "local-persistent"
+        storageClass: "local-hostpath"
         globalMounts:
           - path: /home/monero/.bitmonero

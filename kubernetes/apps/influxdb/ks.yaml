@@ -7,8 +7,7 @@ spec:
   path: "./kubernetes/apps/influxdb/app"
   wait: true
   dependsOn:
-    - name: local-hostpath-persistent
-    - name: volsync  
+    - name: volsync
   postBuild:
     substitute:
       APP_NAME: influxdb

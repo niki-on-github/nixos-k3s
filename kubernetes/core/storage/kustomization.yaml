@@ -2,5 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - minio/ks.yaml
-- local-path/ks.yaml
+- local-hostpath/ks.yaml
+- zfs-localpv/ks.yaml
 - csi-driver-nfs/ks.yaml

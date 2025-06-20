@@ -3,19 +3,20 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: snapshot-controller
-  namespace: backup
+  name: zfs-localpv
+  namespace: storage
 spec:
   interval: 10m
   chart:
     spec:
-      chart: snapshot-controller
-      version: "0.3.0"
+      chart: zfs-localpv
+      version: "2.8.0"
       sourceRef:
+        name: zfs-localpv-charts
         kind: HelmRepository
-        name: democratic-csi-charts
         namespace: flux-system
   values:
-    controller:
-      replicaCount: 1
-      
+    # see https://github.com/openebs/zfs-localpv/blob/develop/deploy/helm/charts/values.yaml
+    zfs:
+      bin: /run/current-system/sw/bin/zfs
+

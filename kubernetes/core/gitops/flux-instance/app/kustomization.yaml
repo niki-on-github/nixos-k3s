@@ -6,8 +6,11 @@ namespace: flux-system
 resources:
   - ./helm-release.yaml
 configMapGenerator:
-  - name: flux-instance-helm-values
+  - name: flux-instance-core
     files:
       - values.yaml=./helm-values.yaml
+  - name: flux-instance-config
+    files:
+      - values.yaml=./../../../../config/settings/flux.yaml
 configurations:
   - kustomizeconfig.yaml

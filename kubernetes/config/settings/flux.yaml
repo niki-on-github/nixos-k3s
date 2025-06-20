@@ -1,0 +1,12 @@
+---
+instance:
+  distribution:
+    # renovate: datasource=github-releases depName=controlplaneio-fluxcd/distribution
+    version: 2.6.1
+  sync:
+    kind: GitRepository
+    url: ssh://gitea@server02.lan/r/nixos-k3s.git
+    ref: refs/heads/main
+    path: kubernetes/flux
+    interval: 2m
+    pullSecret: "flux-git-auth"

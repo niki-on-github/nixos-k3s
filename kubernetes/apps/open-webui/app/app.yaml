@@ -9,20 +9,7 @@ spec:
   resources:
     requests:
       storage: 32Gi
-  storageClassName: "local-persistent"
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: "open-webui-pvc"
-  namespace: ${APP_NAMESPACE}
-spec:
-  accessModes:
-    - "ReadWriteOnce"
-  resources:
-    requests:
-      storage: 2Gi
-  storageClassName: "local-persistent"
+  storageClassName: "local-hostpath"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -35,7 +22,7 @@ spec:
   resources:
     requests:
       storage: 2Gi
-  storageClassName: "local-persistent"
+  storageClassName: "local-hostpath"
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -48,7 +35,7 @@ spec:
   chart:
     spec:
       chart: open-webui
-      version: 6.19.0
+      version: 6.21.0
       sourceRef:
         kind: HelmRepository
         name: open-webui-charts
@@ -59,7 +46,7 @@ spec:
       enabled: true
       image:
         repository: ollama/ollama
-        tag: "0.9.0"
+        tag: "0.9.1"
       persistentVolume:
         enabled: true
         existingClaim: "ollama-pvc"
@@ -75,11 +62,11 @@ spec:
 
     image:
       repository: ghcr.io/open-webui/open-webui
-      tag: "0.6.13"
+      tag: "v0.6.15"
 
     persistence:
       enabled: true
-      existingClaim: "open-webui-pvc"
+      existingClaim: "${APP_NAME}-pvc"
 
     ingress:
       enabled: true

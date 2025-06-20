@@ -19,7 +19,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.0.1
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: nexusforge/unifi-docker
-              tag: "v9.1.120"
+              tag: "v9.2.87"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"
@@ -59,7 +59,7 @@ spec:
           http:
             port: 8443
             protocol: HTTPS
-      ingress:
+      api:
         controller: ${APP_NAME}
         type: LoadBalancer
         loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"

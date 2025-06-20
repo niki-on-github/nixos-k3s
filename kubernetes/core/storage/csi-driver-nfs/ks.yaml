@@ -6,4 +6,4 @@ metadata:
 spec:
   path: "./kubernetes/core/storage/csi-driver-nfs/operator"
   dependsOn:
-    - name: snapshot-controller
+    - name: local-hostpath

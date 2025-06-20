@@ -43,7 +43,7 @@ spec:
       
     persistentVolume:
       enabled: true
-      storageClass: local-persistent
-      accessModes:
-        - ReadWriteOnce
-      size: 500Mi
+      storageClassName: ""
+      storageClass: "-"
+      existingClaim: "${APP_NAME}-pvc"
+      size: "${PVC_CAPACITY}"

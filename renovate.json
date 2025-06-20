@@ -192,6 +192,14 @@
       ]
     },
     {
+      "groupName": "flux",
+      "matchPackageNames": [
+        "/flux/",
+        "/flux-operator/",
+        "/flux-instance/"
+      ]
+    },
+    {
       "groupName": "immich",
       "matchPackageNames": [
         "/immich-server/",

@@ -7,7 +7,6 @@ spec:
   path: "./kubernetes/core/authentication/pocket-id/app"
   dependsOn:
     - name: traefik
-    - name: local-hostpath-persistent
     - name: volsync
   postBuild:
     substitute:

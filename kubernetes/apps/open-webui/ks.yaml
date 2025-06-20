@@ -1,0 +1,14 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: open-webui
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/open-webui/app"
+  dependsOn:
+    - name: searxng
+  postBuild:
+    substitute:
+      APP_NAME: open-webui
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "8Gi"

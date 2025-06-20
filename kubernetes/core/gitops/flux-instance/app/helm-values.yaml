@@ -1,9 +1,5 @@
 ---
 instance:
-  distribution:
-    # TODO renovate
-    # renovate: datasource=github-releases depName=controlplaneio-fluxcd/distribution
-    version: 2.5.1
   cluster:
     networkPolicy: false
   components:
@@ -11,13 +7,6 @@ instance:
     - kustomize-controller
     - helm-controller
     - notification-controller
-  sync:
-    kind: GitRepository
-    url: ssh://gitea@server02.lan/r/nixos-k3s.git
-    ref: refs/heads/main
-    path: kubernetes/flux
-    interval: 2m
-    pullSecret: "flux-git-auth"
   commonMetadata:
     labels:
       app.kubernetes.io/name: flux

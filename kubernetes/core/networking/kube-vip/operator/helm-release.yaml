@@ -31,16 +31,20 @@ spec:
       address: &address "${CONFIG_KUBE_VIP_IP}"
     env:
       # vip_interface: "${CONFIG_KUBE_VIP_INTERFACE}" # auto detect
-      vip_leaderelection: "true"
-      cp_enable: "true"
+      vip_leaderelection: "false" # control plane
+      cp_enable: "false" # control plane
       svc_election: "true"
       address: *address
+      vip_loglevel: "4"
+      vip_leaseduration: "300"
+      vip_renewdeadline: "60"
+      vip_retryperiod: "5"
     resources:
       limits:
-        cpu: 500m
+        cpu: 200m
         memory: 256Mi
       requests:
-        cpu: 200m
+        cpu: 100m
         memory: 128Mi
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json

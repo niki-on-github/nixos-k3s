@@ -18,36 +18,59 @@ spec:
   values:
     controllers:
       ${APP_NAME}:
+        pod:
+          annotations:
+            k8s.v1.cni.cncf.io/networks: networking/multus-br1
         containers:
           app:
             image:
-              repository: docker.io/emqx/mqttx-web
-              tag: "v1.11.1"
+              repository: ghcr.io/aceberg/watchyourlan
+              tag: "2.1.2"
             env:
-              TZ: "${CONFIG_TIMEZONE}"
-              
+              TZ: ${CONFIG_TIMEZONE}
+              IFACES: "net1"
+              HOST:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+            securityContext:
+              privileged: true
+              runAsNonRoot: false
+              runAsUser: 0
+              capabilities:
+                add:
+                  - NET_ADMIN
+                  - NET_RAW
+
     service:
-      main:
+      webui:
         controller: ${APP_NAME}
         ports:
           http:
-            port: 80
+            port: 8840
 
     ingress:
-      main:
+      webui:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
         hosts:
-          - host: &ingress "mqttx.${SECRET_DOMAIN}"
+          - host: &ingress "wyl.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
                 service:
-                  identifier: main
+                  identifier: webui
                   port: http
         tls:
           - hosts:
               - *ingress
+        
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+              - path: /data/WatchYourLAN
 

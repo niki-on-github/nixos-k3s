@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.0.1
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -73,6 +73,6 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 16Gi
-        storageClass: "local-persistent"
+        storageClass: "openebs-zfspv"
         globalMounts:
           - path: /usr/share/tessdata

@@ -1,0 +1,26 @@
+# see https://github.com/openebs/zfs-localpv/blob/develop/docs/storageclasses.md
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: openebs-zfspv
+allowVolumeExpansion: true
+parameters:
+  compression: "on"
+  dedup: "off"
+  thinprovision: "yes"
+  fstype: "zfs"
+  poolname: "${CONFIG_ZFS_POOLNAME}"
+  shared: "yes"
+provisioner: zfs.csi.openebs.io
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+---
+# see https://github.com/openebs/zfs-localpv/blob/develop/docs/storageclasses.md
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: zfspv-snapclass
+  annotations:
+    snapshot.storage.kubernetes.io/is-default-class: "true"
+driver: zfs.csi.openebs.io
+deletionPolicy: Delete

@@ -9,12 +9,13 @@ resources:
 - charts/bjw-s-charts.yaml
 - charts/cilium-charts.yaml
 - charts/cnpg-charts.yaml
+- charts/controlplaneio-fluxcd-charts.yaml
 - charts/coredns-charts.yaml
 - charts/csi-driver-nfs-charts.yaml
 - charts/democratic-csi-charts.yaml
 - charts/drone-charts.yaml
+- charts/external-dns-charts.yaml
 - charts/fairwinds-charts.yaml
-- charts/controlplaneio-fluxcd-charts.yaml
 - charts/gitea-charts.yaml
 - charts/grafana-charts.yaml
 - charts/harbor-charts.yaml
@@ -37,3 +38,4 @@ resources:
 - charts/traefik-charts.yaml
 - charts/vault-autounseal-charts.yaml
 - charts/xenitab-charts.yaml
+- charts/zfs-localpv-charts.yaml

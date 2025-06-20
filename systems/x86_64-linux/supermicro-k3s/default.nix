@@ -4,14 +4,10 @@ let
   cpu = "amd";
   domain = "server02.lan";
   ip = "10.0.1.11";
-  dns = "10.0.1.1";
-  subnet = 24;
-  gateway = "10.0.1.1";
   interface = "enp5s0f1";
   backupInterface = "enp7s0"; # warning when adding nvme this name may changes
   cpufreqmax = 3000000; 
-  bridge = "br1";
-  disk = "/dev/disk/by-id/nvme-Lexar_SSD_NM790_4TB_AAA";
+  disk = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_4TB_AAA";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -55,71 +51,72 @@ in
       group = "minio";
     };
     "sops-age-keys.txt" = {
-        file = ./secrets/sops-age-keys.txt.age;
-        path = "/home/${user}/.config/sops/age/keys.txt";
-        owner = "${user}";
-        group = "users";
-        mode = "600";
-      };
+      file = ./secrets/sops-age-keys.txt.age;
+      path = "/home/${user}/.config/sops/age/keys.txt";
+      owner = "${user}";
+      group = "users";
+      mode = "600";
+    };
+    "ssh.hetzner-storagebox" = {
+      file = ./secrets/ssh.hetzner-storagebox.age;
+      path = "/root/.ssh/ssh.hetzner-storagebox";
+      owner = "root";
+      group = "root";
+      mode = "600";
+    };
+    "ssh.hetzner-storagebox.pub" = {
+      file = ./secrets/ssh.hetzner-storagebox.age;
+      path = "/root/.ssh/ssh.hetzner-storagebox.pub";
+      owner = "root";
+      group = "root";
+      mode = "644";
+    };
   };
 
   sops = {
     defaultSopsFile = ./secrets/secrets.sops.yaml;
-    secrets.user-password.neededForUsers = true;
-  };
-
-
-  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
-  networking = {
-    bridges = {
-      "${bridge}" = {
-        interfaces = [ "${interface}" "${backupInterface}" ];
-      };
-    };
-    interfaces = {
-      ${bridge} = {
-        useDHCP = false;
-        ipv4.addresses = [{
-          address = "${ip}";
-          prefixLength = subnet;
-        }];
-      };
+    secrets = {
+      user-password.neededForUsers = true;
+      hetzner-borg-password.owner = config.users.users.root.name;
     };
   };
-
-  # use dynamic routing entries
-  systemd.network = {
-    enable = true;
-    networks = {
-      "40-${bridge}" = {
-        matchConfig.Name = "${bridge}";
-        networkConfig = {
-          DHCP = "no";
-          Address = "${ip}/${toString subnet}";
-          Gateway = "${gateway}";
-          DNS = "${dns}";
-        };
-        linkConfig = {
-          RequiredForOnline = "no";
-        };
-      };
-    };
-  };
-
-  networking.networkmanager.enable = true;
-  systemd.network.wait-online.enable = false;
-  systemd.services.NetworkManager-wait-online.enable = false;
 
   templates = {
     apps = {
-      modernUnix.enable = true;
+      modern-unix.enable = true;
       monitoring.enable = true;
+    };
+    backup = {
+      hetzner = {
+        enable = true;
+        schedule = "weekly";
+        password-path = "${config.sops.secrets.hetzner-borg-password.path}";
+        paths = ["/mnt/backup/minio"];
+        snapshot = {
+          enable = true;
+          inplace = true;
+          path = "/mnt/backup";
+        };
+      };
+    };
+    networking = {
+      bridges = [{
+        name = "br1";
+        interfaces = ["${interface}" "${backupInterface}"];
+        ip = ip;
+      }];
     };
     system = {
       setup = {
         enable = true;
-        encryption = "full";
+        filesystem = "zfs";
+        encryption = "system";
         disk = disk;
+        zfs = {
+          datasets = [
+            { name = "volumes"; }
+          ];
+        };
       };
       crypttab = {
         devices = [{
@@ -150,7 +147,7 @@ in
         bootstrap = {
           helm = {
             enable = true;
-            completedIf = "get CustomResourceDefinition -A | grep -q 'cilium.io'";
+            completedIf = "get CustomResourceDefinition -A | grep -Eo 'cilium.io|toolkit.fluxcd.io' | sort | uniq | wc -l | grep -q 2";
             helmfile = "/etc/k3s/helmfile.yaml";
           };
         };
@@ -172,17 +169,19 @@ in
   };
 
   boot.initrd.luks.devices."crypt_01" = {
-    device = "/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_Plus_1TB_AAA-part1";
+    device = "/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_Plus_1TBAAA-part1";
     preLVM = true;
-    keyFile = "/disk.key";
+    # we reuse passphrase from system unlock
+    keyFile = lib.mkIf (config.templates.system.setup.encryption == "full") "/disk.key";
     allowDiscards = true;
     fallbackToPassword = true;
   };
 
   boot.initrd.luks.devices."crypt_02" = {
-    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-AAA-part1";
+    device = "/dev/disk/by-id/ata-WDC_AAA-part1";
     preLVM = true;
-    keyFile = "/disk.key";
+    # we reuse passphrase from system unlock
+    keyFile = lib.mkIf (config.templates.system.setup.encryption == "full") "/disk.key";
     allowDiscards = true;
     fallbackToPassword = true;
   };
@@ -211,7 +210,7 @@ in
         DISABLE_REGISTRATION = true;
       };
       actions = {
-        ENABLED = true;
+        ENABLED = false;
       };
     };
   };
@@ -235,8 +234,7 @@ in
     memoryPercent = 25;
   };
 
-
-  boot.loader.grub = {
+  boot.loader.grub = lib.mkIf (config.templates.system.setup.encryption == "full" && config.templates.system.setup.filesystem == "btrfs") {
     extraEntries = ''
       menuentry "Memtest86+" {
         linux /@/boot/memtest.bin console=ttyS0,115200
@@ -315,8 +313,8 @@ in
     "d /var/lib/rancher/k3s/server/manifests 0775 root data -"
     "L /home/${user}/.kube/config  - - - - /etc/rancher/k3s/k3s.yaml"
     "L /var/lib/rancher/k3s/server/manifests/flux-git-auth.yaml - - - - ${config.age.secrets.flux-git-auth.path}"
-    "L /var/lib/rancher/k3s/server/manifests/flux-sops-age.yaml - - - - ${config.age.secrets.flux-sops-age.path}"                                  
-    "L /var/lib/rancher/k3s/server/manifests/00-coredns-custom.yaml - - - - /etc/k3s/coredns-custom.yaml" # use 00- prefix to deploy this first                                 
+    "L /var/lib/rancher/k3s/server/manifests/flux-sops-age.yaml - - - - ${config.age.secrets.flux-sops-age.path}"
+    "L /var/lib/rancher/k3s/server/manifests/00-coredns-custom.yaml - - - - /etc/k3s/coredns-custom.yaml" # use 00- prefix to deploy this first
   ];
   
   # required for deploy-rs
@@ -352,7 +350,7 @@ in
           namespace: kube-system
           # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
-          version: 1.42.2
+          version: 1.42.4
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
           wait: true
         - name: flux-operator
@@ -364,7 +362,7 @@ in
           namespace: flux-system
           chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
           version: 0.22.0
-          values: ["${../../../kubernetes/core/gitops/flux-instance/app/helm-values.yaml}"]
+          values: ["${../../../kubernetes/core/gitops/flux-instance/app/helm-values.yaml}", "${../../../kubernetes/config/settings/flux.yaml}"]
           wait: true
           needs:
           - flux-system/flux-operator
@@ -425,24 +423,6 @@ in
       };
   };
 
-  # Manually trigger with `systemctl start borgbackup-job-minio`
-  # browse backup with `sudo borg-job-minio mount /mnt/backup/borg $MOUNTPOINT`
-  # after browsing/restoring unmount with `sudo borg-job-minio mount $MOUNTPOINT` 
-  services.borgbackup.jobs."minio" = {
-    paths = [
-      "/mnt/backup/minio"
-    ];
-    encryption.mode = "none";
-    repo = "/mnt/backup/${domain}/borg";
-    compression = "auto,zstd";
-    startAt = "Mon 06:00:00";
-    prune.keep = {
-      daily = 7;
-      weekly = 2;
-      monthly = 1;
-    };
-  };
-  
   systemd.services.opnsense-kvm-backup = {
     serviceConfig.Type = "oneshot";
     path = [
@@ -508,7 +488,7 @@ in
           --delete \
           --ignore-missing-args \
           --log-file="/mnt/backup/${domain}/blockchain/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
-          "/opt/k3s/data/persistent/v/apps-''${blockchain}-data" /mnt/backup/${domain}/blockchain/
+          "/opt/k3s/data/local-hostpath/v/apps-''${blockchain}-data" /mnt/backup/${domain}/blockchain/
 
         ${pkgs.kubectl}/bin/kubectl scale deploy -n apps ''${blockchain} --replicas=1
         ${pkgs.fluxcd}/bin/flux resume ks ''${blockchain}

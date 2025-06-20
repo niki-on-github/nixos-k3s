@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: 35.4.0
+      version: 36.1.0
       sourceRef:
         kind: HelmRepository
         name: traefik-charts
@@ -46,9 +46,6 @@ spec:
       prometheus:
         entryPoint: metrics
 
-    globalArguments:
-      - "--global.checknewversion"
-
     additionalArguments:
       - "--serverstransport.insecureskipverify=true"
       - "--providers.kubernetescrd.allowCrossNamespace=true"
@@ -56,6 +53,7 @@ spec:
       - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=60000s"
       - "--entrypoints.websecure.transport.respondingTimeouts.idleTimeout=60000s"
       - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=60000s"
+      - "--providers.kubernetesingress.ingressendpoint.ip=${CONFIG_KUBE_VIP_IP}"
 
     providers:
       kubernetesCRD:
@@ -66,6 +64,8 @@ spec:
         enabled: true
         allowExternalNameServices: true
         ingressClass: "traefik"
+        publishedService:
+          enabled: false
 
     ports:
       web:

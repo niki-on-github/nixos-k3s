@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.0.1
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,11 +22,23 @@ spec:
           app:
             image:
               repository: clusterzx/paperless-ai
-              tag: 3.0.4
+              tag: 3.0.5
 
             env:
               PUID: 1000
               PGID: 1000
+
+            # initial scan is slow
+            probes:
+              liveness: &probe
+                spec:
+                  initialDelaySeconds: 60
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+
+              readiness: *probe
+              startup: *probe
 
     service:
       webui:

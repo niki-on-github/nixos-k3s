@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.0.1
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: bbernhard/signal-cli-rest-api
-              tag: "0.92"
+              tag: "0.93"
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
@@ -49,7 +49,7 @@ spec:
           app:
             image:
               repository: axllent/mailpit
-              tag: "v1.25.1"
+              tag: "v1.26.1"
 
             env:
               TZ: *tz
@@ -135,7 +135,7 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 1Gi
-        storageClass: "local-persistent"
+        storageClass: "openebs-zfspv"
         advancedMounts:
           mail:
             app:

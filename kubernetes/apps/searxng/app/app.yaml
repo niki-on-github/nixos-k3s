@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.0.1
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -28,7 +28,7 @@ spec:
             dependsOn: redis
             image:
               repository: docker.io/searxng/searxng
-              tag: "latest@sha256:6873f96c525a077fd23244826584462d3f7a28211f510887fd3b5ce200ee3c20"
+              tag: "latest@sha256:a6ad4d72e07b3dc7b6cd80ed6d08e215fcea81b8165c9eeb3bf2b4c27a601f31"
             env:
               TZ: "${CONFIG_TIMEZONE}"
               UWSGI_WORKERS: &cpu

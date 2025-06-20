@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.0.1
+      version: 4.1.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -61,7 +61,7 @@ spec:
           app:
             image:
               repository: docker.io/filebrowser/filebrowser
-              tag: "v2.32.0"
+              tag: "v2.32.3"
             env:
               TZ: "${CONFIG_TIMEZONE}"
               FB_DATABASE: /data/filebrowser.db
@@ -80,6 +80,8 @@ spec:
         controller: samba
         type: LoadBalancer
         loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: smb.${SECRET_DOMAIN}
         ports:
           samba:
             port: 445
@@ -97,6 +99,8 @@ spec:
         controller: ftp
         type: LoadBalancer
         loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: ftp.${SECRET_DOMAIN}
         ports:
           ftp:
             port: 21
@@ -192,7 +196,7 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 128Gi
-        storageClass: "local-persistent"
+        storageClass: "local-hostpath"
         advancedMounts:
           samba:
             app:
