@@ -5,7 +5,6 @@ metadata:
   name: ${APP_NAME}-credentials
   namespace: ${APP_NAMESPACE}
 stringData:
-  # TODO var for jwt secret in config
   jwtSecret: ${SECRET_DATABASE_PASSWORD}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
@@ -19,7 +18,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -27,16 +26,16 @@ spec:
 
   values:
     controllers:
-      api:
+      ${APP_NAME}:
         containers:
           app:
             image:
-              repository: vikunja/api
-              tag: "0.22.1"
+              repository: docker.io/vikunja/vikunja
+              tag: "0.24.6"
 
             env:
-              TZ: &tz "${CONFIG_TIMEZONE}"
-              VIKUNJA_SERVICE_FRONTENDURL: "https://vikunja.${SECRET_DOMAIN}/"
+              TZ: "${CONFIG_TIMEZONE}"
+              VIKUNJA_SERVICE_PUBLICURL: "https://vikunja.${SECRET_DOMAIN}/"
               VIKUNJA_SERVICE_ENABLEREGISTRATION: "true"
               VIKUNJA_DATABASE_TYPE: postgres
               VIKUNJA_DATABASE_USER:
@@ -62,33 +61,13 @@ spec:
               VIKUNJA_SERVICE_JWTSECRET:
                 valueFrom:
                   secretKeyRef:
-                    name: &appCredentials "${APP_NAME}-credentials"
+                    name: "${APP_NAME}-credentials"
                     key: jwtSecret
  
-
-      ${APP_NAME}:
-        containers:
-          app:
-            image:
-              repository: vikunja/frontend
-              tag: "0.22.1"
-
-            env:
-              TZ: *tz
-              VIKUNJA_SERVICE_JWTSECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: *appCredentials
-                    key: jwtSecret           
 
     service:
       webui:
         controller: ${APP_NAME}
-        ports:
-          http:
-            port: 80
-      api:
-        controller: api
         ports:
           http:
             port: 3456
@@ -106,21 +85,6 @@ spec:
                 service:
                   identifier: webui
                   port: http
-              - path: /api/v1/
-                pathType: Prefix
-                service:
-                  identifier: api
-                  port: http
-              - path: /dav/
-                pathType: Prefix
-                service:
-                  identifier: api
-                  port: http
-              - path: /.well-known/
-                pathType: Prefix
-                service:
-                  identifier: api
-                  port: http
         tls:
           - hosts:
               - *ingress
@@ -135,21 +99,6 @@ spec:
                 service:
                   identifier: webui
                   port: http
-              - path: /api/v1/
-                pathType: Prefix
-                service:
-                  identifier: api
-                  port: http
-              - path: /dav/
-                pathType: Prefix
-                service:
-                  identifier: api
-                  port: http
-              - path: /.well-known/
-                pathType: Prefix
-                service:
-                  identifier: api
-                  port: http
 
         tls:
           - hosts:
@@ -159,6 +108,6 @@ spec:
       data:
         existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
-          api:
+          ${APP_NAME}:
             app:
               - path: /app/vikunja/files

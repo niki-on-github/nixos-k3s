@@ -6,7 +6,7 @@ metadata:
 spec:
   path: "./kubernetes/apps/telegraf/app"
   dependsOn:
-    - name: influxdb
+    - name: influxdb2
   postBuild:
     substitute:
       APP_NAME: telegraf

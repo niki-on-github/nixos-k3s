@@ -13,7 +13,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -43,8 +43,8 @@ spec:
         initContainers:
           init:
             image:
-              repository: python
-              tag: "3.13"
+              repository: docker.io/python
+              tag: "3.14"
             command:
             - "python3"
             args:
@@ -52,8 +52,8 @@ spec:
             - "--output"
             - "/config/qBittorrent/qBittorrent.conf"
             env:
-              # NOTE disable webui password and use authelia for auth
-              # TODO Bug only 0.0.0.0/0 works specify the POD Network or local network does not work!
+              # NOTE We disable webui password and use authelia for auth
+              # NOTE Bug only 0.0.0.0/0 works specify the POD Network or local network does not work!
               QBT_Preferences__WebUI__AuthSubnetWhitelist: "0.0.0.0/0"
               QBT_Preferences__WebUI__ReverseProxySupportEnabled: true
               QBT_Preferences__WebUI__TrustedReverseProxiesList: "${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL};${CONFIG_CLUSTER_SERVICE_NETWORK_IP_POOL}"
@@ -81,7 +81,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/qbittorrent
-              tag: "5.1.0@sha256:37aefd713ba31d51255995261616f1144378887bc5f21665a0ebf851fb85f69a"
+              tag: "5.1.2@sha256:31ac39705e31f7cdcc04dc46c1c0b0cdf8dc6f9865d4894efc097a33adc41524"
 
             # NOTE: Open shell in pod change setting in WebUI and observe the config value via `cat /config/qBittorrent/qBittorrent.conf`           
             # For more details see https://github.com/home-operations/containers/tree/main/apps/qbittorrent

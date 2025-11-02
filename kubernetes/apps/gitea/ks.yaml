@@ -5,8 +5,12 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/gitea/app"
+  dependsOn:
+    - name: tailscale
   postBuild:
     substitute:
       APP_NAME: gitea
       APP_NAMESPACE: apps
       PVC_CAPACITY: "32Gi"
+      BACKUP_CACHE_CAPACITY: "4Gi"
+      BACKUP_SCHEDULE: "0 */1 * * *"

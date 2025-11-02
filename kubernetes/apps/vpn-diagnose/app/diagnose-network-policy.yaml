@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: diagnose-network-policy
+  namespace: vpn-apps
+  labels:
+    app: diagnose-network-policy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: diagnose-network-policy
+  template:
+    metadata:
+      labels:
+        app: diagnose-network-policy
+        vpn: "test-network-policy"
+    spec:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+      containers:
+      - name: network-tools
+        image: jonlabelle/network-tools
+        tty: true
+        stdin: true
+        command:
+        - /bin/bash
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW

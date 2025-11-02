@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tailscale-cleanup
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: tailscale-cleanup
+          image: ghcr.io/niki-on-github/tailscale-node-cleanup:v0.2.0
+          env:
+            - name: TAILNET_ID
+              value: "${SECRET_TAILSCALE_TAILNET_ID}"
+            - name: TS_CLIENT_ID
+              value: "${SECRET_TAILSCALE_OAUTH_CLIENT_ID}"
+            - name: TS_CLIENT_SECRET
+              value: "${SECRET_TAILSCALE_OAUTH_CLIENT_SECRET}"
+            - name: CLEANUP_TAG
+              value: "k8s"
+

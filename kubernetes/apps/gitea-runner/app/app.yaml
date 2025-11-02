@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -21,7 +21,7 @@ spec:
         initContainers:
           init:
             image:
-              repository: busybox
+              repository: docker.io/busybox
               tag: "1.37.0"
             command:
             - "/bin/mkdir"
@@ -31,6 +31,17 @@ spec:
             - "-p"
             - "/init/act"
             - "/init/docker"
+            - "/init/certs"
+          certs:
+            image:
+              repository: docker.io/alpine
+              tag: "3.22"
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                apk add --no-cache ca-certificates
+                update-ca-certificates
+                cp -aLf /etc/ssl/certs /init/certs
 
         containers:
           app:
@@ -41,14 +52,16 @@ spec:
               runAsGroup: 1000
 
             image:
-              # TODO fix renovate, add sha256
-              repository: vegardit/gitea-act-runner
-              tag: "dind-0.2.11"
+              # TODO fix renovate
+              repository: docker.io/vegardit/gitea-act-runner
+              tag: "dind-0.2.12@sha256:06e4b98c3c8f28d4891d59a1deb8c1189830ecfa9ea49dc4013f0dabae1258c7"
 
+            # NOTE: When you change something here delete the persistent data of the runner to ensure to apply the new settings!
             env:
-              # GITEA_INSTANCE_URL: "http://gitea-webui.${APP_NAMESPACE}.svc.cluster.local:3000"
-              GITEA_INSTANCE_URL: "https://git.${SECRET_DOMAIN}"
-              GITEA_INSTANCE_INSECURE: false
+              # action `docker/build-push-action`, `comment-pull-request`, ... do not play nice with self signed certs
+              # GITEA_INSTANCE_URL: "https://git.${SECRET_DOMAIN}" # dies does not work with some action plugins
+              GITEA_INSTANCE_URL: "http://gitea-webui.${APP_NAMESPACE}.svc.cluster.local:3000" # Workaround access internal http endpoint direct
+              GITEA_INSTANCE_INSECURE: true
               GITEA_RUNNER_REGISTRATION_TOKEN: "${SECRET_GITEA_RUNNER_TOKEN}"
               GITEA_RUNNER_LOG_LEVEL: "info"
               GITEA_RUNNER_JOB_CONTAINER_PRIVILEGED: true
@@ -56,10 +69,12 @@ spec:
               GITEA_RUNNER_UID: 1000
               GITEA_RUNNER_GID: 1000
               GITEA_RUNNER_MAX_PARALLEL_JOBS: 4
-              GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "-e RUNNER_TEMP=/tmp --mount type=bind,source=/etc/ssl/certs/internal-ca.pem,target=/etc/ssl/certs/internal-ca.pem,readonly"
-              GITEA_RUNNER_VALID_VOLUME_1: /etc/ssl/certs/internal-ca.pem
+              GITEA_RUNNER_JOB_CONTAINER_OPTIONS: "-e RUNNER_TEMP=/tmp --mount type=bind,source=/etc/ssl/certs,target=/etc/ssl/certs,readonly"
+              GITEA_RUNNER_VALID_VOLUME_1: /etc/ssl/certs
               GITEA_RUNNER_ENV_VAR_1_NAME: "REGISTRY"
               GITEA_RUNNER_ENV_VAR_1_VALUE: "git.${SECRET_DOMAIN}"
+              # NOTE the default nix container does nto work in actions see https://icewind.nl/entry/gitea-actions-nix/
+              GITEA_RUNNER_LABELS: "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:act-latest,ubuntu-latest-full:docker://ghcr.io/catthehacker/ubuntu:full-latest,ubuntu-20.04:docker://ghcr.io/catthehacker/ubuntu:act-20.04,ubuntu-22.04:docker://ghcr.io/catthehacker/ubuntu:act-22.04,ubuntu-24.04:docker://ghcr.io/catthehacker/ubuntu:act-24.04"
 
     persistence:
       data:
@@ -67,16 +82,20 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: ${PVC_CAPACITY}
-        storageClass: "local-hostpath"
+        storageClass: "openebs-zfspv-reprovisioned"
         advancedMounts:
           ${APP_NAME}:
             init:
+              - path: /init
+            certs:
               - path: /init
             app:
               - path: /data
                 subPath: "act"
               - path: /var/lib/docker
                 subPath: "docker"
+              - path: /etc/ssl/certs
+                subPath: "certs"
       certs:
         type: secret
         name: internal-ca

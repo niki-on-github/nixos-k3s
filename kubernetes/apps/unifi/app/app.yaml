@@ -19,7 +19,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -28,10 +28,13 @@ spec:
   values:
     controllers:
       ${APP_NAME}:
+        pod:
+          annotations:
+            k8s.v1.cni.cncf.io/networks: networking/multus-br1
         initContainers:
           init:
             image:
-              repository: busybox
+              repository: docker.io/busybox
               tag: "1.37.0"
             command:
             - "/bin/mkdir"
@@ -43,8 +46,8 @@ spec:
         containers:
           app:
             image:
-              repository: nexusforge/unifi-docker
-              tag: "v9.2.87"
+              repository: docker.io/nexusforge/unifi-docker
+              tag: "v9.5.21"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

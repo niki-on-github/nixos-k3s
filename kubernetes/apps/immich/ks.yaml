@@ -19,7 +19,7 @@ spec:
   patches:
     - target:
         kind: Cluster
-        # TODO labelSelector and name does not work!?
+        # NOTE labelSelector and name does not work!?
         # labelSelector: kustomize.toolkit.fluxcd.io/name in (immich-db)
       patch: |
         - op: add

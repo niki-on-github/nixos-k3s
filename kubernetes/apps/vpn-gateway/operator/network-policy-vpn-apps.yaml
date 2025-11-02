@@ -19,6 +19,18 @@ spec:
     - matchLabels:
         k8s:io.kubernetes.pod.namespace: vpn-gateway
         app.kubernetes.io/name: pod-gateway
+    toPorts:
+    - ports:
+      - port: "4789"
+        protocol: UDP
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: vpn-gateway
+        app.kubernetes.io/name: pod-gateway
+    icmps:
+      - fields:
+        - type: 8   # Echo Request (ping)
+          family: IPv4
   - toEndpoints:
      - matchLabels:
         k8s:io.kubernetes.pod.namespace: kube-system
@@ -36,6 +48,11 @@ spec:
     - matchLabels:
         k8s:io.kubernetes.pod.namespace: vpn-gateway
         app.kubernetes.io/name: pod-gateway
+    toPorts:
+      - ports:
+          - port: "4789"
+            protocol: UDP
+  - fromEndpoints:
     - matchLabels:
         k8s:io.kubernetes.pod.namespace: networking
         app.kubernetes.io/name: traefik

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -21,7 +21,7 @@ spec:
         initContainers:
           init:
             image:
-              repository: jonlabelle/network-tools
+              repository: docker.io/jonlabelle/network-tools
               tag: "latest"
             command:
             - "/usr/bin/wget"
@@ -34,8 +34,8 @@ spec:
         containers:
           app:
             image:
-              repository: frooodle/s-pdf
-              tag: "0.46.2"
+              repository: docker.io/frooodle/s-pdf
+              tag: "1.5.0"
             env:
               LANGS: en_GB,de_DE
 

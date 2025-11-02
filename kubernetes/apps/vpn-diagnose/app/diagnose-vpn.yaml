@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: diagnose-vpn
+  namespace: vpn-apps
+  labels:
+    app: diagnose-vpn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: diagnose-vpn
+  template:
+    metadata:
+      labels:
+        app: diagnose-vpn
+        vpn: "enabled"
+    spec:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+      containers:
+      - name: network-tools
+        image: jonlabelle/network-tools
+        tty: true
+        stdin: true
+        command:
+        - /bin/bash
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW

@@ -12,6 +12,10 @@ spec:
   - toEndpoints:
     - matchLabels:
         k8s:io.kubernetes.pod.namespace: vpn-apps
+    toPorts:
+    - ports:
+      - port: "4789"
+        protocol: UDP
   - toCIDR: 
     - "0.0.0.0/0"
     toPorts:
@@ -30,3 +34,18 @@ spec:
       rules:
         dns:
           - matchPattern: "*.vpn-gateway.svc.cluster.local"
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: vpn-apps
+    toPorts:
+        - ports:
+            - port: "4789"
+              protocol: UDP
+  - fromEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: vpn-apps
+    icmps:
+      - fields:
+        - type: 8   # Echo Request (ping)
+          family: IPv4

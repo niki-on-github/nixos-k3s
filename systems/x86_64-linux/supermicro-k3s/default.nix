@@ -4,14 +4,15 @@ let
   cpu = "amd";
   domain = "server02.lan";
   ip = "10.0.1.11";
-  interface = "enp5s0f1";
+  interface = "enp5s0f1np1";
   backupInterface = "enp7s0"; # warning when adding nvme this name may changes
   cpufreqmax = 3000000; 
-  disk = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_4TB_AAA";
+  disk = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_4TB_XXX";
+  conbee2 = "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DEXXX-if00";
 in
 {
   imports = with inputs.self.nixosModules; [
-    inputs.self.nixosRoles.k3s
+    inputs.self.nixosRoles.server
     inputs.home-manager.nixosModules.home-manager
   ];
 
@@ -37,6 +38,7 @@ in
       4011 # netboot-xyz
       10001 # unifi discovery
     ];
+    trustedInterfaces = [ "cni+" ];
   };
 
   services.k3s.package = pkgs.k3s; 
@@ -85,6 +87,7 @@ in
     apps = {
       modern-unix.enable = true;
       monitoring.enable = true;
+      storage-utils.enable = true;
     };
     backup = {
       hetzner = {
@@ -92,6 +95,7 @@ in
         schedule = "weekly";
         password-path = "${config.sops.secrets.hetzner-borg-password.path}";
         paths = ["/mnt/backup/minio"];
+        exclude = ["/mnt/backup/minio/blockchain"];
         snapshot = {
           enable = true;
           inplace = true;
@@ -115,16 +119,17 @@ in
         zfs = {
           datasets = [
             { name = "volumes"; }
+            { name = "persistent"; }
           ];
         };
       };
       crypttab = {
         devices = [{
-          blkDev = "/dev/disk/by-id/ata-HGST_AAA-part1";
+          blkDev = "/dev/disk/by-id/ata-ST4000DM000-1F2168_Z3013VSB-part1";
           label = "hdd";
           fsType = "btrfs";
           mountpoint = "/mnt/hdd";
-          mountOptions = ["noatime" "compress=zstd" "nofail"];
+          mountOptions = ["noatime" "compress=zstd" "nofail" "subvol=@data"];
         }];
       };
     };
@@ -155,7 +160,7 @@ in
           minio = {
             enable = true;
             credentialsFile = config.age.secrets.minio-credentials.path;
-            buckets = ["volsync" "postgres"];
+            buckets = ["volsync" "postgres" "blockchain"];
             dataDir = ["/mnt/backup/minio"];
           };
         };
@@ -169,7 +174,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_01" = {
-    device = "/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_Plus_1TBAAA-part1";
+    device = "/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_Plus_1TB_XXX-part1";
     preLVM = true;
     # we reuse passphrase from system unlock
     keyFile = lib.mkIf (config.templates.system.setup.encryption == "full") "/disk.key";
@@ -178,7 +183,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_02" = {
-    device = "/dev/disk/by-id/ata-WDC_AAA-part1";
+    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-6XXX-part1";
     preLVM = true;
     # we reuse passphrase from system unlock
     keyFile = lib.mkIf (config.templates.system.setup.encryption == "full") "/disk.key";
@@ -202,9 +207,9 @@ in
     settings = {
       server = {
         HTTP_PORT = 3000;
-        ROOT_URL = "http://${domain}:3000/";
-        DOMAIN = "${domain}";
-        SSH_DOMAIN = "${domain}";
+        ROOT_URL = "http://git.${domain}:3000/";
+        DOMAIN = "git.${domain}";
+        SSH_DOMAIN = "git.${domain}";
       };
       service = {
         DISABLE_REGISTRATION = true;
@@ -215,7 +220,7 @@ in
     };
   };
 
-  # hdd spindown after 60*5 = 300 seconds
+  # hdd spindown after 120*5 = 600 seconds
   services.udev.extraRules = 
     let
       mkRule = as: lib.concatStringsSep ", " as;
@@ -256,6 +261,7 @@ in
       hdparm
       rsync
       gzip
+      gocryptfs
     ];
   };
 
@@ -289,6 +295,9 @@ in
       };
       root = {
         hashedPasswordFile = config.sops.secrets.user-password.path;
+        openssh.authorizedKeys.keyFiles = [
+          ./secrets/ssh.server02.lan.pub
+        ];
       };
     };
   };
@@ -343,25 +352,25 @@ in
           namespace: kube-system
           # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.17.4
+          version: 1.18.3
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
           namespace: kube-system
           # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
-          version: 1.42.4
+          version: 1.45.0
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
           wait: true
         - name: flux-operator
           namespace: flux-system
           chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
-          version: 0.22.0
+          version: 0.33.0
           wait: true
         - name: flux-instance
           namespace: flux-system
           chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
-          version: 0.22.0
+          version: 0.33.0
           values: ["${../../../kubernetes/core/gitops/flux-instance/app/helm-values.yaml}", "${../../../kubernetes/config/settings/flux.yaml}"]
           wait: true
           needs:
@@ -404,7 +413,7 @@ in
     text = ''
       connection: &con01
         accepter: tcp,20108
-        connector: serialdev,/dev/ttyACM0,115200n81,nobreak,local
+        connector: serialdev,${conbee2},115200n81,nobreak,local
         options:
           kickolduser: true
     '';
@@ -456,51 +465,5 @@ in
     wantedBy = [ "timers.target" ];
     partOf = [ "opnsense-kvm-backup.service" ];
     timerConfig.OnCalendar = [ "Tue 06:00:00" ];
-  };
-
-
-  systemd.services.blockchain-backup = {
-    serviceConfig.Type = "oneshot";
-    path = [
-      pkgs.findutils
-      pkgs.gnutar
-      pkgs.rsync
-      pkgs.gzip
-      pkgs.fluxcd
-      pkgs.kubectl
-      pkgs.coreutils
-    ];
-    script = ''
-      echo "Start blockchain backup now"
-      export HOME="/root"
-      mkdir -p /mnt/backup/${domain}/blockchain
-      mkdir -p /mnt/backup/${domain}/blockchain/log
-      
-      blockchains=("monerod" "bitcoind")
-      for blockchain in "''${blockchains[@]}"; do
-        echo "backup ''${blockchain}..."
-        ${pkgs.fluxcd}/bin/flux suspend ks ''${blockchain}
-        ${pkgs.kubectl}/bin/kubectl scale deploy -n apps ''${blockchain} --replicas=0
-        ${pkgs.coreutils}/bin/sleep 100
-
-        ${pkgs.rsync}/bin/rsync \
-          -av \
-          --delete \
-          --ignore-missing-args \
-          --log-file="/mnt/backup/${domain}/blockchain/log/$(date +"%Y-%m-%d_%H-%M-%S").log" \
-          "/opt/k3s/data/local-hostpath/v/apps-''${blockchain}-data" /mnt/backup/${domain}/blockchain/
-
-        ${pkgs.kubectl}/bin/kubectl scale deploy -n apps ''${blockchain} --replicas=1
-        ${pkgs.fluxcd}/bin/flux resume ks ''${blockchain}
-      done
-      
-      echo "blockchain backup completed"
-    '';
-  };
-
-  systemd.timers.blockchain-backup = {
-    wantedBy = [ "timers.target" ];
-    partOf = [ "blockchain-backup.service" ];
-    timerConfig.OnCalendar = [ "Wed 06:00:00" ];
   };
 }

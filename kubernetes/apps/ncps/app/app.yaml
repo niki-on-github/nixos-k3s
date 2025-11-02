@@ -30,7 +30,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -42,7 +42,7 @@ spec:
         initContainers:
           create-directories:
             image:
-              repository: busybox
+              repository: docker.io/busybox
               tag: "1.37.0"
             command:
               - "/bin/sh"
@@ -52,8 +52,8 @@ spec:
 
           migrate-database:
             image:
-              repository: kalbasit/ncps
-              tag: "0.2"
+              repository: docker.io/kalbasit/ncps
+              tag: "v0.4"
             args:
             - /bin/dbmate
             - --url=sqlite:/storage/var/ncps/db/db.sqlite
@@ -63,8 +63,8 @@ spec:
         containers:
           app:
             image:
-              repository: kalbasit/ncps
-              tag: "0.2"
+              repository: docker.io/kalbasit/ncps
+              tag: "v0.4"
             args:
               - "/bin/ncps"
               - serve
@@ -72,6 +72,7 @@ spec:
               - --cache-allow-delete-verb
               - --cache-hostname=ncps.${SECRET_DOMAIN}
               - --cache-data-path=/storage
+              - --cache-temp-path=/nar-temp-dir
               - --cache-database-url=sqlite:/storage/var/ncps/db/db.sqlite
               - --cache-max-size=128G
               - --cache-lru-schedule=@daily
@@ -80,7 +81,7 @@ spec:
               - --upstream-cache=https://nix-community.cachix.org
               - --upstream-cache=https://cuda-maintainers.cachix.org
               - --upstream-cache=https://hyprland.cachix.org
-              - --upstream-cache=https://cache.saumon.network/proxmox-nixos
+              # - --upstream-cache=https://cache.saumon.network/proxmox-nixos
               - --upstream-public-key=cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
               - --upstream-public-key=nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
               - --upstream-public-key=cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=
@@ -118,7 +119,7 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: ${PVC_CAPACITY}
-        storageClass: "local-hostpath"
+        storageClass: "openebs-zfspv-reprovisioned"
         globalMounts:
           - path: /storage
       secret:
@@ -128,3 +129,8 @@ spec:
           ${APP_NAME}:
             app:
               - path: /secret
+      tmp:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /nar-temp-dir

@@ -11,4 +11,4 @@ spec:
     substitute:
       APP_NAME: gitea-runner
       APP_NAMESPACE: apps
-      PVC_CAPACITY: "32Gi"
+      PVC_CAPACITY: "256Gi"

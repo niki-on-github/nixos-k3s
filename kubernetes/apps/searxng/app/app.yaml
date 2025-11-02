@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,22 +22,20 @@ spec:
           redis:
             image:
               repository: docker.io/library/redis
-              tag: 8.0.2
+              tag: 8.2.2
 
           app:
             dependsOn: redis
             image:
               repository: docker.io/searxng/searxng
-              tag: "latest@sha256:a6ad4d72e07b3dc7b6cd80ed6d08e215fcea81b8165c9eeb3bf2b4c27a601f31"
+              tag: "latest@sha256:41b98d7f04bc0ffd37e98a2af5de38a628f1cc4c6374b39ee8eacbc209bf75be"
             env:
               TZ: "${CONFIG_TIMEZONE}"
-              UWSGI_WORKERS: &cpu
+              GRANIAN_BLOCKING_THREADS: &cpu
                 valueFrom:
                   resourceFieldRef:
                     containerName: app
                     resource: limits.cpu # not defined, so will use node allocatable
-              UWSGI_THREADS: *cpu
-            command: ["/usr/local/searxng/venv/bin/uwsgi", "--master", "/usr/local/searxng/.template/uwsgi.ini"]
               
     service:
       webui:
@@ -66,9 +64,6 @@ spec:
       config:
         suffix: config
         data: 
-          limiter.toml: |
-            [botdetection.ip_limit]
-            link_token = true
           settings.yml: |
             use_default_settings: true
             general:
@@ -147,7 +142,5 @@ spec:
             app: 
               - path: /etc/searxng/settings.yml
                 subPath: settings.yml
-              - path: /etc/searxng/limiter.toml
-                subPath: limiter.toml
 
 

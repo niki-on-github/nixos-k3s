@@ -1,0 +1,85 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: docker.io/busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/mkdir"
+            args:
+            - "-m"
+            - "0777"
+            - "-p"
+            - "/init/Musik/Spotify"
+
+        containers:
+          app:
+            image:
+              repository: docker.io/thewicklowwolf/syncify
+              tag: "0.2.41"
+            env:
+              thread_limit: 1
+              crop_album_art: false
+              SPOTIPY_CLIENT_ID: "${SECRET_JELLYPLIST_SPOTIFY_CLIENT_ID}"
+              SPOTIPY_CLIENT_SECRET: "${SECRET_JELLYPLIST_SPOTIFY_CLIENT_SECRET}"
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 5000
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &ingress "syncify.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+
+    persistence:
+      config:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+            - path: /syncify/config
+      media:
+        existingClaim: "network-share-data"
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+            - path: /init
+            app:
+            - path: /syncify/downloads
+              subPath: Musik

@@ -9,3 +9,4 @@ resources:
   - secrets/vault-keys.sops.yaml
   - secrets/jellyplist-spotify-cookie.sops.yaml
   - secrets/external-dns.sops.yaml
+  - secrets/storagebox.sops.yaml

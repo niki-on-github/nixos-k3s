@@ -1,0 +1,67 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: influxdb2
+      version: 2.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: influxdata-charts
+        namespace: flux-system
+
+  values:
+    image:
+      repository: docker.io/influxdb
+      tag: 2.7.12-alpine
+      pullPolicy: IfNotPresent
+
+    adminUser:
+      organization: "${CONFIG_INFLUXDB_ORG}"
+      bucket: "primary"
+      user: "admin"
+      retention_policy: "90d"
+      password: "${SECRET_DATABASE_PASSWORD}"
+      token: "${SECRET_INFLUXDB_ADMIN_TOKEN}"
+
+    persistence:
+      enabled: true
+      useExisting: true
+      name: "${APP_NAME}-pvc"
+      storageClass: "-"
+
+    initScripts:
+      enabled: true
+      scripts:
+        init.sh: |
+          #!/bin/sh
+          influx bucket create -n solaredge -o ${CONFIG_INFLUXDB_ORG} -r 0
+          influx bucket create -n telegraf-opnsense -o ${CONFIG_INFLUXDB_ORG} -r 90d
+          influx bucket create -n telegraf-server -o ${CONFIG_INFLUXDB_ORG} -r 90d
+          influx bucket create -n home -o ${CONFIG_INFLUXDB_ORG} -r 30d
+          influx bucket create -n weather-forecast -o ${CONFIG_INFLUXDB_ORG} -r 30d
+          influx bucket create -n scrutiny -o ${CONFIG_INFLUXDB_ORG} -r 90d
+          influx bucket create -n scrutiny_weekly -o ${CONFIG_INFLUXDB_ORG} -r 0
+          influx bucket create -n scrutiny_monthly -o ${CONFIG_INFLUXDB_ORG} -r 0
+          influx bucket create -n scrutiny_yearly -o ${CONFIG_INFLUXDB_ORG} -r 0
+
+    service:
+      type: ClusterIP
+      port: 8086
+      targetPort: 8086
+      portName: http
+
+    ingress:
+      enabled: true
+      tls: true
+      hostname: "influxdb2.${SECRET_DOMAIN}"
+      ingressClassName: traefik
+      annotation:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+
+
+

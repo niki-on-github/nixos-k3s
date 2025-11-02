@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -21,8 +21,8 @@ spec:
         containers:
           app:
             image:
-              repository: clusterzx/paperless-ai
-              tag: 3.0.5
+              repository: docker.io/clusterzx/paperless-ai
+              tag: 3.0.7
 
             env:
               PUID: 1000

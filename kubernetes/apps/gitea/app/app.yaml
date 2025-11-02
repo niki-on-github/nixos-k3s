@@ -21,7 +21,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -33,8 +33,14 @@ spec:
         containers:
           app:
             image:
-              repository: gitea/gitea
-              tag: "1.24.0"
+              repository: docker.io/gitea/gitea
+              tag: "1.25.0"
+
+            command:
+            - "/bin/sh"
+            args:
+            - "-c"
+            - "update-ca-certificates && /usr/bin/entrypoint"
 
             env:
               USER_UID: "1000"
@@ -53,8 +59,18 @@ spec:
               GITEA__api_ENABLE_SWAGGER: "true"
               GITEA__packages__ENABLED: "true"
               GITEA__actions__ENABLED: "true"
+              GITEA__actions__LOG_RETENTION_DAYS: "90"
               GITEA__migrations__SKIP_TLS_VERIFY: "true"
               GITEA__migrations__ALLOW_LOCALNETWORKS: "true"
+              GITEA__cron__ENABLED: "true"
+              GITEA__cron__RUN_AT_START: "true"
+              GITEA__mailer__ENABLED: "true"
+              GITEA__mailer__FROM: "gitea@${SECRET_DOMAIN}"
+              GITEA__mailer__PROTOCOL: "smtp"
+              GITEA__mailer__SMTP_ADDR: "${CONFIG_MAIL_NOTIFICATION_HOST}"
+              GITEA__mailer__SMTP_PORT: "${CONFIG_MAIL_NOTIFICATION_PORT}"
+
+
     service:
       webui:
         controller: ${APP_NAME}
@@ -89,9 +105,33 @@ spec:
         tls:
           - hosts:
               - *ingress
-        
+
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
+
     persistence:
       data:
         existingClaim: "${APP_NAME}-pvc"
-        globalMounts:
-          - path: /data
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+            - path: /data
+      certs:
+        type: secret
+        name: internal-ca
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+            - path: /etc/ssl/certs/internal-ca.pem
+              subPath: tls.crt

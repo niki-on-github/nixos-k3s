@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: ghcr.io/coder/code-server
-              tag: 4.100.3
+              tag: 4.105.1
             env:
               TZ: ${CONFIG_TIMEZONE}
             args:
@@ -34,6 +34,10 @@ spec:
               - "--port"
               - "80"
               - /config
+            securityContext:
+              privileged: true
+              runAsNonRoot: false
+              runAsUser: 0
               
     service:
       webui:

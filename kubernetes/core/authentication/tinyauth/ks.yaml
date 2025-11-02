@@ -7,7 +7,9 @@ spec:
   path: "./kubernetes/core/authentication/tinyauth/app"
   dependsOn:
     - name: traefik
+    - name: volsync
   postBuild:
     substitute:
       APP_NAME: tinyauth
       APP_NAMESPACE: authentication
+      PVC_CAPACITY: "1Gi"

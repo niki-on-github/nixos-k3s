@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -44,7 +44,7 @@ spec:
               - "${SECRET_SOLAREDGE_INVERTER_IP}"
               - "1502"
               - "--influx_url"
-              - "influxdb.monitoring.svc.cluster.local:8086"
+              - "influxdb2.monitoring.svc.cluster.local:8086"
               - "--influx_org"
               - "${CONFIG_INFLUXDB_ORG}"
               - "--influx_bucket"

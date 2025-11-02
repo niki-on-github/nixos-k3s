@@ -1,0 +1,11 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kubetail
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/kubetail/app"
+  postBuild:
+    substitute:
+      APP_NAME: kubetail
+      APP_NAMESPACE: monitoring

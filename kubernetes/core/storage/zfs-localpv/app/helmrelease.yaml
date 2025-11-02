@@ -19,4 +19,11 @@ spec:
     # see https://github.com/openebs/zfs-localpv/blob/develop/deploy/helm/charts/values.yaml
     zfs:
       bin: /run/current-system/sw/bin/zfs
-
+    # We use a fork of csi-provisioner which allow to use templated names for provisioned PV's instead of UUIDs so we can reuse previously provisioned PV's
+    # see https://github.com/anoxape/external-reprovisioner
+    zfsController:
+      provisioner:
+        image:
+          registry: ghcr.io/
+          repository: anoxape/csi-provisioner
+          tag: v5.3.0-r1

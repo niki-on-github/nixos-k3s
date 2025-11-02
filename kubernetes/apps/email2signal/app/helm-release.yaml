@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -21,12 +21,15 @@ spec:
         containers:
           app:
             image:
-              repository: bbernhard/signal-cli-rest-api
-              tag: "0.93"
+              repository: docker.io/bbernhard/signal-cli-rest-api
+              tag: "0.95"
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
               MODE: "native"
+              BASE_URL: "https://signal-api.${SECRET_DOMAIN}"
+              SWAGGER_HOST: "signal-api.${SECRET_DOMAIN}"
+              SWAGGER_USE_HTTPS_AS_PREFERRED_SCHEME: "true"
               # It's not a good idea to use the AUTO_RECEIVE_SCHEDULE parameter, as you might lose some messages that way.
               # AUTO_RECEIVE_SCHEDULE: "0 2 * * *"
 
@@ -48,8 +51,8 @@ spec:
         containers:
           app:
             image:
-              repository: axllent/mailpit
-              tag: "v1.26.1"
+              repository: docker.io/axllent/mailpit
+              tag: "v1.27.10"
 
             env:
               TZ: *tz

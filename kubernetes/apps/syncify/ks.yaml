@@ -1,0 +1,14 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: syncify
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/syncify/app"
+  dependsOn:
+    - name: network-share
+  postBuild:
+    substitute:
+      APP_NAME: syncify
+      APP_NAMESPACE: media
+      PVC_CAPACITY: "4Gi"

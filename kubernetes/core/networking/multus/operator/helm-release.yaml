@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: rke2-multus
-      version: v4.2.102
+      version: v4.2.208
       sourceRef:
         kind: HelmRepository
         name: rke2-charts

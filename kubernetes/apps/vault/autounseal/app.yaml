@@ -15,7 +15,7 @@ spec:
 
   values:
     image:
-      repository: kennyopennix/vault-autounseal
+      repository: docker.io/kennyopennix/vault-autounseal
       tag: "main"
       
     settings:

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -21,9 +21,8 @@ spec:
         containers:
           app:
             image:
-              repository: louislam/uptime-kuma
-              # TODO tag
-              tag: "1"
+              repository: docker.io/louislam/uptime-kuma
+              tag: "2.0.2"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

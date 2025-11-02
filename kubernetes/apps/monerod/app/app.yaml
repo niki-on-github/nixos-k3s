@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sethforprivacy/simple-monerod
-              tag: v0.18.4.0
+              tag: v0.18.4.3
             command:
             - "/entrypoint.sh"
             args:
@@ -32,9 +32,12 @@ spec:
             - "--no-zmq"
             - "--enable-dns-blocklist"
             - "--prune-blockchain"
+            - "--db-sync-mode=safe"
             env:
               TZ: "${CONFIG_TIMEZONE}"
             resources:
+              requests:
+                cpu: 10m
               limits:
                 cpu: 1000m
       
@@ -52,10 +55,6 @@ spec:
 
     persistence:
       data:
-        suffix: data
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: ${PVC_CAPACITY}
-        storageClass: "local-hostpath"
+        existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /home/monero/.bitmonero

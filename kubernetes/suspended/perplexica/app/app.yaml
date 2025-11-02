@@ -35,7 +35,6 @@ spec:
         containers:
           app:
             image:
-              # TODO tag
               repository: itzcrazykns1337/perplexica
               tag: main@sha256:b5627639b3221351948b2ca95f0d5d8680e8a324bc0ff591ad48849e97fcaab6
 
@@ -43,7 +42,7 @@ spec:
         containers:
           app:
             image:
-              # TODO fix renovate
+              # NOTE: we should schwitch to global hosted searxng
               repository: docker.io/searxng/searxng
               tag: "2024.12.25-73e395c8c"
 

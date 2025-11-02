@@ -8,5 +8,6 @@ configMapGenerator:
   - name: nzbget-scripts
     files:
       - scripts/GetPw.py
+      - scripts/DeleteSamples.py
 generatorOptions:
   disableNameSuffixHash: true

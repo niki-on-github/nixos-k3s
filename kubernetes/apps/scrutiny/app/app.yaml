@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -27,7 +27,7 @@ spec:
             env:
               TZ: "${TIMEZONE}"
               SCRUTINY_API_ENDPOINT: "http://localhost:8080"
-              SCRUTINY_WEB_INFLUXDB_HOST: "influxdb.monitoring.svc.cluster.local"
+              SCRUTINY_WEB_INFLUXDB_HOST: "influxdb2.monitoring.svc.cluster.local"
               SCRUTINY_WEB_INFLUXDB_TOKEN: "${SECRET_INFLUXDB_ADMIN_TOKEN}"
               SCRUTINY_WEB_INFLUXDB_ORG: "${CONFIG_INFLUXDB_ORG}"
               SCRUTINY_WEB_INFLUXDB_BUCKET: "scrutiny"
@@ -72,9 +72,26 @@ spec:
         tls:
           - hosts:
               - *ingress
-        
+    
+    configMaps:
+      setup:
+        suffix: config
+        data:
+          collector.yaml: |
+            version: 1
+            commands:
+              metrics_scan_args: '--scan --json --nocheck=standby'
+              metrics_info_args: '--info --json --nocheck=standby'
+              metrics_smart_args: '--xall --json --nocheck=standby'
+            devices:
+            - device: /dev/sda
+              ignore: true
+              # NOTE: Reading smart data casue spinup for these hdd type
+            log:
+              level: info
+
     persistence:
-      config:
+      app-config:
         existingClaim: "${APP_NAME}-pvc"
         advancedMounts:
           ${APP_NAME}:
@@ -94,4 +111,12 @@ spec:
           ${APP_NAME}:
             collector:
               - path: /run/udev
-          
+      collector-config:
+        type: configMap
+        name: ${APP_NAME}-config
+        defaultMode: 493
+        advancedMounts:
+          ${APP_NAME}:
+            collector:
+              - path: /opt/scrutiny/config/collector.yaml
+                subPath: collector.yaml

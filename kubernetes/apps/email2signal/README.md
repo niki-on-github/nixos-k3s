@@ -9,3 +9,14 @@ Open shell in mailpit container and run:
 ```sh
 echo -e "Subject: Test\n\nTest\n" | sendmail -S localhost:1025 self@signal.localdomain
 ```
+
+## Endpoint
+
+- host: `email2signal-mail.notification.svc`
+- port: `1025`
+- recipient: `self@signal.localdomain`
+
+
+## Swagger UUI
+
+`https://signal-api.k8s.lan//swagger/index.html`

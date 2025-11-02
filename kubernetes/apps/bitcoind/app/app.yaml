@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -21,7 +21,7 @@ spec:
         initContainers:
           init:
             image:
-              repository: busybox
+              repository: docker.io/busybox
               tag: "1.37.0"
             command:
             - "/bin/sh"
@@ -31,18 +31,20 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/bitcoind-container
-              tag: v29.0
+              tag: v30.0
               # pullPolicy: Always
             env:
               TZ: "${CONFIG_TIMEZONE}"
             resources:
+              requests:
+                cpu: 10m
               limits:
                 cpu: 1000m
       
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 101
+        runAsNonRoot: false
+        runAsUser: 0
         runAsGroup: 101
         fsGroup: 101
         fsGroupChangePolicy: OnRootMismatch
@@ -75,6 +77,7 @@ spec:
           init.sh: |
             #!/bin/sh
             echo "run $0"
+            ls -la /home/bitcoin/.bitcoin
             cp -fv /init/bitcoin.conf /home/bitcoin/.bitcoin/bitcoin.conf
             chown 101:101 /home/bitcoin/.bitcoin/bitcoin.conf
           bitcoin.conf: |
@@ -97,11 +100,7 @@ spec:
 
     persistence:
       data:
-        suffix: data
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: ${PVC_CAPACITY}
-        storageClass: "local-hostpath"
+        existingClaim: "${APP_NAME}-pvc"
         globalMounts:
           - path: /home/bitcoin/.bitcoin/
       init:

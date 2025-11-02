@@ -1,14 +1,15 @@
 {
   inputs = {
     nixpkgs = {
-      url = "github:NixOS/nixpkgs/nixos-24.11";
+      url = "github:NixOS/nixpkgs/nixos-25.05";
     };
 
     nixpkgs-unstable = {
       url = "github:nixos/nixpkgs/nixos-unstable";
     };
+
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
+      url = "github:nix-community/home-manager/release-25.05";
     };
 
     nur = {
@@ -17,12 +18,10 @@
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     deploy-rs = {
@@ -31,7 +30,6 @@
 
     disko = {
       url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     personalModules = {
@@ -57,11 +55,10 @@
         personalModules.pkgs
       ];
       nixosDeployments = personalModules.utils.deploy.generateNixosDeployments {
-        inherit inputs;
+        inherit inputs nixpkgs overlays;
         path = ./systems;
-        ssh-user = "nix";
+        ssh-user = "root";
         sharedModules = [
-          { nixpkgs.overlays = overlays; }
           sops-nix.nixosModules.sops
           agenix.nixosModules.default
           disko.nixosModules.disko

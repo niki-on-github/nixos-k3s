@@ -9,7 +9,7 @@ parameters:
   dedup: "off"
   thinprovision: "yes"
   fstype: "zfs"
-  poolname: "${CONFIG_ZFS_POOLNAME}"
+  poolname: "${CONFIG_ZFS_DEFAULT_POOLNAME}"
   shared: "yes"
 provisioner: zfs.csi.openebs.io
 volumeBindingMode: WaitForFirstConsumer
@@ -24,3 +24,22 @@ metadata:
     snapshot.storage.kubernetes.io/is-default-class: "true"
 driver: zfs.csi.openebs.io
 deletionPolicy: Delete
+---
+# see https://github.com/anoxape/external-reprovisioner
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: openebs-zfspv-reprovisioned
+allowVolumeExpansion: true
+parameters:
+  compression: "on"
+  dedup: "off"
+  thinprovision: "yes"
+  fstype: "zfs"
+  poolname: "${CONFIG_ZFS_REPROVISION_POOLNAME}"
+  shared: "yes"
+  external-reprovisioner.anoxape.org/enabled: "true"
+  external-reprovisioner.anoxape.org/volume-name-template: "$${pvc.namespace}-$${pvc.name}"
+provisioner: zfs.csi.openebs.io
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain

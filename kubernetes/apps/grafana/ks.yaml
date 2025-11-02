@@ -8,6 +8,7 @@ spec:
   dependsOn:
     - name: traefik
     - name: prometheus-stack
+    - name: influxdb2
     - name: tailscale
   postBuild:
     substitute:

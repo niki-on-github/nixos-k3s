@@ -9,4 +9,4 @@ spec:
     substitute:
       APP_NAME: ncps
       APP_NAMESPACE: apps
-      PVC_CAPACITY: "128Gi"
+      PVC_CAPACITY: "150Gi"

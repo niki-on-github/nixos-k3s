@@ -10,9 +10,8 @@ spec:
   trigger:
     schedule: ${yaml_str_tag:=!!str} ${BACKUP_SCHEDULE:-"0 */4 * * *"}
     # NOTE: change/inc below to perform a manual backup schedule once
-    # TODO: Currently we can only use one trigger, why?
-    # see https://github.com/backube/volsync/discussions/576
-    # manual: "manual-backup-0009"
+    # NOTE: Currently we can only use one trigger, due to the architecture limitation (see https://github.com/backube/volsync/discussions/576)
+    # manual: "manual-backup-0010"
   restic:
     # NOTE: when your repository has a stale lock that prevents backups increment the number in string below to perform an unlock before the next backup
     unlock: "unlock-00006"
@@ -20,6 +19,7 @@ spec:
     # NOTE: If copyMethod: Clone were used, the temporary, point-in-time copy would be created by cloning the source PVC to a new PVC directly. This is more efficient than Snapshot, but it is not supported by all CSI drivers.
     copyMethod: Clone
     cacheStorageClassName: openebs-zfspv
+    cacheCapacity: "${BACKUP_CACHE_CAPACITY:-2Gi}"
     pruneIntervalDays: 7
     retain:
       daily: ${BACKUP_RETAIN_DAILY:-7}
@@ -27,5 +27,7 @@ spec:
       monthly: ${BACKUP_RETAIN_MONTHLY:-1}
 
     moverResources:
+      requests:
+        cpu: "10m"
       limits:
-        cpu: "500m"
+        cpu: "2000m"

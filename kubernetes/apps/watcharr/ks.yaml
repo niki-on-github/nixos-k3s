@@ -22,6 +22,7 @@ spec:
   path: "./kubernetes/apps/watcharr/app"
   dependsOn:
     - name: watcharr-db
+    - name: tailscale
   postBuild:
     substitute:
       APP_NAME: watcharr

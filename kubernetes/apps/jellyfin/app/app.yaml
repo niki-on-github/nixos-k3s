@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -17,18 +17,18 @@ spec:
 
   values:
     controllers:
-      ${APP_NAME}:      
+      ${APP_NAME}:
         containers:
           app:
             image:
-              repository: jellyfin/jellyfin
-              tag: "10.10.7"
-          
+              repository: docker.io/jellyfin/jellyfin
+              tag: "10.11.1"
+
             env:
               TZ: "${CONFIG_TIMEZONE}"
               JELLYFIN_PublishedServerUrl: "https://jellyfin.${SECRET_DOMAIN}"
               JELLYFIN_FFMPEG__HARDWARE_ACCELERATION_TYPE: "vaapi"
-         
+
     service:
       webui:
         controller: ${APP_NAME}

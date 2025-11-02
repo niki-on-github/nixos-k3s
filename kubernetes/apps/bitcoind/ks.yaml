@@ -10,3 +10,9 @@ spec:
       APP_NAME: bitcoind
       APP_NAMESPACE: apps
       PVC_CAPACITY: "200Gi"
+      BACKUP_VOLSYNC_BUCKET: "blockchain"
+      BACKUP_RETAIN_DAILY: "0"
+      BACKUP_RETAIN_WEEKLY: "1"
+      BACKUP_RETAIN_MONTHLY: "0"
+      BACKUP_SCHEDULE: "0 3 * * 5"
+      BACKUP_CACHE_CAPACITY: "8Gi"

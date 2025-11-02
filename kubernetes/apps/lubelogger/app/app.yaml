@@ -1,0 +1,105 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: docker.io/busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/mkdir"
+            args:
+            - "-m"
+            - "0777"
+            - "-p"
+            - "/init/data"
+            - "/init/keys"
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/hargata/lubelogger
+              tag: "v1.5.3"
+            env:
+              LC_ALL: "de_DE.UTF-8"
+              LANG: "de_DE.UTF-8"
+              EnableAuth: false
+              LUBELOGGER_ALLOWED_FILE_EXTENSIONS: "*"
+              LUBELOGGER_DOMAIN: "https://lubelog.${SECRET_DOMAIN}"
+              LUBELOGGER_OPEN_REGISTRATION: false
+            # make date in table readable by spanning entys across whole browser
+            command:
+            - "/bin/sh"
+            - "-c"
+            args:
+            - |
+              echo '.container { max-width: 99% !important; }' >> /App/wwwroot/css/site.css && \
+              ./CarCareTracker
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 8080
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &ingress "lubelog.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
+        
+    persistence:
+      config:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /init
+            app:
+              - path: /root/.aspnet/DataProtection-Keys
+                subPath: keys
+              - path: /App/data
+                subPath: data

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: grafana
-      version: 9.2.6
+      version: 10.1.4
       sourceRef:
         kind: HelmRepository
         name: grafana-charts
@@ -39,8 +39,9 @@ spec:
     imageRenderer:
       enabled: true
       image:
+        # this is automatically prefixed with docker.io
         repository: grafana/grafana-image-renderer
-        tag: "3.12.6"
+        tag: "v4.1.2"
 
       serviceMonitor:
         enabled: false
@@ -93,6 +94,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/kubernetes
+          - name: backup
+            orgId: 1
+            folder: Backup
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/backup
           - name: thanos
             orgId: 1
             folder: Thanos
@@ -166,6 +175,13 @@ spec:
           revision: 26
           datasource: Prometheus
 
+      backup:
+        volsync:
+          gnetId: 21356
+          revision: 1
+          datasource:
+            - { name: DS_PROMETHEUS, value: Prometheus }
+
       thanos:
         thanos-bucket-replicate:
           url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/bucket-replicate.json
@@ -216,7 +232,7 @@ spec:
             type: influxdb
             access: proxy
             isDefault: false
-            url: http://influxdb.monitoring.svc.cluster.local:8086
+            url: http://influxdb2.monitoring.svc.cluster.local:8086
             user: admin
             secureJsonData:
               token: ${SECRET_INFLUXDB_ADMIN_TOKEN}

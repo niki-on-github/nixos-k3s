@@ -27,6 +27,7 @@ spec:
       DNS_LOCAL_CIDRS: "local"
       VXLAN_IP_NETWORK: "172.16.0"
       VXLAN_ID: 42
+      VXLAN_PORT: 4789
       VXLAN_GATEWAY_FIRST_DYNAMIC_IP: 20
       VPN_INTERFACE: ${SECRET_VPN_INTERFACE}
       VPN_BLOCK_OTHER_TRAFFIC: true
@@ -107,7 +108,7 @@ spec:
           enabled: false
 
   # NOTE: The helm chart use a namespaceSelector but i want a objectSelector for the vpn routing to prevent the volsync backup routed throug the pod-gateway
-  # TODO Better is to have namespaceSelector with option to exlude specific objects, but i dont konw if this is possible
+  # NOTE Better is to have namespaceSelector with option to exlude specific objects, but i dont konw if this is possible
   postRenderers:
     - kustomize: 
         patches:

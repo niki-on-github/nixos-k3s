@@ -5,7 +5,6 @@ resources:
 - charts/authelia-charts.yaml
 - charts/authentik-charts.yaml
 - charts/backube-charts.yaml
-- charts/bitnami-charts.yaml
 - charts/bjw-s-charts.yaml
 - charts/cilium-charts.yaml
 - charts/cnpg-charts.yaml
@@ -21,9 +20,11 @@ resources:
 - charts/harbor-charts.yaml
 - charts/harbor-container-webhook-charts.yaml
 - charts/hashicorp-charts.yaml
+- charts/influxdata-charts.yaml
 - charts/jetstack-charts.yaml
 - charts/k8tz-charts.yaml
 - charts/kube-vip-charts.yaml
+- charts/kubetail-charts.yaml
 - charts/kyverno-charts.yaml
 - charts/metrics-server-charts.yaml
 - charts/minio-operator-charts.yaml

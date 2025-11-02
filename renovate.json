@@ -21,24 +21,24 @@
     }
   ],
   "helm-values": {
-    "fileMatch": [
-      "kubernetes/.+\\.ya?ml$"
+    "managerFilePatterns": [
+      "/kubernetes/.+\\.ya?ml$/"
     ],
     "ignorePaths": [
       "kubernetes/suspended"
     ]
   },
   "flux": {
-    "fileMatch": [
-      "kubernetes/.+\\.ya?ml$"
+    "managerFilePatterns": [
+      "/kubernetes/.+\\.ya?ml$/"
     ],
     "ignorePaths": [
       "kubernetes/suspended"
     ]
   },
   "kubernetes": {
-    "fileMatch": [
-      "kubernetes/.+\\.ya?ml$"
+    "managerFilePatterns": [
+      "/kubernetes/.+\\.ya?ml$/"
     ],
     "ignorePaths": [
       "kubernetes/suspended"
@@ -47,12 +47,12 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        "kubernetes/apps/.+\\.ya?ml$",
-        "kubernetes/config/.+\\.ya?ml$",
-        "kubernetes/core/.+\\.ya?ml$",
-        "kubernetes/flux/.+\\.ya?ml$",
-        "kubernetes/templates/.+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/kubernetes/apps/.+\\.ya?ml$/",
+        "/kubernetes/config/.+\\.ya?ml$/",
+        "/kubernetes/core/.+\\.ya?ml$/",
+        "/kubernetes/flux/.+\\.ya?ml$/",
+        "/kubernetes/templates/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "# renovate: datasource=docker\\n.*: ?(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"
@@ -61,12 +61,12 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "kubernetes/apps/.+\\.ya?ml$",
-        "kubernetes/config/.+\\.ya?ml$",
-        "kubernetes/core/.+\\.ya?ml$",
-        "kubernetes/flux/.+\\.ya?ml$",
-        "kubernetes/templates/.+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/kubernetes/apps/.+\\.ya?ml$/",
+        "/kubernetes/config/.+\\.ya?ml$/",
+        "/kubernetes/core/.+\\.ya?ml$/",
+        "/kubernetes/flux/.+\\.ya?ml$/",
+        "/kubernetes/templates/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "- (\\w+://)?(raw\\.)?github(usercontent)?\\.com\\/(?<depName>[\\w\\-_]+\\/[\\w\\-_]+)\\/(.+\\/)?(?<currentValue>v?[\\d+\\.]+)\\/"
@@ -75,12 +75,12 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "kubernetes/apps/.+\\.ya?ml$",
-        "kubernetes/config/.+\\.ya?ml$",
-        "kubernetes/core/.+\\.ya?ml$",
-        "kubernetes/flux/.+\\.ya?ml$",
-        "kubernetes/templates/.+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/kubernetes/apps/.+\\.ya?ml$/",
+        "/kubernetes/config/.+\\.ya?ml$/",
+        "/kubernetes/core/.+\\.ya?ml$/",
+        "/kubernetes/flux/.+\\.ya?ml$/",
+        "/kubernetes/templates/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\n.*: ?(?<currentValue>.*?)\\n"
@@ -88,12 +88,12 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "kubernetes/apps/.+\\.ya?ml$",
-        "kubernetes/config/.+\\.ya?ml$",
-        "kubernetes/core/.+\\.ya?ml$",
-        "kubernetes/flux/.+\\.ya?ml$",
-        "kubernetes/templates/.+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/kubernetes/apps/.+\\.ya?ml$/",
+        "/kubernetes/config/.+\\.ya?ml$/",
+        "/kubernetes/core/.+\\.ya?ml$/",
+        "/kubernetes/flux/.+\\.ya?ml$/",
+        "/kubernetes/templates/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*=?))?( versionTemplate=(?<versionTemplate>.*=?))?\\n.*: ?(\"?(?<currentValue>[^\"\\n]+=?)\"?)"
@@ -103,8 +103,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "\\.nix$"
+      "managerFilePatterns": [
+        "/\\.nix$/"
       ],
       "matchStrings": [
         "# renovate: repository=(?<registryUrl>.*?)\n *chart: .*/(?<depName>.*?)\n *version: (?<currentValue>.*)\n"
@@ -113,11 +113,11 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "\\.nix$"
+      "managerFilePatterns": [
+        "/\\.nix$/"
       ],
       "matchStrings": [
-         "chart:\\s*oci://(?<packageName>[^\\s]+)\\s*\\n\\s*version:\\s*(?<currentValue>[0-9a-zA-Z._-]+)"
+        "chart:\\s*oci://(?<packageName>[^\\s]+)\\s*\\n\\s*version:\\s*(?<currentValue>[0-9a-zA-Z._-]+)"
       ],
       "datasourceTemplate": "docker"
     }
@@ -188,7 +188,8 @@
       "groupName": "prometheus",
       "matchPackageNames": [
         "/prometheus/",
-        "/thanos/"
+        "/thanos/",
+        "/kube-prometheus-stack/"
       ]
     },
     {
@@ -206,6 +207,13 @@
         "/immich-machine-learning/",
         "/immich/",
         "/immich-app/"
+      ]
+    },
+    {
+      "groupName": "open-webui",
+      "matchPackageNames": [
+        "/open-webui/",
+        "/ollama/"
       ]
     }
   ]

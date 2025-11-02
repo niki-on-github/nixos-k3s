@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,28 +22,27 @@ spec:
           app:
             image:
               repository: ghcr.io/steveiliop56/tinyauth
-              tag: "v3.4.1"
+              tag: "v4.0.1"
 
             env:
-              # TODO use secret
               # generate with `openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 32`
               SECRET: "${SECRET_TINYAUTH_KEY}"
               APP_URL: https://auth.${SECRET_DOMAIN}
               SESSION_EXPIRY: "86400"
               DISABLE_CONTINUE: "true"
-              # TODO use USER_FILE and k8s secret
+              # NOTE we could use USER_FILE and k8s secret to improve this
               # generate with `docker run -i -t --rm ghcr.io/steveiliop56/tinyauth:v3 user create --interactive`, create multiple users by seperate entries by comma
               USERS: "${SECRET_TINYAUTH_USERS}"
               # We use pocket-id with OAuth for passkey login
-              GENERIC_NAME: "pocket-id"
-              GENERIC_AUTH_URL: "https://id.${SECRET_DOMAIN}/authorize"
-              GENERIC_TOKEN_URL: "http://pocket-id.authentication.svc:1411/api/oidc/token"
-              GENERIC_USER_URL: "http://pocket-id.authentication.svc:1411/api/oidc/userinfo"
-              GENERIC_SCOPES: "openid,profile,email"
+              PROVIDERS_GENERIC_NAME: "pocket-id"
+              PROVIDERS_GENERIC_AUTH_URL: "https://id.${SECRET_DOMAIN}/authorize"
+              PROVIDERS_GENERIC_TOKEN_URL: "http://pocket-id.authentication.svc:1411/api/oidc/token"
+              PROVIDERS_GENERIC_USER_INFO_URL: "http://pocket-id.authentication.svc:1411/api/oidc/userinfo"
+              PROVIDERS_GENERIC_SCOPES: "openid,profile,email"
               # generate entry on https://id.${SECRET_DOMAIN}/settings/admin/oidc-clients
               # set callback to https://auth.${SECRET_DOMAIN}/api/oauth/callback/generic
-              GENERIC_CLIENT_ID: "${SECRET_TINYAUTH_CLIENT_ID}"
-              GENERIC_CLIENT_SECRET: "${SECRET_TINYAUTH_CLIENT_SECRET}"
+              PROVIDERS_GENERIC_CLIENT_ID: "${SECRET_TINYAUTH_CLIENT_ID}"
+              PROVIDERS_GENERIC_CLIENT_SECRET: "${SECRET_TINYAUTH_CLIENT_SECRET}"
 
     service:
       webui:
@@ -68,4 +67,9 @@ spec:
         tls:
           - hosts:
               - *ingress
-        
+    
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /data

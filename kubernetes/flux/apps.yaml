@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m
-  timeout: 8m
+  timeout: 10m
   retryInterval: 1m
   dependsOn:
   - name: namespaces
@@ -43,7 +43,7 @@ spec:
           name: not-used
         spec:
           interval: 8m
-          timeout: 8m
+          timeout: 10m
           retryInterval: 5m
           force: true
           prune: true
@@ -92,7 +92,7 @@ spec:
                   name: not-used
                 spec:
                   interval: 8m
-                  timeout: 8m
+                  timeout: 10m
                   chart:
                     spec:
                       interval: 15m
@@ -128,7 +128,7 @@ spec:
                 name: not-used
               spec:
                 interval: 8m
-                timeout: 8m
+                timeout: 10m
                 chart:
                   spec:
                     interval: 15m
@@ -155,7 +155,7 @@ spec:
           name: not-used
         spec:
           interval: 8m
-          timeout: 8m
+          timeout: 10m
           chart:
             spec:
               interval: 15m

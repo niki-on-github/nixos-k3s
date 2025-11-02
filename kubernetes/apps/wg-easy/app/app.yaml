@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,20 +18,36 @@ spec:
   values:
     controllers:
       ${APP_NAME}:
+        initContainers:
+          # start delay to fix some wg interface problems
+          init:
+            image:
+              repository: docker.io/busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/sleep"
+            args:
+            - "30"
         containers:
           app:
             image:
               repository: ghcr.io/wg-easy/wg-easy
               tag: "15"
             env:
-              WG_HOST: &ingress "wireguard.${SECRET_DOMAIN}"
-              WG_PORT: &wg 51820
               PORT: &webui 51821
-              WG_DEFAULT_DNS: "${CONFIG_WG_DNS}"
-              WG_DEFAULT_ADDRESS: "10.8.0.x"
+              DISABLE_IPV6: true
+              INIT_ENABLED: true
+              INIT_USERNAME: "admin"
+              # NOTE: min pw length is 12 characters
+              INIT_PASSWORD: "${SECRET_WEBSERVICES_PASSWORD}-wg"
+              INIT_HOST: &ingress "wg.${SECRET_DOMAIN}"
+              INIT_PORT: &wg 51820
+              INIT_DNS: "${CONFIG_WG_DNS}"
+              INIT_IPV4_CID: "10.8.0.0/24"
+              INIT_IPV6_CID: "2001:0DB8::/32"
             securityContext:
               capabilities:
-                add: ["NET_ADMIN", "SYS_MODULE"]
+                add: ["NET_ADMIN", "SYS_MODULE", "NET_RAW"]
 
     service:
       webui:
@@ -55,9 +71,8 @@ spec:
         className: traefik
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
         hosts:
-          - host: *ingress
+          - host: "wireguard.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix

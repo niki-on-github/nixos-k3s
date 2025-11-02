@@ -5,4 +5,5 @@ resources:
   - ../../../templates/volsync-pvc
   - app.yaml
  # enable this to get deiscovery for new devices:
+ # NOTE: is now obsolete we now use multus to fix this
  #  - unifi-udp-discovery.yaml

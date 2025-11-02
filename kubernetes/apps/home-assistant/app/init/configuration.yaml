@@ -18,3 +18,14 @@ http:
   - !env_var HASS_TRUSTED_PROXIES
 
 python_script:
+
+notify:
+  - name: email_notify
+    platform: smtp
+    server: email2signal-mail.notification.svc
+    port: 1025
+    sender: hass@k8s.lan
+    encryption: none
+    recipient:
+      - self@signal.localdomain
+    sender_name: 'Home Assistant'

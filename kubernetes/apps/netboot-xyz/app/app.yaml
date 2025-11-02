@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.1.1
+      version: 4.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -26,7 +26,7 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/netboot-xyz
-              tag: "v2.0.87"
+              tag: "v2.0.88"
             env:
               NETWORK_IP: "${CONFIG_NETBOOT_XYZ_HOST_NETWORK_IP}"
               INTERFACE: "${CONFIG_NETBOOT_XYZ_HOST_INTERFACE}"
