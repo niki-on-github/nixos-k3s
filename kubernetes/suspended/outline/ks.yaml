@@ -1,0 +1,29 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: outline-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: outline
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "outline"
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: outline
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/outline/app"
+  dependsOn:
+    - name: outline-db
+  postBuild:
+    substitute:
+      APP_NAME: outline
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "64Gi"

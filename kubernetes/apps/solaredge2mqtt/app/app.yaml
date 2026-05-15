@@ -1,0 +1,163 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              # repository: ghcr.io/deroetzi/solaredge2mqtt
+              # tag: 2.3.1
+              repository: ghcr.io/niki-on-github/solaredge2mqtt
+              tag: "dev@sha256:017a07efb82c6ffd32fa657174338c19b7eb37e6e9e1b2dae84a1f8fa41e5dc5"
+            env:
+              TZ: "${CONFIG_TIMEZONE}"
+
+    secrets:
+      secrets:
+        suffix: secrets
+        stringData:
+          secrets.yml: |-
+            # SolarEdge2MQTT Secrets File
+            # Secrets can be referenced in configuration.yml using !secret tag
+            # Example: password: !secret mqtt_password
+            mqtt_user: "${SECRET_DATABASE_USER}"
+            mqtt_password: "${SECRET_DATABASE_PASSWORD}"
+            influxdb_token: "${SECRET_INFLUXDB_ADMIN_TOKEN}"
+            modbus_host: "${SECRET_SOLAREDGE_INVERTER_IP}"
+            location_latitude: "${SECRET_HOME_LATITUDE}"
+            location_longitude: "${SECRET_HOME_LONGITUDE}"
+            weather_api_key: "${SECRET_OPENWEATHERMAP_API_KEY}"
+
+    configMaps:
+      config:
+        suffix: config
+        data:
+          configuration.yml: |-
+            # SolarEdge2MQTT Configuration File
+
+            # Interval between requests in seconds
+            interval: 10
+
+            # Set logging level to DEBUG, INFO (default), WARNING, ERROR, CRITICAL
+            logging_level: WARNING
+
+            # Location settings (required for weather and forecast features)
+            location:
+              latitude: !secret location_latitude
+              longitude: !secret location_longitude
+
+            # Modbus configuration
+            modbus:
+              host: !secret modbus_host
+              port: 1502
+              timeout: 2
+              unit: 1
+              
+              # Enable or disable detection of meters
+              # meter0 is typically the export/import meter (default: true)
+              # meter1 and meter2 are often not installed (default: false)
+              meter:
+                - true   # meter0 (index 0)
+                - false  # meter1 (index 1)
+                - false  # meter2 (index 2)
+              
+              # Enable or disable detection of batteries (default: true)
+              battery:
+                - true  # battery0
+                - true  # battery1
+              
+              # Check grid status (requires extra hardware like Export+Import meter)
+              check_grid_status: true
+              
+              # Advanced power controls (enabled, disabled, or disable)
+              advanced_power_controls: disabled
+              
+            # MQTT configuration (required)
+            mqtt:
+              client_id: solaredge2mqtt
+              broker: "mosquitto.${APP_NAMESPACE}.svc.cluster.local"
+              port: 1883
+              username: !secret mqtt_user
+              password: !secret mqtt_password
+              topic_prefix: solaredge
+              retain: true
+
+            # Powerflow configuration
+            powerflow:
+              external_production: false  # Set to true if you have additional producers
+              retain: true
+
+            # Energy calculation settings
+            energy:
+              retain: true
+
+            # Price settings for energy calculation
+            prices:
+              consumption: 0.50  # Price per kWh for energy from grid
+              delivery: 0.08     # Price per kWh for energy delivered to grid
+            
+            # Home Assistant Auto Discovery (optional)
+            homeassistant:
+              enable: true
+              topic_prefix: homeassistant
+              retain: true
+
+            # InfluxDB configuration (optional)
+            influxdb:
+              host: "http://influxdb2.monitoring.svc.cluster.local"
+              port: 8086
+              token: !secret influxdb_token
+              org: "${CONFIG_INFLUXDB_ORG}"
+              bucket: solaredge2
+              retention: 63072000
+              retention_raw: 1000
+
+            # Weather configuration (optional, requires location)
+            weather:
+              provider: metno
+              interval: 60
+              metno:
+                user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0"
+              retain: true
+
+            # Forecast configuration (optional, requires weather and InfluxDB)
+            forecast:
+              enable: true
+              hyperparametertuning: true
+              cachingdir: /app/cache
+              retain: true
+
+
+    persistence:
+      cache:
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /app/cache
+      config:
+        type: configMap
+        name: ${APP_NAME}-config
+        globalMounts:
+          - path: /app/config/configuration.yml
+            subPath: configuration.yml
+      secrets:
+        type: secret
+        name: ${APP_NAME}-secrets
+        globalMounts:
+          - path: /app/config/secrets.yml
+            subPath: secrets.yml

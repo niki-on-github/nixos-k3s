@@ -1,0 +1,61 @@
+# TODO studdy on https://cloudnative-pg.io/documentation/current/declarative_database_management/ to combine this
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: piped-tailscale-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: piped-tailscale
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "piped-tailscale"
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: piped-tailscale
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/piped/tailscale"
+  dependsOn:
+    - name: piped-tailscale-db
+    - name: tailscale
+  postBuild:
+    substitute:
+      APP_NAME: piped-tailscale
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "piped-tailscale"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: piped-local-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: piped-local
+      APP_NAMESPACE: media
+      POSTGRES_DATABASE: "piped-local"
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: piped-local
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/piped/local"
+  dependsOn:
+    - name: piped-local-db
+  postBuild:
+    substitute:
+      APP_NAME: piped-local
+      APP_NAMESPACE: media
+      POSTGRES_DATABASE: "piped-local"

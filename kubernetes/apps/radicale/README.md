@@ -1,0 +1,19 @@
+# [Radicale](https://github.com/tomsquest/docker-radicale)
+
+Radicale is a small but powerful CalDAV (calendars, to-do lists) and CardDAV (contacts) server, that:
+
+- Shares calendars and contact lists through CalDAV, CardDAV and HTTP.
+- Supports events, todos, journal entries and business cards.
+- Works out-of-the-box, no complicated setup or configuration required.
+- Offers flexible authentication options.
+- Can limit access by authorization.
+- Stores all data on the file system in a simple folder structure.
+- Can be extended with plugins.
+
+## Andoride
+
+Use `DAVx5` and `Fossify Calendar` to sync events.
+
+## Home Assistant
+
+Use `CalDAV` integration to add events to Home Assistant Calendar.

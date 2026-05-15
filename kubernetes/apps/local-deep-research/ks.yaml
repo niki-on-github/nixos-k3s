@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: local-deep-research
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/local-deep-research/app"
+  dependsOn:
+    - name: omni-route
+    - name: searxng
+    - name: tailscale
+  postBuild:
+    substitute:
+      APP_NAME: local-deep-research
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "16Gi"

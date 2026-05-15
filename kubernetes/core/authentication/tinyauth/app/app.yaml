@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: ghcr.io/steveiliop56/tinyauth
-              tag: "v4.0.1"
+              tag: "v4.1.0@sha256:402ee231204757a3e01b4aaba9e4aa09a3c7c4680a82bc47135632ec8864b8c8"
 
             env:
               # generate with `openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 32`

@@ -13,7 +13,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -40,7 +40,7 @@ spec:
           app:
             image:
               repository: docker.io/nzbgetcom/nzbget
-              tag: "v25.4"
+              tag: "v26.0@sha256:5ea1c8fdd01955cd671ef6cbd00aa54af19b5249558ff431f7b8ab13ee25acbb"
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

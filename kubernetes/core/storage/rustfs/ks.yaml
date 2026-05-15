@@ -1,0 +1,29 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: rustfs
+  namespace: flux-system
+spec:
+  path: "./kubernetes/core/storage/rustfs/app"
+  wait: true
+  dependsOn:
+    - name: traefik
+  postBuild:
+    substitute:
+      APP_NAME: rustfs
+      APP_NAMESPACE: storage
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: rustfs-setup
+  namespace: flux-system
+spec:
+  path: "./kubernetes/core/storage/rustfs/setup"
+  wait: true
+  dependsOn:
+    - name: rustfs
+  postBuild:
+    substitute:
+      APP_NAME: rustfs-setup
+      APP_NAMESPACE: storage

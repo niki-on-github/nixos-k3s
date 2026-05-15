@@ -17,11 +17,16 @@ In order to meet the energy requirements I have made the following decisions:
 - CPU: AMD Ryzen 7 Pro 5750GE (35W TDP)
 - RAM: 2 x 32GB Kingston KSM32ED8/32HC DDR4-3200 DIMM CL22 Single (ECC)
 - PSU: Supermicro PWS-203-1H 200W (Fan modded)
-- NVME: 4TB Lexar NM790 M.2 2280
-- NIC: Intel X710-DA2 10GbE
-- SSD1: 1TB WD Red SA500
-- SSD2: 1TB Samsung 870 Evo
+- NIC: Intel X710-DA2 10Gb
+- NVME1: 4TB Samsung 990 Pro M.2 2280 (System + Data)
+- NVME2: 1TB Samsung 990 EVO M.2 2280 (Backup on RAID1)
+- SSD: 1TB WD Red SA500 (Backup on RAID1)
 - Geekworm X650 PiKVM (seperate power)
+
+### Prefered Changes
+
+- Swap Samsung 990 EVO to an 1TB Samsung 990 Pro and use as system disk to sperate data and system
+- For the Backup on RAID1 use a Kingston DC600ME 960GB
 
 ## Power Consumption
 

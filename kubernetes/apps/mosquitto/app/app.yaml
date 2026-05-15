@@ -19,13 +19,21 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
         namespace: flux-system
 
   values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+
     controllers:
       ${APP_NAME}:
         initContainers:
@@ -45,17 +53,21 @@ spec:
           app:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
-              tag: 2.0.22      
+              tag: 2.0.22
 
     service:
       mqtt:
         controller: ${APP_NAME}
+        type: LoadBalancer
+        loadBalancerIP: "${CONFIG_KUBE_VIP_IP}"
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: mqtt.${SECRET_DOMAIN}
         ports:
           mqtt:
             port: 1883
           websocket:
             port: 9001
-        
+
     persistence:
       data:
         existingClaim: "${APP_NAME}-pvc"

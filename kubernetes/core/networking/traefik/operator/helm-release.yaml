@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: 37.2.0
+      version: 39.0.6
       sourceRef:
         kind: HelmRepository
         name: traefik-charts
@@ -69,16 +69,24 @@ spec:
 
     ports:
       web:
-        redirections:
-          entryPoint:
-            to: websecure
-            scheme: https
-            permanent: true
-            priority: 10
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+              scheme: https
+              permanent: true
+              priority: 10
       websecure:
-        tls:
-          enabled: true
-          options: default
+        http:
+          tls:
+            enabled: true
+            options: default
+  
+   # experimental:
+   #   plugins:
+   #     traefik-plugin-query-modification:
+   #       moduleName: "github.com/kingjan1999/traefik-plugin-query-modification"
+   #       version: "v1.0.0"
 
   # NOTE: Add out self signed root ca cert to traefik to get working setup with our self signed cert from oidc auth provider
   postRenderers:

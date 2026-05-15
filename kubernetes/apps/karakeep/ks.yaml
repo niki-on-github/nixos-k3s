@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: karakeep
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/karakeep/app"
+  dependsOn:
+    - name: tailscale
+    - name: omni-route
+  postBuild:
+    substitute:
+      APP_NAME: karakeep
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "karakeep"
+      PVC_CAPACITY: "32Gi"

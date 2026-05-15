@@ -35,6 +35,14 @@ sops --encrypt --in-place vpn-config.sops.yaml
 
 ## Self Singed CA
 
+Generate the root ca key. Tools like mkCert do not work, they generate root key where pathlen contraints is set to zero! The simplest solution is to use the following openssl command:
+
+```sh
+openssl req -new -x509 -keyout ca.key -out ca.crt -days 36500 -nodes -subj "/CN=HomelabCA" -addext "basicConstraints=critical,CA:TRUE,pathlen:1" -addext "keyUsage=critical,keyCertSign,cRLSign"
+```
+
+Add root ca key to kubernetes secret:
+
 ```bash
 kubectl -n networking create secret tls internal-ca --dry-run=client --cert=ca.crt --key=ca.key -o yaml > ca-certs.sops.yaml
 sops --encrypt --encrypted-regex '^(data|stringData)$' --in-place ca-certs.sops.yaml

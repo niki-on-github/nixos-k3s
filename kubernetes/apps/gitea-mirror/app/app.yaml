@@ -1,0 +1,187 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${APP_NAME}-config
+  namespace: ${APP_NAMESPACE}
+data:
+  BETTER_AUTH_SECRET: "${SECRET_GITEA_MIRROR_BETTER_AUTH_SECRET}"
+  CLEANUP_DELETE_IF_NOT_IN_GITHUB: "false"
+  CLEANUP_ORPHANED_REPO_ACTION: "archive"
+  GITEA_LFS: "true"
+  GITEA_MIRROR_INTERVAL: "8h"
+  GITEA_ORGANIZATION: "github-mirrors"
+  GITEA_ORG_VISIBILITY: "public"
+  GITEA_TOKEN: "${SECRET_GITEA_MIRROR_TOKEN}"
+  ENCRYPTION_SECRET: "${SECRET_GITEA_MIRROR_ENCRYPTION_SECRET}"
+  GITEA_URL: "http://gitea-webui.apps.svc.cluster.local:3000"
+  GITEA_USERNAME: "github"
+  INCLUDE_ARCHIVED: "false"
+  MIRROR_ISSUES: "false"
+  MIRROR_ORGANIZATIONS: "false"
+  MIRROR_RELEASES: "false"
+  MIRROR_WIKI: "false"
+  NODE_ENV: "production"
+  PRIVATE_REPOSITORIES: "false"
+  PUBLIC_REPOSITORIES: "true"
+  SCHEDULE_ENABLED: "true"
+  SKIP_FORKS: "false"
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: docker.io/busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/mkdir"
+            args:
+            - "-m"
+            - "0777"
+            - "-p"
+            - "/init/mirror-01"
+            - "/init/mirror-02"
+            - "/init/mirror-03"
+
+        containers:
+          mirror-01:
+            image: &image
+              repository: ghcr.io/raylabshq/gitea-mirror
+              tag: v3.12.5
+            env:
+              PORT: "4321"
+              BETTER_AUTH_TRUSTED_ORIGINS: "https://gitea-mirror-01.${SECRET_DOMAIN}"
+              BETTER_AUTH_URL: "https://gitea-mirror-01.${SECRET_DOMAIN}"
+              MIRROR_STARRED: "false"
+            envFrom:
+              - configMapRef:
+                  name: ${APP_NAME}-config
+          mirror-02:
+            image: *image
+            env:
+              PORT: "4322"
+              BETTER_AUTH_TRUSTED_ORIGINS: "https://gitea-mirror-02.${SECRET_DOMAIN}"
+              BETTER_AUTH_URL: "https://gitea-mirror-02.${SECRET_DOMAIN}"
+              MIRROR_STARRED: "false"
+            envFrom:
+              - configMapRef:
+                  name: ${APP_NAME}-config
+          mirror-03:
+            image: *image
+            env:
+              PORT: "4323"
+              BETTER_AUTH_TRUSTED_ORIGINS: "https://gitea-mirror-03.${SECRET_DOMAIN}"
+              BETTER_AUTH_URL: "https://gitea-mirror-03.${SECRET_DOMAIN}"
+              MIRROR_STARRED: "true"
+            envFrom:
+              - configMapRef:
+                  name: ${APP_NAME}-config
+
+
+    service:
+      webui-01:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 4321
+      webui-02:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 4322
+      webui-03:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 4323
+
+    ingress:
+      webui-01:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "gitea-mirror-01.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui-01
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+      webui-02:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "gitea-mirror-02.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui-02
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+      webui-03:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "gitea-mirror-03.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui-03
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /init
+            mirror-01:
+              - path: /app/data
+                subPath: mirror-01
+            mirror-02:
+              - path: /app/data
+                subPath: mirror-02
+            mirror-03:
+              - path: /app/data
+                subPath: mirror-03
+

@@ -9,3 +9,7 @@
 1. Delete the tailscale secret for the ingress
 2. Delete the staefulset for the ingress
 3. kill/restart the operator
+
+## Limitations
+
+We can only deploy one operator in the cluster :(

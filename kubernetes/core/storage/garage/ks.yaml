@@ -1,0 +1,29 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: garage
+  namespace: flux-system
+spec:
+  path: "./kubernetes/core/storage/garage/app"
+  wait: true
+  dependsOn:
+    - name: traefik
+  postBuild:
+    substitute:
+      APP_NAME: garage
+      APP_NAMESPACE: storage
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: garage-setup
+  namespace: flux-system
+spec:
+  path: "./kubernetes/core/storage/garage/setup"
+  wait: true
+  dependsOn:
+    - name: garage
+  postBuild:
+    substitute:
+      APP_NAME: garage-setup
+      APP_NAMESPACE: storage

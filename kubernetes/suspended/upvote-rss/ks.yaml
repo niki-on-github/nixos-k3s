@@ -1,0 +1,11 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: upvote-rss
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/upvote-rss/app"
+  postBuild:
+    substitute:
+      APP_NAME: upvote-rss
+      APP_NAMESPACE: apps

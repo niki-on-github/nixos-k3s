@@ -1,0 +1,69 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name:   ${APP_NAME}-code
+  namespace: ${APP_NAMESPACE}
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  values:
+    controllers:
+      ${APP_NAME}-code:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.106.3@sha256:1a0e813039c8f01404a89654278779ac77492b833bc2d126431268b9b1f1e40a
+            env:
+              TZ: ${CONFIG_TIMEZONE}
+            args:
+              - --auth
+              - "none"
+              - --user-data-dir
+              - "/config/.vscode"
+              - --extensions-dir
+              - "/config/.vscode"
+              - "--port"
+              - "80"
+              - /config
+            securityContext:
+              privileged: true
+              runAsNonRoot: false
+              runAsUser: 0
+              
+    service:
+      webui:
+        controller: ${APP_NAME}-code
+        ports:
+          http:
+            port: 80
+            
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &host zigbee2mqtt-code.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *host
+
+    persistence:
+      config:
+        existingClaim: "${APP_NAME}-pvc"
+

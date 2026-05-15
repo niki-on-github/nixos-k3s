@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 27,
+  "id": 32,
   "links": [],
   "panels": [
     {
@@ -71,14 +71,14 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "battery = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"instantaneous_power\")\n\ninverter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n\njoin(tables: {battery: battery, inverter: inverter}, on: [\"_time\", \"_start\", \"_stop\"], method: \"inner\")\n  |> map(fn: (r) => ({_time: r._time, _value: r._value_inverter + r._value_battery }))\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()\n",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"pv_production\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
           "refId": "A"
         }
       ],
@@ -134,14 +134,14 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "meter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power\")\n\ninverter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n\njoin(tables: {meter: meter, inverter: inverter}, on: [\"_time\", \"_start\", \"_stop\"], method: \"inner\")\n  |> map(fn: (r) => ({_time: r._time, _value: r._value_inverter - r._value_meter }))\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"consumer_total\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
           "refId": "A"
         }
       ],
@@ -226,7 +226,7 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": -100
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
@@ -306,14 +306,14 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"instantaneous_power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"battery_power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
           "refId": "A"
         }
       ],
@@ -370,14 +370,14 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"inverter_power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
           "refId": "A"
         }
       ],
@@ -434,14 +434,14 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"soe\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state_of_charge\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
           "refId": "A"
         }
       ],
@@ -497,14 +497,14 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"grid_power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
           "refId": "A"
         }
       ],
@@ -588,7 +588,7 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": -100
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
@@ -646,25 +646,25 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^temperature zigbee2mqtt/ESP32H2 Temperature$/",
+          "fields": "/^value \\{device_class=\"temperature\", domain=\"sensor\", entity_id=\"warmwassertemperatur_temperature\", friendly_name=\"Warmwassertemperatur Temperatur\", source=\"HA\"\\}$/",
           "values": false
         },
         "showPercentChange": false,
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "from(bucket: \"home\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"nodered\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"identity\"] == \"zigbee2mqtt/ESP32H2 Temperature\")\n  |> aggregateWindow(every: 2m, fn: last, createEmpty: false)\n  |> yield(name: \"last\")\n  ",
+          "query": "from(bucket: \"home_assistant\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"friendly_name\"] == \"Warmwassertemperatur Temperatur\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
-      "title": "Warmwasser",
+      "title": "Wasser",
       "type": "stat"
     },
     {
@@ -711,31 +711,31 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^temperature zigbee2mqtt/Temperatur\\-OG$/",
+          "fields": "/^value \\{device_class=\"temperature\", domain=\"sensor\", entity_id=\"0x00158d0007f7a210_temperature\", friendly_name=\"Temperatur\\-Arbeitszimmer Temperatur\", source=\"HA\"\\}$/",
           "values": false
         },
         "showPercentChange": false,
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "from(bucket: \"home\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"nodered\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"identity\"] == \"zigbee2mqtt/Temperatur-OG\")\n  |> aggregateWindow(every: 2m, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"home_assistant\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"friendly_name\"] == \"Temperatur-Arbeitszimmer Temperatur\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
-      "title": "Temp. OG",
+      "title": "Temp",
       "type": "stat"
     }
   ],
   "preload": false,
   "refresh": "",
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": []
@@ -748,5 +748,5 @@
   "timezone": "",
   "title": "esp-dashboard",
   "uid": "ad588e36-165d-464f-9f94-a8b553cfbcc3",
-  "version": 1
+  "version": 3
 }

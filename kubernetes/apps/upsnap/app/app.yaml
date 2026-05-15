@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        pod:
+          annotations:
+            # required to send wol packages
+            k8s.v1.cni.cncf.io/networks: networking/multus-br1
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/seriousm4x/upsnap
+              tag: "5.3.2"
+            securityContext:
+              capabilities:
+                add: ["NET_RAW"]
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 8090
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "upsnap.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
+
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+            - path: /app/pb_data

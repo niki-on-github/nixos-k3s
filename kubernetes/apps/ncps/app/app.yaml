@@ -30,7 +30,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -64,7 +64,7 @@ spec:
           app:
             image:
               repository: docker.io/kalbasit/ncps
-              tag: "v0.4"
+              tag: "v0.5"
             args:
               - "/bin/ncps"
               - serve

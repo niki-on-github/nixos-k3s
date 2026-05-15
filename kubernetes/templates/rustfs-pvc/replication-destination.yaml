@@ -1,0 +1,20 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: "${APP_NAME}-bootstrap"
+  namespace: "${APP_NAMESPACE}"
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    copyMethod: Snapshot
+    repository: "${APP_NAME}-restic-src-credentials"
+    cacheStorageClassName: "openebs-zfspv"
+    storageClassName: "openebs-zfspv"
+    volumeSnapshotClassName: "zfspv-snapclass"
+    accessModes:
+    - "ReadWriteOnce"
+    capacity: "${PVC_CAPACITY:-1Gi}"
+    enableFileDeletion: true
+    cleanupTempPVC: true
+    cleanupCachePVC: true

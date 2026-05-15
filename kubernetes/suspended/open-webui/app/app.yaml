@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "ollama-pvc"
+  namespace: ${APP_NAMESPACE}
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 32Gi
+  storageClassName: "openebs-zfspv-reprovisioned"
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: open-webui
+      version: 8.19.0
+      sourceRef:
+        kind: HelmRepository
+        name: open-webui-charts
+        namespace: flux-system
+
+  values:
+    strategy:
+      type: OnDelete
+
+    ollama:
+      enabled: true
+      updateStrategy:
+        type: "Recreate"
+      image:
+        repository: docker.io/ollama/ollama
+        tag: "0.13.1@sha256:8850b8b33936b9fb246e7b3e02849941f1151ea847e5fb15511f17de9589aea1"
+        pullPolicy: IfNotPresent
+      persistentVolume:
+        enabled: true
+        existingClaim: "ollama-pvc"
+      ollama:
+        models:
+          pull: ${CONFIG_OLLAMA_PULL_MODELS}
+
+    pipelines:
+      enabled: false
+      #strategy:
+      #  type: Recreate
+      #image:
+      #  repository: ghcr.io/open-webui/pipelines
+      #  tag: main@sha256:b48e9bc338ce2be0acfbeff01810db72408a12f07739f9e3879c1f2b00952d6e
+      #  pullPolicy: IfNotPresent
+      #persistence:
+      #  enabled: true
+      #  existingClaim: "open-webui-pipelines-pvc"
+
+    image:
+      repository: ghcr.io/open-webui/open-webui
+      tag: "0.6.41@sha256:3e07bcede92e97cc3e741de095045a8b5d20bc257ecdb713bd2a47f68e9dff72"
+      pullPolicy: "IfNotPresent"
+
+    persistence:
+      enabled: true
+      existingClaim: "${APP_NAME}-pvc"
+
+    ingress:
+      enabled: true
+      class: "traefik"
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      host: "open-webui.${SECRET_DOMAIN}"
+      tls: true
+
+    extraEnvVars:
+      # -- Default API key value for Pipelines. Should be updated in a production deployment, or be changed to the required API key if not using Pipelines
+      - name: OPENAI_API_KEY
+        value: "0p3n-w3bu!"
+      - name: ENABLE_RAG_WEB_SEARCH
+        value: "True"
+      - name: RAG_WEB_SEARCH_ENGINE
+        value: "searxng"
+      - name: RAG_WEB_SEARCH_RESULT_COUNT
+        value: "3"
+      - name: RAG_WEB_SEARCH_CONCURRENT_REQUESTS
+        value: "10"
+      - name: SEARXNG_QUERY_URL
+        value: "http://searxng.apps.svc.cluster.local:8080/search?q=<query>"
+      - name: WEBUI_AUTH
+        value: "false"
+      - name: ANONYMIZED_TELEMETRY
+        value: "false"
+      - name: SCARF_NO_ANALYTICS
+        value: "false"

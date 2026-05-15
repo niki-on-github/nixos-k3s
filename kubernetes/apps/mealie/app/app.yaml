@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: ghcr.io/mealie-recipes/mealie
-              tag: "v3.3.2"
+              tag: "v3.6.1@sha256:e4690164cc4ed1bbd82adc00dd9aeed37bd49d938fe2f0ca46cb5082d05ddb71"
             env:
               ALLOW_SIGNUP: "false"
               PUID: 1000

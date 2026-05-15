@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 2000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 2000
+        runAsUser: 2000
+
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/maziggy/bambuddy
+              tag: 0.2.4
+            env:
+              PORT: &httpPort 8000
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                add:
+                  - NET_BIND_SERVICE
+                drop:
+                  - ALL
+              
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: *httpPort
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "bambuddy.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+        
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /app/data/
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+              - path: /tmp
+                subPath: tmp
+              - path: /app/logs
+                subPath: logs
+

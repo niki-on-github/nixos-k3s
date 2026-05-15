@@ -1,0 +1,13 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: redlib
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/redlib/app"
+  dependsOn:
+    - name: tailscale
+  postBuild:
+    substitute:
+      APP_NAME: redlib
+      APP_NAMESPACE: apps

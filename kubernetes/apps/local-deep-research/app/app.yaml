@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: docker.io/localdeepresearch/local-deep-research
+              tag: "1.6.1"
+            env:
+              LDR_DATA_DIR: /data
+              LDR_LLM_PROVIDER: openai_endpoint
+              LDR_LLM_OPENAI_ENDPOINT_URL: "${CONFIG_LLM_OPENAI_COMPATIBLE_ENDPOINT_URL}"
+              LDR_LLM_OPENAI_ENDPOINT_API_KEY: "${SECRET_LLM_OPENAI_COMPATIBLE_ENDPOINT_API_KEY}"
+              LDR_LLM_MODEL: "${CONFIG_LLM_RESEARCH_MODEL}"
+              LDR_SEARCH_ENGINE_WEB_SEARXNG_DEFAULT_PARAMS_INSTANCE_URL: "http://searxng.apps.svc.cluster.local:8080"
+              LDR_SECURITY_CORS_ALLOWED_ORIGINS: "*"
+              LDR_SECURITY_WEBSOCKET_ALLOWED_ORIGINS: "*"
+              LDR_SEARCH__TOOL: "searxng"
+              LDR_GENERAL__ENABLE_FACT_CHECKING: true
+
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 5000
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "deep-research.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+      
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}" 
+
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        globalMounts:
+          - path: /data

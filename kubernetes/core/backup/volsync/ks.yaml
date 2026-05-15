@@ -9,4 +9,5 @@ spec:
   dependsOn:
     - name: zfs-localpv-volume
     - name: prometheus-crds
-    - name: minio-external
+    - name: garage-setup
+    - name: rustfs-setup

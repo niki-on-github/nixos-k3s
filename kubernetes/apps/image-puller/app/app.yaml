@@ -17,9 +17,18 @@ spec:
       hostIPC: true
       containers:
       - name: ${APP_NAME}
-        image: ghcr.io/niki-on-github/container-image-puller:v0.1.2
+        image: ghcr.io/niki-on-github/container-image-puller:v0.4.2
         securityContext:
           privileged: true
+        env:
+        - name: PRUNE_SCHEDULE
+          value: "0 3 * * *"
+        - name: PRUNE_DAYS
+          value: "30"
+        - name: DEBUG
+          value: "0"
+        - name: IGNORE_PRUNE_NAMES
+          value: "quay.io/backube/volsync:0.13.1,docker.io/library/busybox:1.37.0,docker.io/rancher/mirrored-pause:3.6"
         volumeMounts:
         - mountPath: /host
           name: host

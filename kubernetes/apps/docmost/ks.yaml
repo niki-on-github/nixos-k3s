@@ -1,0 +1,29 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: docmost-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: docmost
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "docmost"
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: docmost
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/docmost/app"
+  dependsOn:
+    - name: docmost-db
+  postBuild:
+    substitute:
+      APP_NAME: docmost
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "64Gi"

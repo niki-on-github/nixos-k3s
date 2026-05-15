@@ -1,7 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:best-practices"
+  ],
+  "ignorePaths": [
+    ".gitea/workflows/flux-diff.yaml",
+    ".gitea/workflows/nix-cache.yaml"
   ],
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dashboard",
@@ -11,15 +15,9 @@
   "commitMessageTopic": "{{depName}}",
   "commitMessageExtra": "to {{newVersion}}",
   "commitMessageSuffix": "",
-  "prHourlyLimit": 99,
-  "prConcurrentLimit": 99,
+  "prHourlyLimit": 999,
+  "prConcurrentLimit": 999,
   "minimumReleaseAge": "1 day",
-  "hostRules": [
-    {
-      "matchHost": "docker.io",
-      "concurrentRequestLimit": 2
-    }
-  ],
   "helm-values": {
     "managerFilePatterns": [
       "/kubernetes/.+\\.ya?ml$/"
@@ -33,7 +31,8 @@
       "/kubernetes/.+\\.ya?ml$/"
     ],
     "ignorePaths": [
-      "kubernetes/suspended"
+      "kubernetes/suspended",
+      "**/zfs-localpv/app/helmrelease.yaml"
     ]
   },
   "kubernetes": {
@@ -45,6 +44,17 @@
     ]
   },
   "customManagers": [
+    {
+    "customType": "regex",
+    "managerFilePatterns": [
+        "//kubernetes/core/storage/zfs-localpv/app/helmrelease\.yaml$/"
+      ],
+    "matchStrings": [
+      "repository: (?<depName>[^\\s]+)\\s+tag: (?<currentValue>[^\\s]+)"
+    ],
+    "depNameTemplate": "ghcr.io/{{{depName}}}",
+    "datasourceTemplate": "docker"
+  },
     {
       "customType": "regex",
       "managerFilePatterns": [
@@ -124,6 +134,16 @@
   ],
   "packageRules": [
     {
+      "matchCategories": [
+        "docker"
+      ],
+      "pinDigests": true
+    },
+{
+      "matchPackageNames": ["anoxape/csi-provisioner"],
+      "registryUrls": ["https://ghcr.io"]
+    },
+    {
       "matchUpdateTypes": [
         "major"
       ],
@@ -169,7 +189,8 @@
     {
       "groupName": "traefik",
       "matchPackageNames": [
-        "/traefik/"
+        "/traefik/",
+        "/traefik-crds/"
       ]
     },
     {
@@ -193,9 +214,15 @@
       ]
     },
     {
+      "groupName": "ollama",
+      "matchPackageNames": [
+        "/ollama/"
+      ]
+    },
+    {
       "groupName": "flux",
       "matchPackageNames": [
-        "/flux/",
+        "/fluxcd/",
         "/flux-operator/",
         "/flux-instance/"
       ]
@@ -210,11 +237,17 @@
       ]
     },
     {
-      "groupName": "open-webui",
+      "groupName": "auto-merge",
       "matchPackageNames": [
-        "/open-webui/",
-        "/ollama/"
-      ]
+        "/searxng/",
+        "/invidious/",
+        "/telegraf/",
+        "/nginx/",
+        "/redis/",
+        "/syncify/"
+      ],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true
     }
   ]
 }

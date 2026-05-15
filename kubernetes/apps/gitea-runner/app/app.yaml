@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -35,7 +35,7 @@ spec:
           certs:
             image:
               repository: docker.io/alpine
-              tag: "3.22"
+              tag: "3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659"
             command: ["/bin/sh", "-c"]
             args:
               - |

@@ -1,0 +1,12 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: portfolio-performance
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/portfolio-performance/app"
+  postBuild:
+    substitute:
+      APP_NAME: portfolio-performance
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "8Gi"

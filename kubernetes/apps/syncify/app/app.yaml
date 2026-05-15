@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: docker.io/thewicklowwolf/syncify
-              tag: "0.2.41"
+              tag: "0.2.52@sha256:154f7f18ca68a1b3a9453e57654e6650271a92d130d3f16b767dafac45de3edc"
             env:
               thread_limit: 1
               crop_album_art: false

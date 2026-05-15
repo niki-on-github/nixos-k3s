@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: docker.io/nginx
-              tag: "1.29.3"
+              tag: "1.30.0@sha256:55d1fb0944aafb8534b253e486c6cf57d3e0c785c4f6a7b3e9f02c5a080fb2ce"
           generator1:
             image:
               repository: "ghcr.io/niki-on-github/grafana-esp-bridge"

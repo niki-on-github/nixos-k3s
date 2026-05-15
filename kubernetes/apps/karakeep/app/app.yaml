@@ -1,0 +1,152 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: docker.io/busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/mkdir"
+            args:
+            - "-p"
+            - "/init/karakeep"
+            - "/init/meilisearch"
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/karakeep-app/karakeep
+              tag: 0.29.1@sha256:3b521070cdc26d7385cc288fe0cf7aef17e1fa551a1960cdfd7b8d5d732167a9
+          
+            env:
+              KARAKEEP_VERSION: "release"
+              NEXTAUTH_SECRET: "${SECRET_KARAKEEP_NEXTAUTH_SECRET}"
+              NEXTAUTH_URL: "https://karakeep.${SECRET_DOMAIN}"
+              MEILI_MASTER_KEY: "${SECRET_MEILI_MASTER_KEY}"
+              DATA_DIR: /data
+              MEILI_ADDR: "http://127.0.0.1:7700"
+              BROWSER_WEB_URL: "http://${APP_NAME}-chrome.${APP_NAMESPACE}.svc.cluster.local:9222"
+              OLLAMA_BASE_URL: "${CONFIG_LLM_BASE_URL}"
+              INFERENCE_TEXT_MODEL: "${CONFIG_LLM_TEXT_MODEL}"
+              INFERENCE_IMAGE_MODEL: "${CONFIG_LLM_IMAGE_MODEL}"
+              EMBEDDING_TEXT_MODEL: "${CONFIG_LLM_EMBEDDING_MODEL}"
+              INFERENCE_JOB_TIMEOUT_SEC: "300"
+              INFERENCE_FETCH_TIMEOUT_SEC: "600"
+              INFERENCE_ENABLE_AUTO_TAGGING: "true"
+              INFERENCE_ENABLE_AUTO_SUMMARIZATION: "true"
+              INFERENCE_NUM_WORKERS: "1"
+              INFERENCE_CONTEXT_LENGTH: "8192"
+              INFERENCE_MAX_OUTPUT_TOKENS: "4096"
+              CRAWLER_ENABLE_ADBLOCKER: true
+
+          meilisearch:
+            image:
+              repository: docker.io/getmeili/meilisearch
+              tag: v1.39.0@sha256:52b60339c068245fc0660242fcbd5822c5984c033eea044e1d2d8cb3f01ea470
+            env:
+              MEILI_NO_ANALYTICS: "true"
+              MEILI_ENV: "production"
+              MEILI_MASTER_KEY: "${SECRET_MEILI_MASTER_KEY}"
+
+      chrome:
+        containers:
+          app:
+            image:
+              repository: gcr.io/zenika-hub/alpine-chrome
+              tag: "124"
+            args:
+              - --disable-gpu
+              - --disable-dev-shm-usage
+              - --remote-debugging-address=0.0.0.0
+              - --remote-debugging-port=9222
+              - --hide-scrollbars
+              - --headless
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                add:
+                - SYS_ADMIN
+              readOnlyRootFilesystem: true
+              runAsNonRoot: true
+              runAsUser: 1000
+              runAsGroup: 1000
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 3000
+      chrome:
+        controller: chrome
+        ports:
+          http:
+            port: 9222
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "karakeep.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - "${APP_NAME}"
+        
+    persistence:
+      data:
+        existingClaim: "${APP_NAME}-pvc"
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /init
+            app:
+              - path: /data
+                subPath: karakeep
+            meilisearch:
+              - path: /data
+                subPath: meilisearch
+      chrome-tmp:
+        type: emptyDir
+        advancedMounts:
+          chrome:
+            app:
+              - path: /tmp

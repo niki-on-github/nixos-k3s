@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: docker.io/eeacms/rsync
-              tag: 2.9
+              tag: 3.0@sha256:e1e17256d41c99b4a7508a53b05086c872adc2b005dd99413bc08c0dbfb2ded0
             args:
             - "server"
             env:
@@ -32,11 +32,14 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/crazy-max/samba
-              tag: 4.21.4
-
+              repository: ghcr.io/niki-on-github/docker-samba-cached
+              tag: v4.21.5@sha256:5c873e243dbfa6f12bdfb0a862bae42d85541e0472d018d2af3074e0b124a8db
             env:
               TZ: "${CONFIG_TIMEZONE}"
+              CACHE_WORK_DIR: "/hdd"
+            securityContext:
+              capabilities:
+                add: ["IPC_LOCK"]
 
       nfs:
         containers:
@@ -72,7 +75,7 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/tinyfilemanager
-              tag: "v2.7"
+              tag: "v2.7.2"
 
 
     service:

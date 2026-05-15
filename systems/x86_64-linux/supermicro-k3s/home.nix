@@ -7,6 +7,7 @@
 
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
     matchBlocks = {
       "git.server02.lan" = {
         port = 222;

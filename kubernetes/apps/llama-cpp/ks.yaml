@@ -1,0 +1,12 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: llama-cpp
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/llama-cpp/app"
+  postBuild:
+    substitute:
+      APP_NAME: llama-cpp
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "64Gi"

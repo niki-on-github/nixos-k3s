@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: grafana
-      version: 10.1.4
+      version: 10.5.15
       sourceRef:
         kind: HelmRepository
         name: grafana-charts
@@ -102,14 +102,6 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/backup
-          - name: thanos
-            orgId: 1
-            folder: Thanos
-            type: file
-            disableDeletion: false
-            editable: true
-            options:
-              path: /var/lib/grafana/dashboards/thanos
           # - name: cilium
           #   orgId: 1
           #   folder: Cilium
@@ -135,12 +127,6 @@ spec:
         # cloudnative-pg:
         #   url: https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/main/docs/src/samples/monitoring/grafana-dashboard.json
         #   datasource: Prometheus
-        # minio:
-        #   # renovate: depName="MinIO Dashboard"
-        #   gnetId: 13502
-        #   revision: 24
-        #   datasource:
-        #     - { name: DS_PROMETHEUS, value: Prometheus }
  
       flux:
         flux-cluster:
@@ -182,43 +168,10 @@ spec:
           datasource:
             - { name: DS_PROMETHEUS, value: Prometheus }
 
-      thanos:
-        thanos-bucket-replicate:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/bucket-replicate.json
-          datasource: Prometheus
-        thanos-compact:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/compact.json
-          datasource: Prometheus
-        thanos-overview:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/overview.json
-          datasource: Prometheus
-        thanos-query:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query.json
-          datasource: Prometheus
-        thanos-query-frontend:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query-frontend.json
-          datasource: Prometheus
-        thanos-receieve:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/receive.json
-          datasource: Prometheus
-        thanos-rule:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/rule.json
-          datasource: Prometheus
-        thanos-sidecar:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/sidecar.json
-          datasource: Prometheus
-        thanos-store:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/store.json
-          datasource: Prometheus
-
     datasources:
       datasources.yaml:
         apiVersion: 1
         datasources:
-          #- name: Prometheus
-          #  type: prometheus
-          #  access: proxy
-          #  url: http://thanos-query.monitoring:9090
           - name: Prometheus
             type: prometheus
             access: proxy
@@ -256,7 +209,6 @@ spec:
       - grafana-clock-panel
       - isovalent-hubble-datasource
 
-
     serviceMonitor:
       enabled: true
 
@@ -266,11 +218,6 @@ spec:
     env:
       GF_EXPLORE_ENABLED: true
       GF_SECURITY_ALLOW_EMBEDDING: true
-      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "${SECRET_GRAFANA_OAUTH_CLIENT_SECRET}"
-      GF_AUTH_GENERIC_OAUTH_API_URL: https://auth.${SECRET_DOMAIN}/api/oidc/userinfo
-      GF_AUTH_GENERIC_OAUTH_AUTH_URL: https://auth.${SECRET_DOMAIN}/api/oidc/authorization
-      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: https://auth.${SECRET_DOMAIN}/api/oidc/token
-      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: grafana
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

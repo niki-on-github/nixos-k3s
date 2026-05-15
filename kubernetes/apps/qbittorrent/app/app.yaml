@@ -13,7 +13,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -81,7 +81,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/qbittorrent
-              tag: "5.1.2@sha256:31ac39705e31f7cdcc04dc46c1c0b0cdf8dc6f9865d4894efc097a33adc41524"
+              tag: "5.1.4@sha256:bb82ad6668f8eda1d0fcce6c1341498bfa879155bb1295cd9d314a2c35c07a01"
 
             # NOTE: Open shell in pod change setting in WebUI and observe the config value via `cat /config/qBittorrent/qBittorrent.conf`           
             # For more details see https://github.com/home-operations/containers/tree/main/apps/qbittorrent

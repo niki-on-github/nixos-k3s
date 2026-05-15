@@ -10,7 +10,6 @@ resources:
   - resources/home-automation.yaml
   - resources/kubevirt.yaml
   - resources/media.yaml
-  - resources/minio-operator.yaml
   - resources/monitoring.yaml
   - resources/networking.yaml
   - resources/notification.yaml

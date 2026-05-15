@@ -23,13 +23,15 @@ resources:
 - charts/influxdata-charts.yaml
 - charts/jetstack-charts.yaml
 - charts/k8tz-charts.yaml
+- charts/kestra-charts.yaml
 - charts/kube-vip-charts.yaml
 - charts/kubetail-charts.yaml
 - charts/kyverno-charts.yaml
 - charts/metrics-server-charts.yaml
-- charts/minio-operator-charts.yaml
 - charts/nvidia-charts.yaml
+- charts/ollama-charts.yaml
 - charts/open-webui-charts.yaml
+- charts/piped-charts.yaml
 - charts/piraeus-charts.yaml
 - charts/prometheus-community-charts.yaml
 - charts/rke2-charts.yaml

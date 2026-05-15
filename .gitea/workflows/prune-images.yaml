@@ -1,0 +1,16 @@
+name: Prune Container Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: "curlimages/curl:latest"
+    steps:
+      - name: Prune Image on Host
+        run: |
+          curl -s -X POST http://image-puller.system.svc.cluster.local/prune-images \
+            -H "Content-Type: application/json" \
+            -d '{"days": 14}'

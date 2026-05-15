@@ -5,7 +5,7 @@ metadata:
   name: xenitab-charts
   namespace: flux-system
 spec:
-  interval: 24h
+  interval: 6h
   type: oci
   url: oci://ghcr.io/xenitab/helm-charts
   timeout: 3m

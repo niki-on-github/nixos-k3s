@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "${APP_NAME}-pvc"
+  namespace: ${APP_NAMESPACE}
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "${PVC_CAPACITY:-1Gi}"
+  storageClassName: "openebs-zfspv"
+  # see https://github.com/backube/volsync/issues/627#issuecomment-1688603593
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: "${APP_NAME}-bootstrap"

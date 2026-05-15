@@ -6,6 +6,5 @@ metadata:
 spec:
   path: "./kubernetes/core/networking/cilium/operator"
   dependsOn:
-    - name: traefik-crds
     - name: prometheus-crds
     - name: cert-manager

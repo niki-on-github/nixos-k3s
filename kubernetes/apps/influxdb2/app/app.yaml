@@ -17,7 +17,7 @@ spec:
   values:
     image:
       repository: docker.io/influxdb
-      tag: 2.7.12-alpine
+      tag: 2.8.0-alpine@sha256:f15dfc604753f53b180364a331b46c2f4bc5c08a665d025982b301efa69bc2f7
       pullPolicy: IfNotPresent
 
     adminUser:
@@ -48,6 +48,7 @@ spec:
           influx bucket create -n scrutiny_weekly -o ${CONFIG_INFLUXDB_ORG} -r 0
           influx bucket create -n scrutiny_monthly -o ${CONFIG_INFLUXDB_ORG} -r 0
           influx bucket create -n scrutiny_yearly -o ${CONFIG_INFLUXDB_ORG} -r 0
+          influx bucket create -n speedport -o ${CONFIG_INFLUXDB_ORG} -r 180d
 
     service:
       type: ClusterIP

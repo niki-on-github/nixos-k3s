@@ -1,0 +1,77 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: piped
+      version: 8.0.20
+      sourceRef:
+        kind: HelmRepository
+        name: piped-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: piped-tailscale
+
+    frontend:
+      env:
+        BACKEND_HOSTNAME: "pipedapi.${SECRET_TAILSCALE_TAILNET_NAME}"
+
+    backend:
+      config:
+        HTTP_WORKERS: 2
+        PROXY_PART: "https://ytproxy.${SECRET_TAILSCALE_TAILNET_NAME}"
+        API_URL: "https://pipedapi.${SECRET_TAILSCALE_TAILNET_NAME}"
+        FRONTEND_URL: "https://piped.${SECRET_TAILSCALE_TAILNET_NAME}"
+        COMPROMISED_PASSWORD_CHECK: false
+        DISABLE_REGISTRATION: false
+        FEED_RETENTION: 14
+        database:
+          connection_url: "jdbc:postgresql://${APP_NAME}-postgresql-rw.${CONFIG_DATABASE_NAMESPACE}.svc.cluster.local/${POSTGRES_DATABASE}"
+          driver_class: org.postgresql.Driver
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          username: "${SECRET_DATABASE_USER}"
+          password: "${SECRET_DATABASE_PASSWORD}"
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: tailscale
+        primary: true
+        hosts:
+          - host: "piped"
+            paths:
+              - path: "/"
+        tls:
+          - hosts: 
+            - "piped"
+
+      backend:
+        enabled: true
+        ingressClassName: tailscale
+        primary: false
+        hosts:
+          - host: "pipedapi"
+            paths:
+              - path: "/"
+        tls:
+          - hosts: 
+            - "pipedapi"
+
+      ytproxy:
+        enabled: true
+        ingressClassName: tailscale
+        primary: false
+        hosts:
+          - host: "ytproxy"
+            paths:
+              - path: "/"
+        tls:
+          - hosts: 
+            - "ytproxy"
+

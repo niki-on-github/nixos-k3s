@@ -2,11 +2,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+ - bambuddy/ks.yaml
  - bitcoind/ks.yaml
  - cyberchef/ks.yaml
+ - docmost/ks.yaml
  - email2signal/ks.yaml
  - esp-dashboard/ks.yaml
  - excalidraw/ks.yaml
+ - gitea-mirror/ks.yaml
  - gitea-runner/ks.yaml
  - gitea/ks.yaml
  - grafana/ks.yaml
@@ -14,12 +17,15 @@ resources:
  - image-puller/ks.yaml
  - immich/ks.yaml
  - influxdb2/ks.yaml
+ - invidious/ks.yaml
  - it-tools/ks.yaml 
  - jdownloader/ks.yaml
  - jellyfin/ks.yaml
  - jellyseerr/ks.yaml
+ - karakeep/ks.yaml
  - kubetail/ks.yaml
- - linkwarden/ks.yaml
+ - llama-cpp/ks.yaml
+ - local-deep-research/ks.yaml
  - lubelogger/ks.yaml
  - mail-archiver/ks.yaml
  - manyfold/ks.yaml
@@ -27,27 +33,34 @@ resources:
  - miniflux/ks.yaml
  - monerod/ks.yaml
  - mosquitto/ks.yaml
+ - navidrome/ks.yaml
  - ncps/ks.yaml
  - netboot-xyz/ks.yaml
  - network-share/ks.yaml
- - nodered/ks.yaml
  - nzbget/ks.yaml
+ - omni-route/ks.yaml
  - omni-tools/ks.yaml
- - open-webui/ks.yaml
- - paperless-ai/ks.yaml
+ - openchamber/ks.yaml
  - paperless/ks.yaml
  - pgadmin/ks.yaml
+ - portfolio-performance/ks.yaml
  - qbittorrent/ks.yaml
+ - radicale/ks.yaml
  - readeck/ks.yaml
+ - redlib/ks.yaml
+ - romm/ks.yaml
  - scrutiny/ks.yaml
  - searxng/ks.yaml
- - solaredge/ks.yaml
+ - solaredge2mqtt/ks.yaml
+ - speedtest/ks.yaml
  - stirling-pdf/ks.yaml 
+ - supersplat/ks.yaml
  - syncify/ks.yaml
  - syncthing/ks.yaml
  - tailscale/ks.yaml
  - telegraf/ks.yaml
  - unifi/ks.yaml
+ - upsnap/ks.yaml
  - uptime-kuma/ks.yaml
  - vault/ks.yaml
  - vaultwarden/ks.yaml
@@ -56,5 +69,4 @@ resources:
  - vpn-gateway/ks.yaml
  - watcharr/ks.yaml
  - wg-easy/ks.yaml
- - wiki/ks.yaml
  - zigbee2mqtt/ks.yaml

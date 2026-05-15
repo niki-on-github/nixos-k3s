@@ -1,0 +1,31 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: romm-db
+  namespace: flux-system
+spec:
+  path: "./kubernetes/templates/postgres"
+  wait: true
+  postBuild:
+    substitute:
+      APP_NAME: romm
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "romm"
+      POSTGRES_MAJOR: "16"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: romm
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/romm/app"
+  dependsOn:
+    - name: romm-db
+    - name: tailscale
+  postBuild:
+    substitute:
+      APP_NAME: romm
+      APP_NAMESPACE: apps
+      POSTGRES_DATABASE: "romm"
+      PVC_CAPACITY: "64Gi"

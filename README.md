@@ -27,6 +27,8 @@ A single node k3s cluster which can be **fully reproducibly deployed with a sing
 
 In contrast to most public nixos system repositories, i use a separate nixos module repository and not a monorepository with all my systems. Since my systems have highly different release and update cycles, this makes it much easier to manage different system version states. A partial mirror of my nixos modules is available at [niki-on-github/nixos-modules](https://github.com/niki-on-github/nixos-modules).
 
+My AI services are deployed to a separate cluster that is only temporarily powered on. Due to the poor idle power consumption of a multi-GPU setup, I decided to power it on only when needed. This is automated via Home Assistant using Wake-on-LAN. My AI cluster configuration is currently not available in a public repository.
+
 ## Setup
 
 ### Install

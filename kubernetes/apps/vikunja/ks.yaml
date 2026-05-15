@@ -20,7 +20,6 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/vikunja/app"
-  wait: true
   dependsOn:
     - name: vikunja-db
     - name: tailscale

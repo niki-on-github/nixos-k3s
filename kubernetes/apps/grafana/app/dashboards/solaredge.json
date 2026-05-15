@@ -18,580 +18,9 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 24,
+  "id": 33,
   "links": [],
-  "liveNow": false,
   "panels": [
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "P3C6603E967DC8568"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": -1
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 0,
-        "y": 0
-      },
-      "id": 13,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "query": "battery = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"instantaneous_power\")\n\ninverter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n\njoin(tables: {battery: battery, inverter: inverter}, on: [\"_time\", \"_start\", \"_stop\"], method: \"inner\")\n  |> map(fn: (r) => ({_time: r._time, _value: r._value_inverter + r._value_battery }))\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()\n",
-          "refId": "A"
-        }
-      ],
-      "title": "PV",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "P3C6603E967DC8568"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 3,
-        "y": 0
-      },
-      "id": 6,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
-          "refId": "A"
-        }
-      ],
-      "title": "Inverter",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "P3C6603E967DC8568"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 6,
-        "y": 0
-      },
-      "id": 8,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "query": "meter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power\")\n\ninverter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n\njoin(tables: {meter: meter, inverter: inverter}, on: [\"_time\", \"_start\", \"_stop\"], method: \"inner\")\n  |> map(fn: (r) => ({_time: r._time, _value: r._value_inverter - r._value_meter }))\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
-          "refId": "A"
-        }
-      ],
-      "title": "Verbrauch",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "P3C6603E967DC8568"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": -1
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 9,
-        "y": 0
-      },
-      "id": 9,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
-          "refId": "A"
-        }
-      ],
-      "title": "Export/Import",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "P3C6603E967DC8568"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": -1
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 0,
-        "y": 5
-      },
-      "id": 11,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"instantaneous_power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
-          "refId": "A"
-        }
-      ],
-      "title": "Battery",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "P3C6603E967DC8568"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "decimals": 2,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "rothz"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 3,
-        "y": 5
-      },
-      "id": 5,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"frequency\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> last()",
-          "refId": "A"
-        }
-      ],
-      "title": "Frequency",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "P3C6603E967DC8568"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-RdYlGr"
-          },
-          "decimals": 0,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 0,
-        "y": 10
-      },
-      "id": 4,
-      "options": {
-        "minVizHeight": 200,
-        "minVizWidth": 200,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"soe\")\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n\n",
-          "refId": "A"
-        }
-      ],
-      "title": "Battery",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "P3C6603E967DC8568"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 2,
-          "mappings": [],
-          "max": 50.2,
-          "min": 49.8,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "rothz"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 15
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "P3C6603E967DC8568"
-          },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"frequency\")\n  |> aggregateWindow(every: 4m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")",
-          "refId": "A"
-        }
-      ],
-      "title": "Frequency",
-      "type": "timeseries"
-    },
     {
       "datasource": {
         "type": "influxdb",
@@ -610,6 +39,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 100,
             "gradientMode": "opacity",
@@ -629,6 +59,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -645,7 +76,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -655,7 +86,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Value"
+              "options": "consumer_total"
             },
             "properties": [
               {
@@ -696,7 +127,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 0
       },
       "id": 10,
       "options": {
@@ -707,10 +138,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
@@ -718,12 +151,11 @@
             "uid": "P3C6603E967DC8568"
           },
           "hide": false,
-          "query": "meter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power\")\n\ninverter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n\njoin(tables: {meter: meter, inverter: inverter}, on: [\"_time\", \"_start\", \"_stop\"], method: \"inner\")\n  |> map(fn: (r) => ({_time: r._time, _value: r._value_inverter - r._value_meter }))\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")\n",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"consumer_total\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")",
           "refId": "B"
         }
       ],
       "title": "Verbrauch",
-      "transformations": [],
       "type": "timeseries"
     },
     {
@@ -744,6 +176,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 100,
             "gradientMode": "hue",
@@ -763,6 +196,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -779,7 +213,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -789,7 +223,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Value"
+              "options": "consumer_total"
             },
             "properties": [
               {
@@ -808,7 +242,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "inverter power_ac"
+              "options": "inverter_power"
             },
             "properties": [
               {
@@ -830,7 +264,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 12
       },
       "id": 7,
       "options": {
@@ -841,10 +275,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
@@ -852,7 +288,7 @@
             "uid": "P3C6603E967DC8568"
           },
           "hide": false,
-          "query": "meter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power\")\n\ninverter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n\njoin(tables: {meter: meter, inverter: inverter}, on: [\"_time\", \"_start\", \"_stop\"], method: \"inner\")\n  |> map(fn: (r) => ({_time: r._time, _value: r._value_inverter - r._value_meter }))\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")\n",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"consumer_total\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")",
           "refId": "B"
         },
         {
@@ -861,12 +297,11 @@
             "uid": "P3C6603E967DC8568"
           },
           "hide": false,
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"inverter_power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")",
           "refId": "A"
         }
       ],
       "title": "Eigenverbrauch",
-      "transformations": [],
       "type": "timeseries"
     },
     {
@@ -886,6 +321,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 100,
             "gradientMode": "hue",
@@ -902,6 +338,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -918,7 +355,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -934,7 +371,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 24
       },
       "id": 12,
       "options": {
@@ -945,17 +382,19 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "battery = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"instantaneous_power\")\n\ninverter = from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"inverter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_ac\")\n\njoin(tables: {battery: battery, inverter: inverter}, on: [\"_time\", \"_start\", \"_stop\"], method: \"inner\")\n  |> map(fn: (r) => ({_time: r._time, _value: r._value_inverter + r._value_battery }))\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")\n",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"pv_production\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")",
           "refId": "A"
         }
       ],
@@ -980,6 +419,7 @@
             "axisPlacement": "auto",
             "axisWidth": 40,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 100,
             "gradientMode": "scheme",
@@ -999,6 +439,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1017,7 +458,7 @@
             "steps": [
               {
                 "color": "red",
-                "value": null
+                "value": 0
               },
               {
                 "color": "green",
@@ -1033,7 +474,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 35
       },
       "id": 2,
       "options": {
@@ -1044,17 +485,19 @@
           "showLegend": false
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"soe\")\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")\n  \n",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"battery_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state_of_charge\")\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")\n  \n",
           "refId": "A"
         }
       ],
@@ -1079,6 +522,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 20,
             "gradientMode": "hue",
@@ -1098,6 +542,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1114,7 +559,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -1124,7 +569,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "battery instantaneous_power"
+              "options": "inverter_power"
             },
             "properties": [
               {
@@ -1136,14 +581,14 @@
               },
               {
                 "id": "displayName",
-                "value": "Battery"
+                "value": "Inverter"
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "meter power"
+              "options": "grid_power"
             },
             "properties": [
               {
@@ -1162,7 +607,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "inverter power_ac"
+              "options": "battery_power"
             },
             "properties": [
               {
@@ -1174,7 +619,7 @@
               },
               {
                 "id": "displayName",
-                "value": "Inverter"
+                "value": "Battery"
               }
             ]
           }
@@ -1184,7 +629,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 69
+        "y": 46
       },
       "id": 1,
       "options": {
@@ -1195,27 +640,29 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "P3C6603E967DC8568"
           },
-          "query": "from(bucket: \"solaredge\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"meter\" or r[\"_measurement\"] == \"inverter\" or r[\"_measurement\"] == \"battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power\" or r[\"_field\"] == \"power_ac\" or r[\"_field\"] == \"instantaneous_power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")",
+          "query": "from(bucket: \"solaredge2\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"powerflow_raw\")\n  |> filter(fn: (r) => r[\"_field\"] == \"battery_power\" or r[\"_field\"] == \"inverter_power\" or r[\"_field\"] == \"grid_power\")\n  |> aggregateWindow(every: 2m, fn: median, createEmpty: false)\n  |> yield(name: \"median\")",
           "refId": "A"
         }
       ],
       "title": "Power",
-      "transformations": [],
       "type": "timeseries"
     }
   ],
+  "preload": false,
   "refresh": "",
-  "schemaVersion": 39,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": []
@@ -1228,6 +675,5 @@
   "timezone": "",
   "title": "SolarEdge",
   "uid": "ad588e36-165d-464f-9f94-a8b553cfbcc2",
-  "version": 1,
-  "weekStart": ""
+  "version": 1
 }

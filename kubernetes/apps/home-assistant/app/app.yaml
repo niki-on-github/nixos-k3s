@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -18,23 +18,28 @@ spec:
   values:
     controllers:
       ${APP_NAME}:
+        pod:
+          annotations:
+            # required to send wol packages
+            k8s.v1.cni.cncf.io/networks: networking/multus-br1
+
         initContainers:
-          init:
+          setup:
             image:
-              repository: docker.io/busybox
-              tag: "1.37.0"
+              repository: ghcr.io/home-assistant/home-assistant
+              tag: 2025.12.0@sha256:8951fcbb794da8f261e1639c668639bc90f9520b48099b5715f6d5fbfef08a0e
             command:
-            - "/bin/sh"
+            - "/bin/bash"
             args:
-            - "/init.sh"
+            - "/setup.sh"
         containers:
           app:
             image:
               repository: ghcr.io/home-assistant/home-assistant
-              tag: 2025.10.4
+              tag: "2026.3"
           
             env:
-              # NOTE: hass does not support env-variables for configuration directly, but you can use env variables in configuration.yaml with `!env_var VAR_NAME`
+              # NOTE: hass does not support env-variables for configuration directly, but you can use/load env variables in configuration.yaml with `!env_var VAR_NAME`
               HASS_TRUSTED_PROXIES: ${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}
               HASS_RECORDER_DB_URL:
                 valueFrom:
@@ -55,7 +60,7 @@ spec:
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
         hosts:
-          - host: &ingress "hass.${SECRET_DOMAIN}"
+          - host: &ingress "home.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
@@ -84,12 +89,19 @@ spec:
       scripts:
         suffix: scripts
         data:
-          init.sh: |
-            #!/bin/sh
+          setup.sh: |
+            #!/bin/bash
             echo "run $0"
-            cp -nv /init/* /config/ 
-            mkdir -p /config/python_scripts
-                        
+            cp -nv /setup/* /config/
+            mkdir -p "/config/python_scripts"
+            mkdir -p "/config/custom_components"
+            if [ ! -d "/config/custom_components/hacs" ]; then
+              wget "https://github.com/hacs/integration/releases/latest/download/hacs.zip" -O "/config/custom_components/hacs.zip"
+              mkdir -p "/config/custom_components/hacs"
+              unzip "/config/custom_components/hacs.zip" -d "/config/custom_components/hacs"
+              rm -f /config/custom_components/hacs.zip
+            fi
+ 
     persistence:
       config:
         existingClaim: "${APP_NAME}-pvc"
@@ -97,20 +109,26 @@ spec:
           ${APP_NAME}:
             app:
               - path: /config
-            init:
+            setup:
               - path: /config
-      init:
+      setup:
         type: configMap
-        name: home-assistant-init
+        name: home-assistant-setup
         advancedMounts:
           ${APP_NAME}:
-            init:
-              - path: /init
+            setup:
+              - path: /setup
       scripts:
         type: configMap
         name: ${APP_NAME}-scripts
         advancedMounts:
           ${APP_NAME}:
-            init:
-              - path: /init.sh
-                subPath: init.sh
+            setup:
+              - path: /setup.sh
+                subPath: setup.sh
+      certs:
+        type: secret
+        name: internal-ca
+        globalMounts:
+          - path: /etc/ssl/certs/internal-ca.pem
+            subPath: tls.crt

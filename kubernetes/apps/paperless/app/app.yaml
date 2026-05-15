@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -36,14 +36,13 @@ spec:
             image:
               # renovate: datasource=docker
               repository: docker.io/library/redis
-              tag: 8.2.2
+              tag: 8.6.3
 
           app:
             dependsOn: redis
             image:
-              # renovate: datasource=docker
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.19.3
+              tag: 2.20.1@sha256:98528e58787e48c73748608e8d4c03b1692c185e69fc237c00c44d3b4f68b335
 
             env:
               COMPOSE_PROJECT_NAME: paperless

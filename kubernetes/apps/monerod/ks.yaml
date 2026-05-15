@@ -5,6 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/monerod/app"
+  wait: false
   postBuild:
     substitute:
       APP_NAME: monerod

@@ -3,8 +3,7 @@ import subprocess
 
 with open('flux-diff.md') as f:
     for line in f:
-        m = re.match(r'^\+\s*image:\s*(\S+)', line)
-        if m:
+        if m := re.match(r'^\+\s*image:\s*(\S+)', line):
             image = m.group(1)
             print('pull image:', image)
             subprocess.run([

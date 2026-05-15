@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -17,19 +17,22 @@ spec:
 
   values:
     defaultPodOptions:
-      hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
 
     controllers:
       ${APP_NAME}:
+        pod:
+          annotations:
+            k8s.v1.cni.cncf.io/networks: networking/multus-br1
         containers:
           app:
             image:
               repository: ghcr.io/niki-on-github/netboot-xyz
-              tag: "v2.0.88"
+              tag: "v2.0.89@sha256:342de491c930cd9a9cab5f1755d913e1cc657faeaaad53e369beb57364c35b26"
             env:
               NETWORK_IP: "${CONFIG_NETBOOT_XYZ_HOST_NETWORK_IP}"
-              INTERFACE: "${CONFIG_NETBOOT_XYZ_HOST_INTERFACE}"
+              # INTERFACE: "${CONFIG_NETBOOT_XYZ_HOST_INTERFACE}"
+              INTERFACE: "net1" # multus interface
 
             securityContext:
               capabilities:

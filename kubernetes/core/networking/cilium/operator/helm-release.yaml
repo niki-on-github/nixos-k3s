@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: cilium
-      version: 1.18.3
+      version: 1.19.1
       sourceRef:
         kind: HelmRepository
         name: cilium-charts
@@ -48,6 +48,10 @@ spec:
       dashboards:
         <<: *dashboards
 
+    l7Proxy: true
+    envoy:
+      enabled: true
+
     hubble:
       enabled: true
       dashboards:
@@ -60,20 +64,12 @@ spec:
           certValidityDuration: 1095
       
       ui:
-        enabled: true
+        enabled: false
         prometheus:
           <<: *prometheus
 
         ingress:
-          enabled: true
-          className: traefik
-          annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          hosts:
-            -  &host "hubble.${SECRET_DOMAIN}"
-          tls:
-            - hosts:
-                - *host
+          enabled: false
 
       metrics:
         enabled:
@@ -82,7 +78,7 @@ spec:
           - tcp
           - flow
           - icmp
-          - http
+          - httpV2
         serviceMonitor:
           enabled: false
         dashboards:
@@ -90,6 +86,10 @@ spec:
 
       relay:
         enabled: true
+        service:
+          # TODO switch back to ClusterIP after debugging
+          type: NodePort
+          nodePort: 31234
         prometheus:
           <<: *prometheus
 

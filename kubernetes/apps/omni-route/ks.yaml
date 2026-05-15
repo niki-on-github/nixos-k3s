@@ -1,0 +1,14 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: omni-route
+  namespace: flux-system
+spec:
+  path: "./kubernetes/apps/omni-route/app"
+  dependsOn:
+    - name: tailscale
+  postBuild:
+    substitute:
+      APP_NAME: omni-route
+      APP_NAMESPACE: apps
+      PVC_CAPACITY: "4Gi"

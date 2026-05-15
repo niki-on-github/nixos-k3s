@@ -19,6 +19,22 @@ http:
 
 python_script:
 
+#https://www.home-assistant.io/integrations/influxdb/
+#influxdb:
+#  api_version: 2
+#  ssl: false
+#  host: influxdb2.monitoring.svc.cluster.local
+#  port: 8086
+#  token: !secret influxdb_token
+#  organization: "homelab"
+#  bucket: "home_assistant"
+#  tags:
+#    source: HA
+#  tags_attributes:
+#    - friendly_name
+#    - device_class
+#  default_measurement: units
+
 notify:
   - name: email_notify
     platform: smtp

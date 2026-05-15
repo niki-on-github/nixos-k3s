@@ -25,6 +25,8 @@ spec:
     - name: home-assistant-db
     - name: tailscale
     - name: mosquitto
+    - name: radicale
+    - name: influxdb2
   postBuild:
     substitute:
       APP_NAME: home-assistant

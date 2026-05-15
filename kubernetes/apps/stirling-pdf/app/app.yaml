@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: docker.io/frooodle/s-pdf
-              tag: "1.5.0"
+              tag: "2.7.3@sha256:f2e9ab8c82174cc96d573889d91228ad01f489dcbfe0ef7916c969e3a61cafca"
             env:
               LANGS: en_GB,de_DE
 

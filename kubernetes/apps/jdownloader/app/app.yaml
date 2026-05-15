@@ -13,7 +13,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: docker.io/jlesage/jdownloader-2
-              tag: v25.07.2
+              tag: v26.03.1@sha256:3d6cb102bd9bacff12ab1ca5136a38cb8f93d6595a7ccf5bce60aac4df138ebd
 
             env:
               TZ: "${CONFIG_TIMEZONE}"

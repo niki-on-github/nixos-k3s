@@ -20,7 +20,7 @@ spec:
   chart:
     spec:
       chart: kube-vip
-      version: 0.9.1
+      version: 0.9.7
       sourceRef:
         kind: HelmRepository
         name: kube-vip-charts
@@ -60,7 +60,7 @@ spec:
   chart:
     spec:
       chart: kube-vip-cloud-provider
-      version: 0.2.9
+      version: 0.2.10
       sourceRef:
         kind: HelmRepository
         name: kube-vip-charts

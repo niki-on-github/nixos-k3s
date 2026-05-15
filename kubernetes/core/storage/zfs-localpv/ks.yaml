@@ -5,7 +5,9 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/core/storage/zfs-localpv/app"
-  wait: true
+  wait: true  
+  dependsOn:
+    - name: prometheus-crds
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

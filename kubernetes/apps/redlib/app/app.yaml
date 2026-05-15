@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/silvenga/redlib
+              tag: "latest@sha256:5b7b92744ca153c75bef1f5b6b5ffb6985a230c91019d722a88ec758b15f502d"
+              #repository: quay.io/redlib/redlib
+              #tag: "latest@sha256:dffb6c5a22f889d47d8e28e33411db0fb6c5694599f72cf740c912c12f5fc1c6"
+            env:
+              REDLIB_SFW_ONLY: "off"
+              REDLIB_ENABLE_RSS: "on"
+              REDLIB_ROBOTS_DISABLE_INDEXING: "on"
+              REDLIB_DEFAULT_SHOW_NSFW: "on"
+              REDLIB_DEFAULT_BLUR_NSFW: "off"
+              REDLIB_DEFAULT_HIDE_AWARDS: "on"
+              REDLIB_DEFAULT_AUTOPLAY_VIDEOS: "off"
+              REDLIB_DEFAULT_HIDE_HLS_NOTIFICATION: "off"
+              REDLIB_DEFAULT_USE_HLS: "on"
+              REDLIB_DEFAULT_LAYOUT: "card"
+              REDLIB_DEFAULT_REMOVE_DEFAULT_FEEDS: "on"
+              REDLIB_DEFAULT_HIDE_SIDEBAR_AND_SUMMARY: "on"
+              REDLIB_DEFAULT_SUBSCRIPTIONS: "selfhosted+homelab+LocalLLaMA+kubernetes+comfyui+homeassistant+homeautomation"
+              # REDLIB_DEFAULT_FILTERS: ""
+
+    service:
+      webui:
+        controller: ${APP_NAME}
+        ports:
+          http:
+            port: 8080
+
+    ingress:
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress "redlib.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+        tls:
+          - hosts:
+              - *ingress
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "${APP_NAME}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: webui
+                  port: http
+
+        tls:
+          - hosts:
+              - "${APP_NAME}"

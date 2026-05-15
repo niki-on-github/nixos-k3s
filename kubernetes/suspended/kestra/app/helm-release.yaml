@@ -9,13 +9,25 @@ spec:
   chart:
     spec:
       chart: kestra
-      version: 0.22.9
+      version: 1.0.24
       sourceRef:
         kind: HelmRepository
         name: kestra-charts
         namespace: flux-system
 
   values:
+    common:
+      replicas: 1
+      extraVolumes:
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: "${APP_NAME}-pvc"
+
+      extraVolumeMounts:
+        - name: app-storage
+          mountPath: &storagePath "/app/storage"
+          readOnly: false
+
     ingress:
       enabled: true
       className: traefik
@@ -30,15 +42,25 @@ spec:
         - hosts:
             - *host
 
-    minio:
-      enabled: true
-      persistence:
-        enabled: true
-        storageClass: "local-persistent"
+    configurations:
+      application:
+        datasources:
+          postgres:
+            url: "jdbc:postgresql://${APP_NAME}-postgresql-rw.${CONFIG_DATABASE_NAMESPACE}.svc.cluster.local:5432/${POSTGRES_DATABASE}"
+            driver-class-name: org.postgresql.Driver
+            username: "${SECRET_DATABASE_USER}"
+            password: "${SECRET_DATABASE_PASSWORD}"
+        kestra:
+          server:
+            basic-auth:
+              username: "admin@${SECRET_DOMAIN}"
+              password: "${SECRET_WEBSERVICES_PASSWORD}"
+          queue:
+            type: postgres
+          repository:
+            type: postgres
+          storage:
+            type: local
+            local:
+              base-path: *storagePath
 
-    postgresql:
-      enabled: true
-      primary:
-        persistence:
-          enabled: true
-          storageClass: "local-persistent"

@@ -13,6 +13,9 @@ configMapGenerator:
   - name: esp-dashboard-2
     files:
       - dashboards/esp2.json
+  - name: zfs-localpv
+    files:
+      - dashboards/zfs-localpv.json
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

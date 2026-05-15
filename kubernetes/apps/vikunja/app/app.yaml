@@ -18,7 +18,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -27,14 +27,26 @@ spec:
   values:
     controllers:
       ${APP_NAME}:
+        pod:
+          securityContext:
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
+
         containers:
           app:
             image:
               repository: docker.io/vikunja/vikunja
-              tag: "0.24.6"
+              tag: "2.1.0"
 
             env:
-              TZ: "${CONFIG_TIMEZONE}"
+              VIKUNJA_SERVICE_TIMEZONE: "${CONFIG_TIMEZONE}"
+              VIKUNJA_SERVICE_ENABLEEMAILREMINDERS: "true"
+              VIKUNJA_MAILER_ENABLED: "true"
+              VIKUNJA_MAILER_HOST: "${CONFIG_MAIL_NOTIFICATION_HOST}"
+              VIKUNJA_MAILER_PORT: "${CONFIG_MAIL_NOTIFICATION_PORT}"
+              VIKUNJA_MAILER_AUTHTYPE: "plain"
+              VIKUNJA_MAILER_FROMEMAIL: "vikunja@${SECRET_DOMAIN}"
               VIKUNJA_SERVICE_PUBLICURL: "https://vikunja.${SECRET_DOMAIN}/"
               VIKUNJA_SERVICE_ENABLEREGISTRATION: "true"
               VIKUNJA_DATABASE_TYPE: postgres
@@ -111,3 +123,9 @@ spec:
           ${APP_NAME}:
             app:
               - path: /app/vikunja/files
+      cache:
+        type: emptyDir
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+              - path: /.cache

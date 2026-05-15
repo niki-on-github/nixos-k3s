@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  template:
+    metadata:
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        capabilities:
+          drop:
+            - ALL
+        readOnlyRootFilesystem: true
+      initContainers:
+        - name: get-busybox-tools
+          image: busybox:musl
+          command: ["/bin/sh", "-c", "cp /bin/busybox /tools/busybox && chmod +x /tools/busybox"]
+          volumeMounts:
+            - name: tools
+              mountPath: /tools
+        - name: get-garage-bin
+          image: docker.io/dxflrs/garage:v2.2.0
+          imagePullPolicy: IfNotPresent
+          command: ["/tools/busybox", "sh", "-c", "/tools/busybox cp /garage /shared/garage"]
+          volumeMounts:
+            - name: tools
+              mountPath: /tools
+            - name: garage-bin
+              mountPath: /shared
+      containers:
+        - name: configure
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          envFrom:
+            - secretRef:
+                name: "garage-secrets"
+          env:
+            - name: GARAGE_HOST
+              value: "garage.storage.svc.cluster.local"
+            - name: GARAGE_CAPACITY
+              value: "1T"
+            - name: GARAGE_ZONE
+              value: "dc1"
+            - name: GARAGE_BUCKETS
+              value: "volsync,postgres,blockchain"
+            - name: GARAGE_KEY_NAME
+              value: "default"
+
+          command: ["/bin/sh", "/scripts/setup.sh"]
+          volumeMounts:
+            - name: garage-bin
+              mountPath: /shared
+            - name: configure-script
+              mountPath: /scripts
+      volumes:
+        - name: tools
+          emptyDir: {}
+        - name: garage-bin
+          emptyDir: {}
+        - name: configure-script
+          configMap:
+            name: garage-scripts
+            defaultMode: 0755
+

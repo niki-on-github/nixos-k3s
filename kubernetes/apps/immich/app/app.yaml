@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-server
-              tag: "v2.2.0"
+              tag: "v2.3.1@sha256:f8d06a32b1b2a81053d78e40bf8e35236b9faefb5c3903ce9ca8712c9ed78445"
             env: &env
               REDIS_HOSTNAME: "${APP_NAME}-redis.${APP_NAMESPACE}.svc.cluster.local"
               IMMICH_MACHINE_LEARNING_URL: "http://${APP_NAME}-machine-learning.${APP_NAMESPACE}.svc.cluster.local:3003"
@@ -52,7 +52,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
-              tag: "v2.2.0"
+              tag: "v2.3.1@sha256:379e31b8c75107b0af8141904baa8cc933d7454b88fdb204265ef11749d7d908"
             env: *env
 
       redis:
@@ -60,7 +60,7 @@ spec:
           app:
             image:
               repository: registry.hub.docker.com/library/redis
-              tag: "8.2-alpine"
+              tag: "8.4-alpine@sha256:4eec4565e45aa0b3966554c866bc73211e281b0b3d89fe9a33c982e6faca809d"
 
     service:
       webui:

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,10 +22,11 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/serien-and-movie-planer
-              tag: v1.3.7
+              tag: v1.4.5
 
             env:
               TZ: &tz "${CONFIG_TIMEZONE}"
+              TRAILER_SEARCH_URL: "https://invidious.${SECRET_DOMAIN}/search?q="
               POSTGRES_USER:
                 valueFrom:
                   secretKeyRef:
@@ -52,7 +53,7 @@ spec:
           app:
             image:
               repository: ghcr.io/niki-on-github/serien-and-movie-crawler
-              tag: v1.3.7
+              tag: v1.4.5
 
             env:
               TZ: *tz

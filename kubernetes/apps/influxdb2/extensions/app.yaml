@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: ${APP_NAME}-weather-forecast
+  name: ${APP_NAME}
   namespace: ${APP_NAMESPACE}
 spec:
   interval: 10m
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -17,12 +17,12 @@ spec:
 
   values:
     controllers:
-      ${APP_NAME}:
+      weather-forecast:
         containers:
-          rest:
+          app:
             image:
               repository: ghcr.io/niki-on-github/influxdb-weather-forecast
-              tag: "v0.0.2"
+              tag: "v0.0.2@sha256:5f893ab9968690cfa4d03c040073f3897eef37e1e8855ebd240f9ee5c7f07f82"
 
             env:
               LATITUDE: ${SECRET_HOME_LATITUDE}
@@ -32,3 +32,16 @@ spec:
               INFLUXDB_ORG: "${CONFIG_INFLUXDB_ORG}"
               INFLUXDB_BUCKET: "weather-forecast"
               UPDATE_INTERVAL_IN_SECONDS: 14400
+      speedport:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/niki-on-github/speedport2influxdb
+              tag: "v0.0.5@sha256:66b80b82a636444ff3e76dcce2c882a3e93143a91ab53ddace678d54efce08ba"
+
+            env:
+              INFLUX_TOKEN: "${SECRET_INFLUXDB_ADMIN_TOKEN}"
+              INFLUX_URL: "influxdb2.${APP_NAMESPACE}.svc.cluster.local:8086"
+              INFLUX_ORG: "${CONFIG_INFLUXDB_ORG}"
+              INFLUX_BUCKET: "speedport"
+              LOOP_INTERVAL: 600

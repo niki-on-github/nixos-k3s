@@ -7,8 +7,8 @@ let
   interface = "enp5s0f1np1";
   backupInterface = "enp7s0"; # warning when adding nvme this name may changes
   cpufreqmax = 3000000; 
-  disk = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_4TB_XXX";
-  conbee2 = "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DEXXX-if00";
+  disk = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_4TB_S7DPNJ0Y102589K";
+  conbee2 = "/dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2650942-if00";
 in
 {
   imports = with inputs.self.nixosModules; [
@@ -31,6 +31,7 @@ in
       80 # http
       3000 # nixos gitea
       20108 # zigbee adapter via serial2net
+      31234 # cilium relay (debugging)
     ];
     allowedUDPPorts = [
       67 # netboot-xyz
@@ -46,12 +47,6 @@ in
   age.secrets = {
     flux-git-auth.file = ./secrets/flux-git-auth.yaml.age;
     flux-sops-age.file = ./secrets/flux-sops-age.yaml.age;
-    minio-credentials = {
-      file = ./secrets/minio-credentials.age;
-      mode = "770";
-      owner = "minio";
-      group = "minio";
-    };
     "sops-age-keys.txt" = {
       file = ./secrets/sops-age-keys.txt.age;
       path = "/home/${user}/.config/sops/age/keys.txt";
@@ -94,8 +89,8 @@ in
         enable = true;
         schedule = "weekly";
         password-path = "${config.sops.secrets.hetzner-borg-password.path}";
-        paths = ["/mnt/backup/minio"];
-        exclude = ["/mnt/backup/minio/blockchain"];
+        paths = ["/mnt/backup/garage" "/mnt/backup/rustfs"];
+        exclude = ["/mnt/backup/rustfs/blockchain"];
         snapshot = {
           enable = true;
           inplace = true;
@@ -156,14 +151,6 @@ in
             helmfile = "/etc/k3s/helmfile.yaml";
           };
         };
-        addons = {
-          minio = {
-            enable = true;
-            credentialsFile = config.age.secrets.minio-credentials.path;
-            buckets = ["volsync" "postgres" "blockchain"];
-            dataDir = ["/mnt/backup/minio"];
-          };
-        };
       };
       kvm = {
         enable = true;
@@ -174,7 +161,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_01" = {
-    device = "/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_Plus_1TB_XXX-part1";
+    device = "/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_Plus_1TB_S7U4NJ0Y151873V-part1";
     preLVM = true;
     # we reuse passphrase from system unlock
     keyFile = lib.mkIf (config.templates.system.setup.encryption == "full") "/disk.key";
@@ -183,7 +170,7 @@ in
   };
 
   boot.initrd.luks.devices."crypt_02" = {
-    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-6XXX-part1";
+    device = "/dev/disk/by-id/ata-WDC_WDS100T1R0A-68A4W0_212507A00254-part1";
     preLVM = true;
     # we reuse passphrase from system unlock
     keyFile = lib.mkIf (config.templates.system.setup.encryption == "full") "/disk.key";
@@ -195,14 +182,13 @@ in
     device = "/dev/disk/by-label/data01";
     fsType = "btrfs";
     options = ["defaults" "noatime" "compress=zstd" "subvol=@data"];
-    neededForBoot = true; # gitea and minio store data here so ensure to first mount the drive
+    neededForBoot = true; # gitea store data here so ensure to first mount the drive
   };
 
   services.gitea = {
     enable = true;
     lfs.enable = true;
     stateDir = "/mnt/backup/gitea";
-    useWizard = false; # broken
     group = "data";
     settings = {
       server = {
@@ -352,25 +338,25 @@ in
           namespace: kube-system
           # renovate: repository=https://helm.cilium.io
           chart: cilium/cilium
-          version: 1.18.3
+          version: 1.19.1
           values: ["${../../../kubernetes/core/networking/cilium/operator/helm-values.yaml}"]
           wait: true
         - name: coredns
           namespace: kube-system
           # renovate: repository=https://coredns.github.io/helm
           chart: coredns/coredns
-          version: 1.45.0
+          version: 1.45.2
           values: ["${../../../kubernetes/core/networking/coredns/app/helm-values.yaml}"]
           wait: true
         - name: flux-operator
           namespace: flux-system
           chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
-          version: 0.33.0
+          version: 0.35.0
           wait: true
         - name: flux-instance
           namespace: flux-system
           chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
-          version: 0.33.0
+          version: 0.35.0
           values: ["${../../../kubernetes/core/gitops/flux-instance/app/helm-values.yaml}", "${../../../kubernetes/config/settings/flux.yaml}"]
           wait: true
           needs:
@@ -426,6 +412,7 @@ in
     serviceConfig = {
         Type = "simple";
         User = "root"; # todo user with only dialout group?
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep 5";
         ExecStart = ''${pkgs.ser2net}/bin/ser2net -n -c /etc/ser2net.yaml''; 
         ExecReload = ''kill -HUP $MAINPID'';
         Restart = "on-failure";

@@ -1,0 +1,175 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${APP_NAME}-secrets
+  namespace: ${APP_NAMESPACE}
+stringData:
+  # garage
+  GARAGE_RPC_SECRET: "${SECRET_GARAGE_RPC_SECRET}"
+  GARAGE_ADMIN_TOKEN: "${SECRET_GARAGE_ADMIN_TOKEN}"
+  # webui
+  API_ADMIN_KEY: "${SECRET_GARAGE_ADMIN_TOKEN}"
+  # setup
+  GARAGE_KEY_ID: "${SECRET_S3_KEY_ID}"
+  GARAGE_SECRET_KEY: "${SECRET_S3_SECRET_KEY}"
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.6.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+
+  values:
+    controllers:
+      ${APP_NAME}:
+        initContainers:
+          init:
+            image:
+              repository: docker.io/busybox
+              tag: "1.37.0"
+            command:
+            - "/bin/mkdir"
+            args:
+            - "-m"
+            - "777"
+            - "-p"
+            - "/init/meta"
+            - "/init/data"
+
+        containers:
+          app:
+            image:
+              repository: docker.io/dxflrs/garage
+              tag: "v2.2.0"
+            envFrom:
+            - secretRef:
+                name: ${APP_NAME}-secrets
+          webui:
+            image:
+              repository: docker.io/khairul169/garage-webui
+              tag: "1.1.0"
+            envFrom:
+            - secretRef:
+                name: ${APP_NAME}-secrets
+            env:
+              API_BASE_URL: "http://garage.${APP_NAMESPACE}.svc.cluster.local:3903"
+              S3_ENDPOINT_URL: "http://garage.${APP_NAMESPACE}.svc.cluster.local:3900"
+
+    service:
+      api:
+        controller: ${APP_NAME}
+        ports:
+          s3:
+            port: 3900
+          rpc:
+            port: 3901
+          web:
+            port: 3902
+          admin:
+            port: 3903
+          webui:
+            port: 3909
+
+    ingress:
+      s3:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - host: &ingress1 "garage-s3.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: api
+                  port: s3
+          - host: &ingress2 "*.garage-s3.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: api
+                  port: s3
+        tls:
+          - hosts:
+            - *ingress1
+            - *ingress2
+      webui:
+        className: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "authentication-auth@kubernetescrd"
+        hosts:
+          - host: &ingress3 "garage.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: api
+                  port: webui
+        tls:
+          - hosts:
+            - *ingress3
+
+    configMaps:
+      config:
+        suffix: config
+        data:
+          garage.toml: |
+            metadata_dir = "/var/lib/garage/meta"
+            data_dir = "/var/lib/garage/data"
+            db_engine = "sqlite"
+            metadata_auto_snapshot_interval = "3h"
+            replication_factor = 1
+            compression_level = 2
+            rpc_bind_addr = "[::]:3901"
+
+            [s3_api]
+            s3_region = "garage"
+            api_bind_addr = "[::]:3900"
+            root_domain = ".garage-s3.${SECRET_DOMAIN}"
+
+            [s3_web]
+            bind_addr = "[::]:3902"
+            root_domain = ".${APP_NAME}.${APP_NAMESPACE}.svc.cluster.local"
+            index = "index.html"
+
+            [admin]
+            api_bind_addr = "[::]:3903"
+
+    persistence:
+      data:
+        type: hostPath
+        hostPath: /mnt/backup/garage
+        hostPathType: DirectoryOrCreate
+        advancedMounts:
+          ${APP_NAME}:
+            init:
+              - path: /init
+            app:
+              - path: /var/lib/garage/data
+                subPath: data
+              - path: /var/lib/garage/meta
+                subPath: meta
+      config:
+        type: configMap
+        name: ${APP_NAME}-config
+        advancedMounts:
+          ${APP_NAME}:
+            app:
+            - path: /etc/garage.toml
+              subPath: garage.toml
+            webui:
+            - path: /etc/garage.toml
+              subPath: garage.toml

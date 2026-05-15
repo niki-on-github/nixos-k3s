@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -43,13 +43,13 @@ spec:
           redis:
             image:
               repository: docker.io/library/redis
-              tag: 8.2.2
+              tag: 8.6.3@sha256:0c341492924cad6f5483f9133e43bd6c51ecdecbcadfac5b51657393b6a7936c
 
           app:
             dependsOn: redis
             image:
               repository: ghcr.io/manyfold3d/manyfold
-              tag: 0.127.1
+              tag: 0.129.4@sha256:f6a6ce77d12914e6ddbdd8a5457dc41f8f6445ff802cd1a486064b1b82da0746
           
             env:
               DATABASE_ADAPTER: postgresql

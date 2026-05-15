@@ -1,0 +1,79 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: piped
+      version: 8.0.20
+      sourceRef:
+        kind: HelmRepository
+        name: piped-charts
+        namespace: flux-system
+
+  values:
+    global:
+      nameOverride: piped-local
+
+    frontend:
+      env:
+        BACKEND_HOSTNAME: "pipedapi.${SECRET_DOMAIN}"
+
+    backend:
+      config:
+        HTTP_WORKERS: 2
+        COMPROMISED_PASSWORD_CHECK: false
+        DISABLE_REGISTRATION: false
+        FEED_RETENTION: 14
+        database:
+          connection_url: "jdbc:postgresql://${APP_NAME}-postgresql-rw.${CONFIG_DATABASE_NAMESPACE}.svc.cluster.local/${POSTGRES_DATABASE}"
+          driver_class: org.postgresql.Driver
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          username: "${SECRET_DATABASE_USER}"
+          password: "${SECRET_DATABASE_PASSWORD}"
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        primary: true
+        hosts:
+          - host: "piped.${SECRET_DOMAIN}"
+            paths:
+              - path: "/"
+        tls:
+          - hosts: 
+            - "piped.${SECRET_DOMAIN}"
+
+      backend:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        primary: false
+        hosts:
+          - host: "pipedapi.${SECRET_DOMAIN}"
+            paths:
+              - path: "/"
+        tls:
+          - hosts: 
+            - "pipedapi.${SECRET_DOMAIN}"
+
+      ytproxy:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        primary: false
+        hosts:
+          - host: "ytproxy.${SECRET_DOMAIN}"
+            paths:
+              - path: "/"
+        tls:
+          - hosts: 
+            - "ytproxy.${SECRET_DOMAIN}"

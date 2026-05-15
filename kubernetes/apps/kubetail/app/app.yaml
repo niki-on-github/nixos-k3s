@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: kubetail
-      version: 0.15.4
+      version: 0.18.2
       sourceRef:
         kind: HelmRepository
         name: kubetail-charts
@@ -39,4 +39,24 @@ spec:
           tls:
           - hosts:
               - *host
-
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${APP_NAME}-tailscale
+  namespace: ${APP_NAMESPACE}
+spec:
+  ingressClassName: tailscale
+  tls:
+  - hosts:
+    - "kubetail"
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kubetail
+            port:
+              number: 8080

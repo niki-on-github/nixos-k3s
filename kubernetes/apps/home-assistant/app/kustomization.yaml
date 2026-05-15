@@ -6,7 +6,7 @@ resources:
   - app.yaml
   - code.yaml
 configMapGenerator:
-  - name: home-assistant-init
+  - name: home-assistant-setup
     files:
       - init/automations.yaml
       - init/configuration.yaml

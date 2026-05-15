@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 4.4.0
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: docker.io/s1t5/mailarchiver
-              tag: "2510.5"
+              tag: "2603.2@sha256:c071dcbf7c9d0d788a007ebb06d118f45a65944350c42d2b7cfa0828348dca09"
 
             env:
               ConnectionStrings__DefaultConnection: "Host=${APP_NAME}-postgresql-rw.${CONFIG_DATABASE_NAMESPACE}.svc.cluster.local;Database=${POSTGRES_DATABASE};Username=${SECRET_DATABASE_USER};Password=${SECRET_DATABASE_PASSWORD};"

@@ -6,7 +6,8 @@ metadata:
 spec:
   path: "./kubernetes/apps/zigbee2mqtt/app"
   dependsOn:
-    - name: mosquitto  
+    - name: mosquitto
+    - name: tailscale
   postBuild:
     substitute:
       APP_NAME: zigbee2mqtt

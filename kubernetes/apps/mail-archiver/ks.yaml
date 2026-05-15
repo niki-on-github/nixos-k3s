@@ -20,7 +20,6 @@ metadata:
   namespace: flux-system
 spec:
   path: "./kubernetes/apps/mail-archiver/app"
-  wait: true
   dependsOn:
     - name: mail-archiver-db
   postBuild:

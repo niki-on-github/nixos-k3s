@@ -1,0 +1,33 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: "${APP_NAME}-backup"
+  namespace: "${APP_NAMESPACE}"
+spec:
+  # Set this when recover a cluster see https://github.com/backube/volsync/issues/627
+  paused: false
+  sourcePVC: "${APP_NAME}-pvc"
+  trigger:
+    schedule: ${yaml_str_tag:=!!str} ${BACKUP_SCHEDULE:-"0 */4 * * *"}
+    # NOTE: change/inc below to perform a manual backup schedule once
+    # NOTE: Currently we can only use one trigger, due to the architecture limitation (see https://github.com/backube/volsync/discussions/576)
+    # manual: "manual-backup-0012"
+  restic:
+    # NOTE: when your repository has a stale lock that prevents backups increment the number in string below to perform an unlock before the next backup
+    unlock: "unlock-00007"
+    repository: "${APP_NAME}-restic-dest-credentials"
+    # NOTE: If copyMethod: Clone were used, the temporary, point-in-time copy would be created by cloning the source PVC to a new PVC directly. This is more efficient than Snapshot, but it is not supported by all CSI drivers.
+    copyMethod: Clone
+    cacheStorageClassName: openebs-zfspv
+    cacheCapacity: "${BACKUP_CACHE_CAPACITY:-2Gi}"
+    pruneIntervalDays: 7
+    retain:
+      daily: ${BACKUP_RETAIN_DAILY:-7}
+      weekly: ${BACKUP_RETAIN_WEEKLY:-2}
+      monthly: ${BACKUP_RETAIN_MONTHLY:-2}
+
+    moverResources:
+      requests:
+        cpu: "10m"
+      limits:
+        cpu: "2000m"
